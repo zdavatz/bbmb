@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+# Model::Customer -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
+
+require 'thread'
+require 'bbmb/model/order'
+
+module BBMB
+  module Model
+class Customer
+  attr_reader :customer_id, :email, :archive, :quotas
+  attr_accessor :address1, :address2, :address3, :canton, :city,
+    :drtitle, :ean13, :fax, :firstname, :language, :lastname,
+    :organisation, :phone_business, :phone_mobile, :phone_private, :plz,
+    :status, :title
+  def initialize(customer_id, email=nil)
+    @archive = {}
+    @customer_id = customer_id
+    @email = email
+    @favorites = Order.new(self)
+    @protected = {}
+    @quotas = []
+  end
+  def add_quota(quota)
+    @quotas.push(quota).uniq!
+    quota
+  end
+  def address_lines
+    [
+      @organisation,
+      [@drtitle, @firstname, @lastname].compact.join(' '),
+      @address1,
+      @address2,
+      @address3,
+      [@plz, @city].compact.join(' '),
+    ].compact
+  end
+  def commit_order!(commit_time = Time.now)
+    Thread.exclusive {
+      id = @archive.keys.max.to_i.next
+      order = current_order
+      order.commit!(id, commit_time)
+      @archive.store(id, order)
+      @current_order = nil
+      order
+    }
+  end
+  def current_order
+    @current_order ||= Order.new(self)
+  end
+  def quota(article_id)
+    @quotas.find { |quota| quota.article_number == article_id }
+  end
+  def email=(email)
+    if(@email || email)
+      raise "Invalid email address: nil" unless email
+      ## notify the server of this change, as it affects the user-data
+      BBMB.server.rename_user(@email, email)
+      @email = email
+    end
+  end
+  def favorites 
+    @favorites ||= Order.new(self)
+  end
+  def order(commit_id)
+    @archive[commit_id.to_i]
+  end
+  def orders
+    @archive.values
+  end
+  def protect!(key)
+    @protected.store(key, true)
+  end
+  def protects?(key)
+    @protected.fetch(key, false)
+  end
+  def turnaround
+    orders.inject(0) { |memo, order| order.total + memo }
+  end
+end
+  end
+end
