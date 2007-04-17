@@ -10,12 +10,15 @@ module Updater
   def Updater.run
     PollingManager.new.poll_sources { |filename, io|
       if(importer = BBMB.config.importers[filename])
-        klass = Util.const_get(importer)
-        count = klass.new.import(io)
-        BBMB.logger.debug('updater') { 
-          sprintf("%s imported %i entities", importer, imported) }
+        import(importer, io)
       end
     }
+  end
+  def Updater.import(importer, io)
+    klass = Util.const_get(importer)
+    count = klass.new.import(io)
+    BBMB.logger.debug('updater') { 
+      sprintf("%s imported %i entities", importer, imported) }
   end
 end
   end

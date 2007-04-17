@@ -29,6 +29,9 @@ class Order
     def price
       @product.price(@quantity)
     end
+    def price_base
+      @product.price
+    end
     def total
       price * @quantity
     end
