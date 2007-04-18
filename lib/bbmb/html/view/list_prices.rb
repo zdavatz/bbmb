@@ -4,7 +4,15 @@
 module BBMB
   module Html
     module View
+module Vat
+  def vat(model)
+    if(vat = model.vat)
+      sprintf("%.1f%%", vat.to_f)
+    end
+  end
+end
 module ListPrices
+  include Vat
   BACKGROUND_ROW = 'bg'
   BACKGROUND_SUFFIX = ''
   HEAD_OFFSET_STEP = [0,1]
@@ -39,11 +47,6 @@ module ListPrices
   end
   def price_levels(model)
     price1(model)
-  end
-  def vat(model)
-    if(vat = model.vat)
-      sprintf("%.1f%%", vat.to_f)
-    end
   end
 end
     end
