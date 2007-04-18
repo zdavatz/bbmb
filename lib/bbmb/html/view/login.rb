@@ -17,6 +17,7 @@ class LoginForm < HtmlGrid::Form
   }
   CSS_MAP = { [0,3,2] => 'new-customer' }
   EVENT = :login
+  FORM_ID = 'login'
   FORM_NAME = 'login'
   LABELS = true
   SYMBOL_MAP = {
