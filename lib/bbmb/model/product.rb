@@ -11,9 +11,9 @@ class ProductInfo
   attr_accessor :catalogue1, :catalogue2, :catalogue3, :description,
     :ean13, :expiry_date, :partner_index, :pcode, :promotion, :sale,
     :status
-  int_accessor :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, :mwst
+  int_accessor :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty
   money_accessor :price, :l1_price, :l2_price, :l3_price, :l4_price, 
-    :l5_price, :l6_price
+    :l5_price, :l6_price, :vat
   def initialize(article_number)
     @article_number = article_number
     @backorder = false
@@ -53,7 +53,7 @@ class Product < ProductInfo
     info = ProductInfo.new(@article_number)
     [ :catalogue1, :catalogue2, :catalogue3, :description, :ean13,
       :expiry_date, :partner_index, :pcode, :promotion, :sale, :status,
-      :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, :mwst,
+      :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, :vat,
       :price, :l1_price, :l2_price, :l3_price, :l4_price, :l5_price,
       :l6_price
     ].each { |key|

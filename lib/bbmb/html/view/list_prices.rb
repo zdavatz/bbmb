@@ -40,6 +40,11 @@ module ListPrices
   def price_levels(model)
     price1(model)
   end
+  def vat(model)
+    if(vat = model.vat)
+      sprintf("%.1f%%", vat.to_f)
+    end
+  end
 end
     end
   end
