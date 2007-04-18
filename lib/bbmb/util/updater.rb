@@ -18,7 +18,7 @@ module Updater
     klass = Util.const_get(importer)
     count = klass.new.import(io)
     BBMB.logger.debug('updater') { 
-      sprintf("%s imported %i entities", importer, imported) }
+      sprintf("%s imported %i entities", importer, count) }
   end
 end
   end
