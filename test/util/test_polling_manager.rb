@@ -10,6 +10,85 @@ require 'fileutils'
 
 module BBMB
   module Util
+    class TestFileMission < Test::Unit::TestCase
+      include FlexMock::TestCase
+      def setup
+        @datadir = File.expand_path('../data', File.dirname(__FILE__))
+        BBMB.config = flexmock('config')
+        BBMB.config.should_receive(:bbmb_dir).and_return(@datadir)
+        @mission = FileMission.new
+        @dir = File.expand_path('../data/poll', File.dirname(__FILE__))
+        FileUtils.mkdir_p(@dir)
+        @mission.directory = @dir
+      end
+      def test_poll
+        path = File.join(@dir, 'test.csv')
+        File.open(path, 'w') { |fh| fh.puts 'data' }
+        @mission.poll { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+        }
+        assert_equal(true, File.exist?(path))
+
+        @mission.glob_pattern = '*.xls'
+        @mission.poll { |name, io|
+          flunk "glob_pattern *.xls should not match any files, matched #{name}"
+        }
+
+        @mission.glob_pattern = '*.csv'
+        @mission.poll { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+        }
+      end
+      def test_poll_path
+        path = File.join(@dir, 'test.csv')
+        File.open(path, 'w') { |fh| fh.puts 'data' }
+        @mission.poll_path(path) { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+        }
+        assert_equal(true, File.exist?(path))
+      end
+      def test_poll_path__delete
+        path = File.join(@dir, 'test.csv')
+        File.open(path, 'w') { |fh| fh.puts 'data' }
+        @mission.delete = true
+        @mission.poll_path(path) { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+        }
+        assert_equal(false, File.exist?(path))
+      end
+      def test_poll_path__backup
+        path = File.join(@dir, 'test.csv')
+        File.open(path, 'w') { |fh| fh.puts 'data' }
+        bdir = @mission.backup_dir = File.expand_path('../backup', @dir)
+        bpath = File.join(bdir, 'test.csv')
+        @mission.poll_path(path) { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+        }
+        assert_equal(false, File.exist?(path))
+        assert_equal(true, File.exist?(bpath))
+        assert_equal("data\n", File.read(bpath))
+      end
+      def test_poll_path__backup__error
+        path = File.join(@dir, 'test.csv')
+        File.open(path, 'w') { |fh| fh.puts 'data' }
+        bdir = @mission.backup_dir = File.expand_path('../backup', @dir)
+        bpath = File.join(bdir, 'test.csv')
+        flexstub(BBMB::Util::Mail).should_receive(:notify_error).times(1)
+        @mission.poll_path(path) { |name, io|
+          assert_equal('test.csv', name)
+          assert_equal("data\n", io.read)
+          raise "some error"
+        }
+        assert_equal(false, File.exist?(path))
+        assert_equal(true, File.exist?(bpath))
+        assert_equal("data\n", File.read(bpath))
+      end
+    end
     class TestPopMission < Test::Unit::TestCase
       include FlexMock::TestCase
       def setup
@@ -102,6 +181,39 @@ attached data
         @mission.poll { |name, data|
           assert_equal('ywsarti.csv', name)
           assert_equal('attached data', data)
+        }
+      end
+      def test_poll__error
+        src = <<-EOS
+Content-Type: multipart/mixed; boundary="=-1158308026-727155-3822-1761-1-="
+MIME-Version: 1.0
+
+
+--=-1158308026-727155-3822-1761-1-=
+
+inline text
+--=-1158308026-727155-3822-1761-1-=
+Content-Type: text/csv; filename="ywsarti.csv"
+
+attached data
+--=-1158308026-727155-3822-1761-1-=--
+        EOS
+        flexstub(Net::POP3).should_receive(:start).with('mail.ywesee.com', 110, 
+          'data@bbmb.ch', 
+          'test', Proc).and_return { |host, port, user, pass, block|
+          pop = flexmock('pop')
+          pop.should_receive(:each_mail).and_return { |block2|
+            mail = flexmock('mail')
+            mail.should_receive(:pop).and_return(src)
+            mail.should_receive(:delete)
+            block2.call(mail)
+          }
+          block.call(pop)
+        }
+        flexstub(BBMB::Util::Mail).should_receive(:notify_error)\
+          .times(1).and_return { assert true }
+        @mission.poll { |name, data|
+          raise "some error"
         }
       end
     end

@@ -31,8 +31,9 @@ module Customer
       false
     else
       quantities.each { |article_number, quantity|
-        order.increment(quantity.to_i, 
-                        Model::Product.find_by_article_number(article_number))
+        if(prod = Model::Product.find_by_article_number(article_number))
+          order.increment(quantity.to_i, prod)
+        end
       }
       BBMB.persistence.save(order, _customer)
       true

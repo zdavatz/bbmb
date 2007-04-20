@@ -12,7 +12,7 @@ module UriDir
     content = order.to_i2
     BBMB.config.order_destinations.each { |destination|
       uri = File.join(destination, order.filename)
-      open(uri, 'w') { |fh| fh.write(content) }
+      open(uri, 'w') { |fh| fh.puts(content) }
     }
   end
 end

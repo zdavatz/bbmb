@@ -36,10 +36,12 @@ class CurrentOrder < Global
     BBMB::Util::Mail.send_order(@model)
     BBMB::Util::UriDir.send_order(@model)
     @model = _customer.current_order
-    Info.new(@session, :message => :order_sent, :event => :current_order)
+    Info.new(@session, :message => :order_sent, 
+             :event => :current_order)
   rescue StandardError => err
     BBMB::Util::Mail.notify_error(err)
-    Info.new(@session, :message => :order_sent, :event => :current_order)
+    Info.new(@session, :message => :order_problem, 
+             :event => :current_order)
   end
   def do_update
     @model = _customer.current_order

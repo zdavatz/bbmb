@@ -8,9 +8,9 @@ module BBMB
 class ProductInfo
   include Util::Numbers
   attr_reader :article_number
-  attr_accessor :catalogue1, :catalogue2, :catalogue3, :description,
-    :ean13, :expiry_date, :partner_index, :pcode, :promotion, :sale,
-    :status
+  attr_accessor :backorder_date, :catalogue1, :catalogue2, :catalogue3,
+    :description, :ean13, :expiry_date, :partner_index, :pcode,
+    :promotion, :sale, :status
   int_accessor :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty
   money_accessor :price, :l1_price, :l2_price, :l3_price, :l4_price, 
     :l5_price, :l6_price, :vat
@@ -43,7 +43,7 @@ class Product < ProductInfo
   attr_reader :backorder
   def backorder=(value)
     case value
-    when true, 1, /^(ja|yes|1)$/i
+    when true, 1, /^(ja?|y(es)?|1)$/i
       @backorder = true
     else
       @backorder = false
@@ -51,11 +51,11 @@ class Product < ProductInfo
   end
   def to_info
     info = ProductInfo.new(@article_number)
-    [ :catalogue1, :catalogue2, :catalogue3, :description, :ean13,
-      :expiry_date, :partner_index, :pcode, :promotion, :sale, :status,
-      :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, :vat,
-      :price, :l1_price, :l2_price, :l3_price, :l4_price, :l5_price,
-      :l6_price
+    [ :backorder_date, :catalogue1, :catalogue2, :catalogue3,
+      :description, :ean13, :expiry_date, :partner_index, :pcode,
+      :promotion, :sale, :status, :l1_qty, :l2_qty, :l3_qty, :l4_qty,
+      :l5_qty, :l6_qty, :vat, :price, :l1_price, :l2_price, :l3_price,
+      :l4_price, :l5_price, :l6_price
     ].each { |key|
       info.send("#{key}=", self.send(key))
     }

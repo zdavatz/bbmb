@@ -16,7 +16,7 @@ class InfoComposite < HtmlGrid::DivComposite
     1 => 'info', 
   }
   def message(model)
-    @lookandfeel.lookup(model.message)
+    @lookandfeel.lookup(model.message).gsub("\n", '<br>')
   end
 end
 class Info < Template

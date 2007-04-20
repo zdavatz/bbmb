@@ -13,8 +13,7 @@ class TestProduct < Test::Unit::TestCase
     @product = Product.new("article_number")
   end
   def test_int_accessors
-    [:l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, 
-      :mwst ].each { |key|
+    [:l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty ].each { |key|
       assert_nil(@product.send(key))
       @product.send("#{key}=", "2")
       int = @product.send(key)
@@ -26,7 +25,7 @@ class TestProduct < Test::Unit::TestCase
   end
   def test_money_accessors
     [:price, :l1_price, :l2_price, :l3_price, :l4_price, :l5_price,
-      :l6_price ].each { |key|
+      :l6_price, :vat ].each { |key|
       assert_nil(@product.send(key))
       @product.send("#{key}=", "1.23")
       price = @product.send(key)

@@ -6,7 +6,9 @@ module BBMB
     module View
 module Backorder
   def backorder(model)
-    if(model.backorder)
+    if(date = model.backorder_date)
+      date.strftime(@lookandfeel.lookup(:backorder_date))
+    elsif(model.backorder)
       @lookandfeel.lookup(:backorder)
     end
   end

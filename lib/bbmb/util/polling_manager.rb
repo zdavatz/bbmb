@@ -2,16 +2,16 @@
 # Util::PollingManager -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
 
 require 'bbmb'
+require 'bbmb/util/mail'
 require 'fileutils'
 require 'uri'
 require 'yaml'
 require 'net/pop'
-require 'rmail'
 
 module BBMB
   module Util
 class FileMission
-  attr_accessor :backup_dir, :directory, :glob_pattern
+  attr_accessor :backup_dir, :delete, :directory, :glob_pattern
   def file_paths
     path = File.expand_path(@glob_pattern || '*', @directory)
     Dir.glob(path).collect { |entry|
