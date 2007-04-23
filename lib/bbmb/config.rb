@@ -40,6 +40,7 @@ module BBMB
     'invoice_format'      => "Invoice %s-%s", 
     'invoice_item_format' => "Turnaround: %1.2f \nOrders: %i",
     'invoice_percentage'  => 0.1, 
+    'i2_100'              => 'YWESEE',
     'load_files'          => ['bbmb/util/csv_importer'],
     'log_file'            => STDERR,
     'log_level'           => 'INFO',

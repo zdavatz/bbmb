@@ -4,6 +4,7 @@
 require 'bbmb/config'
 require 'net/ftp'
 require 'tempfile'
+require 'uri'
 
 module BBMB
   module Util

@@ -2,6 +2,7 @@
 # Model::Order -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
 
 require 'encoding/character/utf-8'
+require 'bbmb/config'
 require 'bbmb/util/numbers'
 
 module BBMB
@@ -117,7 +118,7 @@ class Order
       "002:ORDERX",
       "003:220",
       "010:%s" % filename,
-      "100:YWESEE",
+      "100:%s" % BBMB.config.i2_100,
       "101:%s" % @reference,
       "201:CU",
       "202:%s" % @customer.customer_id,

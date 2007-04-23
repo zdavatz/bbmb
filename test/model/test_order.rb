@@ -159,6 +159,49 @@ class TestOrder < Test::Unit::TestCase
     EOS
     assert_equal(expected, @order.to_i2)
   end
+  def test_to_i2__configurable_origin
+    @customer.should_receive(:customer_id).and_return(7)
+    @customer.should_receive(:organisation).and_return('Organisation')
+    position = flexmock('position')
+    position.should_receive(:ean13).and_return("EAN13")
+    position.should_receive(:article_number).and_return("ArticleNumber")
+    position.should_receive(:quantity).and_return(17)
+    position.should_ignore_missing
+    @order.positions.push(position)
+    @order.reference = "Reference"
+    @order.comment = "Comment"
+    @order.commit!('8', Time.local(2006,9,27,9,50,12))
+    @order.priority = 41
+    BBMB.config.i2_100 = 'YWESEE_VES'
+    expected = <<-EOS
+001:7601001000681
+002:ORDERX
+003:220
+010:7-8-20060927095012.txt
+100:YWESEE_VES
+101:Reference
+201:CU
+202:7
+201:BY
+202:1075
+231:Organisation
+236:Comment
+237:61
+238:41
+250:ADE
+251:700008
+300:4
+301:20060927
+500:1
+501:EAN13
+502:ArticleNumber
+520:17
+521:PCE
+540:2
+541:20060927
+    EOS
+    assert_equal(expected, @order.to_i2)
+  end
 end
 class TestOrderPosition < Test::Unit::TestCase
   include FlexMock::TestCase
