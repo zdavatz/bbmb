@@ -7,7 +7,7 @@ require 'bbmb/html/state/json'
 require 'bbmb/html/view/current_order'
 require 'bbmb/util/mail'
 require 'bbmb/util/transfer_dat'
-require 'bbmb/util/uri_dir'
+require 'bbmb/util/ftp_dir'
 
 module BBMB
   module Html
