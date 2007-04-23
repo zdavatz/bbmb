@@ -60,6 +60,7 @@ module BBMB
     'smtp_port'           => 25,
     'smtp_server'         => 'mail.bbmb.ch',
     'smtp_user'           => nil,
+    'tmpfile_basename'    => 'bbmb',
     'update?'             => true,
     'update_hour'         => 23,
     'ydim_config'         => nil,
