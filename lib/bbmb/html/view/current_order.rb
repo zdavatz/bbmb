@@ -346,9 +346,6 @@ class CurrentOrderComposite < HtmlGrid::DivComposite
     [0,2] => :unavailables,
   }
   CSS_ID_MAP = [ 'toolbar' ]
-  SYMBOL_MAP = {
-    :order_transfer => TransferDat,
-  }
   def init
     unless(@model.empty?)
       components.store([1,2], CurrentOrderForm)
@@ -356,13 +353,18 @@ class CurrentOrderComposite < HtmlGrid::DivComposite
     super
   end
   def barcode_reader(model)
-    if(@session.client_activex?)
+    if(@session.client_activex? && !@lookandfeel.disabled?(:barcode_reader))
       BarcodeReader.new(model, @session, self)
     end
   end
   def clear_order(model)
     unless(model.empty?)
       ClearOrder.new(model, @session, self)
+    end
+  end
+  def order_transfer(model)
+    unless(@lookandfeel.disabled?(:transfer_dat))
+      TransferDat.new(:order_transfer, model, @session, self)
     end
   end
   def position_count(model)
