@@ -47,6 +47,22 @@ module Mail
 
     Mail.sendmail(message, from, to, cc)
   end
+  def Mail.send_request(organisation, body)
+    message = RMail::Message.new
+    config = BBMB.config
+    header = message.header
+    header.add('Date', Time.now.rfc822)
+    from = header.from = config.mail_request_from
+    to = header.to = config.mail_request_to
+    cc = header.cc = config.mail_request_cc
+    header.subject = config.mail_request_subject % organisation
+    header.add('Mime-Version', '1.0')
+    header.add('User-Agent', BBMB.config.name)
+    header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
+    header.add('Content-Disposition', 'inline')
+    message.body = body
+    Mail.sendmail(message, from, to, cc)
+  end
 end
   end
 end

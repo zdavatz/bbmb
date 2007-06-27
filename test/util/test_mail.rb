@@ -20,6 +20,10 @@ module BBMB
         config.should_receive(:mail_order_to).and_return('to.test@bbmb.ch')
         config.should_receive(:mail_order_cc).and_return('cc.test@bbmb.ch')
         config.should_receive(:mail_order_subject).and_return('order %s')
+        config.should_receive(:mail_request_from).and_return('from.request.test@bbmb.ch')
+        config.should_receive(:mail_request_to).and_return('to.request.test@bbmb.ch')
+        config.should_receive(:mail_request_cc).and_return('cc.request.test@bbmb.ch')
+        config.should_receive(:mail_request_subject).and_return('Request %s')
         config.should_receive(:name).and_return('Application/User Agent')
         config.should_receive(:smtp_authtype).and_return(:plain)
         config.should_receive(:smtp_helo).and_return('helo.domain')
@@ -101,6 +105,41 @@ i2-data
           assert_equal(['to.test@bbmb.ch', 'cc.test@bbmb.ch'], recipients)
         }
         Mail.send_order(order)
+      end
+      def test_send_request
+        config = setup_config
+        smtp = flexmock('smtp')
+        flexstub(Net::SMTP).should_receive(:start).and_return { 
+          |srv, port, helo, user, pass, type, block|
+          assert_equal('mail.test.com', srv)
+          assert_equal(25, port)
+          assert_equal('helo.domain', helo)
+          assert_equal('user', user)
+          assert_equal('secret', pass)
+          assert_equal(:plain, type)
+          block.call(smtp) 
+        }
+        headers = <<-EOS
+From: from.request.test@bbmb.ch
+To: to.request.test@bbmb.ch
+Cc: cc.request.test@bbmb.ch
+Subject: Request Organisation
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+        EOS
+        body = <<-EOS
+request body
+        EOS
+        smtp.should_receive(:sendmail).and_return { |message, from, recipients|
+          assert(message.include?(headers), 
+                 "missing headers:\n#{headers}\nin message:\n#{message}")
+          assert(message.include?(body), 
+                 "missing body:\n#{body}\nin message:\n#{message}")
+          assert_equal('from.request.test@bbmb.ch', from)
+          assert_equal(['to.request.test@bbmb.ch', 'cc.request.test@bbmb.ch'], 
+                       recipients)
+        }
+        Mail.send_request('Organisation', 'request body')
       end
     end
   end

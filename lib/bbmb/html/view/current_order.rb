@@ -279,16 +279,15 @@ class CurrentOrderForm < HtmlGrid::DivForm
   def toggle(model)
     ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"
     ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:additional_info)}"
-    status = 'open'
-    unless(model.additional_info.empty?)
-      status = 'closed'
-    end
+    status = model.additional_info.empty? ? 'closed' : 'open'
     attrs = {
+      'css_class'     => 'toggler',
       'message_open'  => ms_open, 
       'message_close' => ms_close, 
-      'status'        => status
+      'status'        => status,
+      'togglee'       => 'info',
     }
-    dojo_tag('infotoggler', attrs)
+    dojo_tag('contenttoggler', attrs)
   end
   def total(model)
     span = HtmlGrid::Span.new(model, @session, self)
@@ -383,7 +382,7 @@ class CurrentOrder < Template
     'ywesee' => '../javascript',
   }
   DOJO_REQUIRE = [ 'dojo.widget.*', 'ywesee.widget.*', 
-    'ywesee.widget.InfoToggler' ] #, 'dojo.widget.Tooltip' ]
+    'ywesee.widget.ContentToggler' ] #, 'dojo.widget.Tooltip' ]
   JAVASCRIPTS = [
     "bcreader",
     "order",
