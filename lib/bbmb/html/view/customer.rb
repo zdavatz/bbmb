@@ -66,10 +66,10 @@ class CustomerForm < HtmlGrid::Form
   end
   def change_pass(model)
     unless(set_pass?)
-      button = HtmlGrid::Button.new(:change_password, model, @session, self)
+      button = HtmlGrid::Button.new(:change_pass, model, @session, self)
       form = "document.#{formname}"
       button.onclick = "#{form}.event.value='change_pass';#{form}.submit();"
-      button.value = @lookandfeel.lookup("change_password")
+      button.value = @lookandfeel.lookup("change_pass")
       matrix = components.index(:change_pass)
       @grid.set_colspan(*matrix)
       button

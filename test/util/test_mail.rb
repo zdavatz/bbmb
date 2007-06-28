@@ -124,6 +124,7 @@ From: from.request.test@bbmb.ch
 To: to.request.test@bbmb.ch
 Cc: cc.request.test@bbmb.ch
 Subject: Request Organisation
+Reply-To: sender@email.com
 Mime-Version: 1.0
 User-Agent: Application/User Agent
         EOS
@@ -139,7 +140,7 @@ request body
           assert_equal(['to.request.test@bbmb.ch', 'cc.request.test@bbmb.ch'], 
                        recipients)
         }
-        Mail.send_request('Organisation', 'request body')
+        Mail.send_request('sender@email.com', 'Organisation', 'request body')
       end
     end
   end

@@ -49,7 +49,7 @@ Tel. Praxis:    #{input[:phone_business]}
 E-Mail Adresse: #{input[:email]}
 TVS/Virbac-Nr:  #{input[:customer_id]}
         EOS
-        BBMB::Util::Mail.send_request(input[:organisation], body)
+        BBMB::Util::Mail.send_request(input[:email], input[:organisation], body)
         Info.new(@session, :message => :request_sent, :event => :logout)
       end
     end

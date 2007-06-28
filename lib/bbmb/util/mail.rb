@@ -47,7 +47,7 @@ module Mail
 
     Mail.sendmail(message, from, to, cc)
   end
-  def Mail.send_request(organisation, body)
+  def Mail.send_request(email, organisation, body)
     message = RMail::Message.new
     config = BBMB.config
     header = message.header
@@ -56,6 +56,7 @@ module Mail
     to = header.to = config.mail_request_to
     cc = header.cc = config.mail_request_cc
     header.subject = config.mail_request_subject % organisation
+    header.add('Reply-To', email)
     header.add('Mime-Version', '1.0')
     header.add('User-Agent', BBMB.config.name)
     header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
