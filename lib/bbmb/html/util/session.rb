@@ -26,8 +26,12 @@ class Session < SBSM::Session
     super
   end
   def lookandfeel
-    require 'bbmb/html/util/lookandfeel'
-    @lookandfeel ||= Lookandfeel.new(self) # dtsttcpw
+    if(@lookandfeel.nil? \
+      || (@lookandfeel.language != persistent_user_input(:language)))
+      require 'bbmb/html/util/lookandfeel'
+      @lookandfeel = Lookandfeel.new(self) # dtsttcpw
+    end
+    @lookandfeel
   end
   def process(request)
     begin 
