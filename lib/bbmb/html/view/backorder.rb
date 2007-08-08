@@ -6,10 +6,16 @@ module BBMB
     module View
 module Backorder
   def backorder(model)
-    if(date = model.backorder_date)
-      date.strftime(@lookandfeel.lookup(:backorder_date))
-    elsif(model.backorder)
-      @lookandfeel.lookup(:backorder)
+    value = if(date = model.backorder_date)
+              date.strftime(@lookandfeel.lookup(:backorder_date))
+            elsif(model.backorder)
+              @lookandfeel.lookup(:backorder)
+            end
+    if(value)
+      div = HtmlGrid::Div.new(model, @session, self)
+      div.css_class = 'limited'
+      div.value = value
+      div
     end
   end
 end
