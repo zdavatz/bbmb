@@ -22,7 +22,7 @@ module BBMB
 module ActiveX
   def other_html_headers(context)
     html = ''
-    if @session.client_activex?
+    if(@session.client_activex? && !@lookandfeel.disabled?(:barcode_reader))
       cab = 'BbmbBarcodeReader.CAB#version=1,3,0,0'
       cid = "CLSID:1311F1ED-198B-11D6-8FF9-000103484A9A"
       if(@session.client_nt5?) 
@@ -276,15 +276,17 @@ class CurrentOrderForm < HtmlGrid::DivForm
   SYMBOL_MAP = {
     :order_total => HtmlGrid::LabelText, 
   }
+  def toggle_status(model)
+    model.additional_info.empty? ? 'closed' : 'open'
+  end
   def toggle(model)
     ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"
     ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:additional_info)}"
-    status = model.additional_info.empty? ? 'closed' : 'open'
     attrs = {
       'css_class'     => 'toggler',
       'message_open'  => ms_open, 
       'message_close' => ms_close, 
-      'status'        => status,
+      'status'        => toggle_status(model),
       'togglee'       => 'info',
     }
     dojo_tag('contenttoggler', attrs)
@@ -294,6 +296,9 @@ class CurrentOrderForm < HtmlGrid::DivForm
     span.css_id = 'total'
     span.value = model.total
     span
+  end
+  def submit(model)
+    super unless(model.empty?)
   end
 end
 class Unavailables < HtmlGrid::List
@@ -346,7 +351,7 @@ class CurrentOrderComposite < HtmlGrid::DivComposite
   }
   CSS_ID_MAP = [ 'toolbar' ]
   def init
-    unless(@model.empty?)
+    if(!@model.empty? || @lookandfeel.enabled?(:additional_info_first))
       components.store([1,2], CurrentOrderForm)
     end
     super

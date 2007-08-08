@@ -32,6 +32,9 @@ class ProductInfo
       res || Util::Money.new(0)
     end 
   end
+  def price_base
+    price
+  end
   def to_info
 		self
   end

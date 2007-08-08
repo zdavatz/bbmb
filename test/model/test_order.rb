@@ -14,12 +14,14 @@ class TestOrder < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     @customer = flexmock("customer")
+    @customer.should_receive(:quota)
     @order = Order.new(@customer)
   end
   def test_add
     assert_equal(true, @order.empty?)
     product = flexmock('product')
     product.should_receive(:article_number).and_return('12345')
+    product.should_receive(:price)
     pos = @order.add(3, product)
     assert_equal(false, @order.empty?)
     assert_equal(1, @order.positions.size)
@@ -40,6 +42,7 @@ class TestOrder < Test::Unit::TestCase
     assert_equal(true, @order.empty?)
     product = flexmock('product')
     product.should_receive(:article_number).and_return('12345')
+    product.should_receive(:price)
     pos = @order.add(3, product)
     assert_equal(false, @order.empty?)
     assert_equal(1, @order.positions.size)
@@ -68,6 +71,10 @@ class TestOrder < Test::Unit::TestCase
     assert_equal(nil, @order.commit_time)
     position = flexmock('position')
     @order.positions.push(position)
+    position.should_receive(:article_number).and_return('12345')
+    position.should_receive(:quota)
+    position.should_receive(:price_level).and_return(12)
+    position.should_receive(:price_effective=).with(12)
     position.should_receive(:commit!).times(1)
     time = Time.now
     @order.commit!('commit_id', time)
@@ -98,6 +105,7 @@ class TestOrder < Test::Unit::TestCase
     product = flexmock('product')
     assert_equal(0, @order.quantity(product))
     product.should_receive(:article_number).and_return('12345')
+    product.should_receive(:price)
     @order.add(17, product)
     assert_equal(17, @order.quantity(product))
   end

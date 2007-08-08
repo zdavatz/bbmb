@@ -17,7 +17,8 @@ module Mail
     to = header.to = config.error_recipients
     header.subject = sprintf "%s: %s", BBMB.config.name, error.message
     header.add('User-Agent', BBMB.config.name)
-    message.body = [ error.class, error.message, error.backtrace ].pretty_inspect
+    message.body = [ error.class, error.message, 
+      error.backtrace.pretty_inspect ].join("\n")
     Mail.sendmail(message, from, to)
   end
   def Mail.sendmail(message, from, to, cc=[])

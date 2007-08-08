@@ -20,12 +20,9 @@ class CurrentOrder < Global
   end
   def ajax
     do_update
-    datestr = ''
-    data = {
-      :reference    =>  @model.reference,
-      :comment      =>  @model.comment,
-      :priority     =>  @model.priority,
-      :total        =>  @model.total.to_s,
+    data = {}
+    [ :reference, :comment, :priority, :total ].each { |key|
+      data.store key, @model.send(key).to_s
     }
     State::Json.new(@session, data)
   end

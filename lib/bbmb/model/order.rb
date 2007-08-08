@@ -17,6 +17,7 @@ class Order
     include Util::Numbers
     attr_reader :product
     int_accessor :quantity
+    money_accessor :price_effective
     def initialize(quantity, product)
       @quantity = quantity
       @product = product
@@ -28,10 +29,10 @@ class Order
       @product.send(name, *args, &block)
     end
     def price
-      @product.price(@quantity)
+      @price_effective || price_level
     end
-    def price_base
-      @product.price
+    def price_level
+      @product.price(@quantity)
     end
     def total
       price * @quantity
@@ -52,16 +53,21 @@ class Order
     @unavailable = []
   end
   def add(quantity, product)
+    pos = nil
     if(pos = position(product))
       if(quantity.zero?)
         @positions.delete(pos)
       else
         pos.quantity = quantity
-        pos
       end
     elsif(quantity.nonzero?)
-      @positions.push(Position.new(quantity, product)).last
+      pos = Position.new(quantity, product)
+      @positions.push(pos)
     end
+    if(pos && quantity.nonzero?)
+      pos.price_effective = price_effective(pos)
+    end
+    pos
   end
   def additional_info
     info = {}
@@ -78,7 +84,10 @@ class Order
   end
   def commit!(commit_id, commit_time)
     raise "can't commit empty order" if(empty?)
-    @positions.each { |pos| pos.commit! }
+    @positions.each { |pos| 
+      pos.price_effective = price_effective(pos)
+      pos.commit! 
+    }
     @unavailable.clear
     @commit_time = commit_time
     @commit_id = commit_id
@@ -144,12 +153,19 @@ class Order
   def position(product)
     @positions.find { |pos| pos.product == product }
   end
+  def price_effective(pos)
+    ((quota = quota(pos.article_number)) && quota.price) \
+      || pos.price_level
+  end
   def quantity(product)
     if(pos = position(product))
       pos.quantity
     else
       0
     end
+  end
+  def quota(article_number)
+    @customer.quota(article_number)
   end
   def reverse!
     @positions.reverse!
@@ -159,6 +175,11 @@ class Order
   end
   def sort!(*args, &block)
     @positions.sort!(*args, &block)
+  end
+  def sort_by(*args, &block)
+    twin = dup
+    twin.positions.replace @positions.sort_by(*args, &block)
+    twin
   end
   def total
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }

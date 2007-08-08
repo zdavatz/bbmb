@@ -53,7 +53,8 @@ Subject: Application/User Agent: error-message
 User-Agent: Application/User Agent
         EOS
         body = <<-EOS
-[RuntimeError, "error-message", nil]
+RuntimeError
+error-message
         EOS
         smtp.should_receive(:sendmail).and_return { |message, from, recipients|
           assert(message.include?(headers), 

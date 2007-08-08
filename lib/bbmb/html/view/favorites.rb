@@ -44,6 +44,7 @@ class FavoritesPositions < Positions
     [5,0] => 'right',
     [8,0] => 'right',
   }
+  SORT_DEFAULT = :description
   def delete_position(model)
     super(model, :favorite_product)
   end
