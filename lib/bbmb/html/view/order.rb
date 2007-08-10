@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Html::View::Order -- bbmb.ch -- 27.09.2006 -- hwyss@ywesee.com
 
+require 'bbmb/html/util/multilingual'
 require 'bbmb/html/view/template'
 require 'htmlgrid/labeltext'
 
@@ -42,6 +43,7 @@ class AdditionalInformation < HtmlGrid::Composite
   end
 end
 module PositionMethods
+  include Util::Multilingual
   def delete_position(model, event)
     link = HtmlGrid::Link.new(:delete, model, @session, self)
     url = @lookandfeel.base_url
@@ -52,10 +54,10 @@ module PositionMethods
   def position_modifier(model, name, event)
     link = HtmlGrid::Link.new(name, model, @session, self)
     args = {
-      'query'  =>  model.description.to_s[/^[^\s]+/]
+      'query'  =>  _(model.description).to_s[/^[^\s]+/]
     }
     link.href = @lookandfeel._event_url(event, args)
-    link.value = model.send(name)
+    link.value = _(model.send(name))
     link
   end
 end

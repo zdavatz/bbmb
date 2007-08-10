@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 # Html::View::History -- bbmb.ch -- 03.10.2006 -- hwyss@ywesee.com
 
+require 'bbmb/html/view/multilingual'
 require 'bbmb/html/view/template'
 
 module BBMB
   module Html
     module View
 class HistoryProducts < HtmlGrid::List
+  include Multilingual
   BACKGROUND_ROW = 'bg'
   BACKGROUND_SUFFIX = ''
   COMPONENTS = {

@@ -13,14 +13,25 @@ require 'bbmb/persistence/odba/model/quota'
 module BBMB
   module Persistence
     module ODBA
-      def ODBA.all(klass)
-        klass.odba_extent
+      def ODBA.all(klass, &block)
+        klass.odba_extent(&block)
       end
       def ODBA.save(*objs)
         objs.each { |obj| obj.odba_store }
       end
       def ODBA.delete(*objs)
         objs.each { |obj| obj.odba_delete }
+      end
+      def ODBA.migrate_to_subject
+        all(Model::Product) { |product| 
+          product.migrate_to_subject && product.odba_store 
+        }
+        all(Model::Order) { |order|
+          order.each { |position| 
+            position.migrate_to_subject && position.odba_store 
+          }
+        }
+        ::ODBA.cache.create_deferred_indices(true)
       end
     end
   end

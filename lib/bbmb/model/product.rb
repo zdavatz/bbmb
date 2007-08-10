@@ -1,16 +1,17 @@
 #!/usr/bin/env ruby
 # Model::Product -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
 
+require 'bbmb/model/subject'
 require 'bbmb/util/numbers'
 
 module BBMB
   module Model
-class ProductInfo
+class ProductInfo < Subject
   include Util::Numbers
   attr_reader :article_number
-  attr_accessor :backorder_date, :catalogue1, :catalogue2, :catalogue3,
-    :description, :ean13, :expiry_date, :partner_index, :pcode,
+  attr_accessor :backorder_date, :ean13, :expiry_date, :partner_index, :pcode,
     :promotion, :sale, :status
+  multilingual :description, :catalogue1, :catalogue2, :catalogue3
   int_accessor :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty
   money_accessor :price, :l1_price, :l2_price, :l3_price, :l4_price, 
     :l5_price, :l6_price, :vat
