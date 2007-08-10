@@ -44,7 +44,7 @@ class Result < Global
   def init
     @query = @session.persistent_user_input(:query)
     products = Model::Product.search_by_description(@query)
-    unless(@session.lookandfeel.enabled? :free_products)
+    unless(@session.lookandfeel.enabled? :free_products, false)
       products = products.select { |product| product.price }
     end
     @model = Result.new _order, products
