@@ -5,6 +5,7 @@ $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'test/unit'
 require 'bbmb/model/product'
+require 'bbmb/model/promotion'
 
 module BBMB
   module Model
@@ -57,9 +58,9 @@ class TestProduct < Test::Unit::TestCase
   end
   def test_price
     assert_equal(nil, @product.price)
-    assert_equal(0, @product.price(1))
+    assert_equal(nil, @product.price(1))
     @product.l1_price = 11.50
-    assert_equal(nil, @product.price)
+    assert_equal(11.50, @product.price)
     assert_equal(11.50, @product.price(1))
     @product.price = 12.50
     assert_equal(12.50, @product.price)
@@ -87,6 +88,112 @@ class TestProduct < Test::Unit::TestCase
     assert_equal('article_number', info.article_number)
     info1 = info.to_info
     assert_equal(info, info1)
+  end
+  def test_price_levels__no_promo
+    @product.l1_qty = 1
+    @product.l1_price = 10
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(10, @product.price_qty(6))
+    @product.l2_qty = 6
+    @product.l2_price = 8
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(8, @product.price_qty(6))
+    assert_equal(8, @product.price_qty(12))
+    @product.l3_qty = 12
+    @product.l3_price = 6
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(8, @product.price_qty(6))
+    assert_equal(6, @product.price_qty(12))
+  end
+  def test_price_levels__with_old_promo
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 2
+    promo.end_date = Date.today - 1
+    promo.l1_qty = 1
+    promo.l1_price = 8
+    promo.l2_qty = 12
+    promo.l2_price = 6
+    @product.l1_qty = 1
+    @product.l1_price = 10
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(10, @product.price_qty(6))
+    @product.l2_qty = 6
+    @product.l2_price = 8
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(8, @product.price_qty(6))
+    assert_equal(8, @product.price_qty(12))
+    @product.l3_qty = 12
+    @product.l3_price = 6
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(8, @product.price_qty(6))
+    assert_equal(6, @product.price_qty(12))
+  end
+  def test_price_levels__with_current_promo
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 1
+    promo.end_date = Date.today + 1
+    promo.l1_qty = 1
+    promo.l1_price = 8
+    promo.l2_qty = 12
+    promo.l2_price = 5
+    @product.l1_qty = 1
+    @product.l1_price = 10
+    @product.l2_qty = 6
+    @product.l2_price = 8
+    @product.l3_qty = 12
+    @product.l3_price = 6
+    assert_equal(8, @product.price_qty(1))
+    assert_equal(8, @product.price_qty(6))
+    assert_equal(5, @product.price_qty(12))
+  end
+  def test_price_levels__with_promo_override
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 1
+    promo.end_date = Date.today + 1
+    promo.l1_qty = 6
+    promo.l1_price = 10
+    promo.l2_qty = 12
+    promo.l2_price = 5
+    @product.l1_qty = 1
+    @product.l1_price = 9
+    @product.l2_qty = 6
+    @product.l2_price = 8
+    @product.l3_qty = 12
+    @product.l3_price = 6
+    assert_equal(10, @product.price_qty(1))
+    assert_equal(10, @product.price_qty(6))
+    assert_equal(5, @product.price_qty(12))
+  end
+  def test_freebies__no_promo
+    assert_equal(nil, @product.freebies(1))
+  end
+  def test_freebies__with_old_promo
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 2
+    promo.end_date = Date.today - 1
+    promo.l1_qty = 6
+    promo.l1_price = 8
+    promo.l1_free = 1
+    promo.l2_qty = 12
+    promo.l2_price = 7
+    promo.l2_free = 3
+    assert_equal(nil, @product.freebies(5))
+    assert_equal(nil, @product.freebies(6))
+  end
+  def test_freebies__with_current_promo
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 1
+    promo.end_date = Date.today + 1
+    promo.l1_qty = 6
+    promo.l1_price = 8
+    promo.l1_free = 1
+    promo.l2_qty = 12
+    promo.l2_price = 7
+    promo.l2_free = 3
+    assert_equal(nil, @product.freebies(5))
+    assert_equal(1, @product.freebies(6))
+    assert_equal(1, @product.freebies(11))
+    assert_equal(3, @product.freebies(12))
   end
 end
   end

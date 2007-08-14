@@ -17,6 +17,7 @@ class CurrentOrder < Global
   VIEW = View::CurrentOrder
   def init
     @model = _customer.current_order
+    @model.calculate_effective_prices
   end
   def ajax
     do_update

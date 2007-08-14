@@ -18,8 +18,8 @@ module ListPrices
   HEAD_OFFSET_STEP = [0,1]
   OFFSET_STEP = [0,2]
   def pricex(model, pricex)
-    qval = model.send("l#{pricex}_qty")
-    pval = model.send("l#{pricex}_price")
+    qval = model.qty_level(pricex)
+    pval = model.price_qty(qval)
     if(qval.to_i > 0 && pval.to_f > 0)
       @lookandfeel.lookup(:list_price, qval, pval)
     end

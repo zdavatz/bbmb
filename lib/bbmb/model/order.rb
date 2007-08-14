@@ -25,14 +25,22 @@ class Order
     def commit!
       @product = @product.to_info
     end
+    def freebies
+      if(promo = @product.current_promo)
+        promo.freebies(@quantity)
+      end
+    end
     def method_missing(name, *args, &block)
       @product.send(name, *args, &block)
     end
     def price
-      @price_effective || price_level
+      @price_effective || price_effective
     end
-    def price_level
-      @product.price(@quantity)
+    def price_effective(qty = @quantity)
+      @product.price_effective(qty)
+    end
+    def price_qty(qty = @quantity)
+      @product.price_qty(qty)
     end
     def total
       price * @quantity
@@ -78,15 +86,20 @@ class Order
     }
     info
   end
+  def calculate_effective_prices
+    @positions.each { |pos| 
+      pos.price_effective = price_effective(pos)
+    }
+  end
   def clear
     @positions.clear
     @unavailable.clear
   end
   def commit!(commit_id, commit_time)
     raise "can't commit empty order" if(empty?)
+    calculate_effective_prices
     @positions.each { |pos| 
-      pos.price_effective = price_effective(pos)
-      pos.commit! 
+      pos.commit!
     }
     @unavailable.clear
     @commit_time = commit_time
@@ -112,12 +125,14 @@ class Order
   end
   def i2_body
     lines = []
+    offset = 1
     @positions.each_with_index { |position, idx|
-      lines.push "500:%i" % idx.next,
-				"501:%s" % position.ean13,
-				"502:%s" % position.article_number,
-				"520:%s" % position.quantity,
-				"521:PCE", "540:2", "541:%s" % @commit_time.strftime('%Y%m%d')
+      lines.push *i2_position(idx + offset, position, position.quantity)
+      if(freebies = position.freebies)
+        offset += 1
+        lines.push *i2_position(idx + offset, position, freebies)
+        lines.push "603:21"
+      end
     }
     lines.join("\n")
   end
@@ -147,6 +162,13 @@ class Order
                 "300:4", "301:%s" % @commit_time.strftime('%Y%m%d')
     lines.join("\n")
   end
+  def i2_position(line, position, quantity)
+    ["500:%i" % line,
+      "501:%s" % position.ean13,
+      "502:%s" % position.article_number,
+      "520:%s" % quantity,
+      "521:PCE", "540:2", "541:%s" % @commit_time.strftime('%Y%m%d')]
+  end
   def order_id
     sprintf "%s-%s", @customer.customer_id, @commit_id
   end
@@ -155,7 +177,7 @@ class Order
   end
   def price_effective(pos)
     ((quota = quota(pos.article_number)) && quota.price) \
-      || pos.price_level
+      || pos.price_effective
   end
   def quantity(product)
     if(pos = position(product))
