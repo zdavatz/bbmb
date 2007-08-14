@@ -25,16 +25,6 @@ class TestPromotion < Test::Unit::TestCase
     @promo.end_date = Date.today - 1
     assert_equal(false, @promo.current?)
   end
-  def test_price_effective
-    assert_equal(nil, @promo.price_effective(1))
-    @promo.l1_qty = 6
-    @promo.l1_price = 10
-    assert_equal(nil, @promo.price_effective(5))
-    assert_equal(10, @promo.price_effective(6))
-    @promo.l1_discount = 10
-    assert_equal(nil, @promo.price_effective(5))
-    assert_equal(9, @promo.price_effective(6))
-  end
   def test_price_qty
     assert_equal(nil, @promo.price_qty(1))
     @promo.l1_qty = 6

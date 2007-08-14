@@ -45,15 +45,18 @@ class ProductInfo < Subject
     price(1)
   end
   def price_effective(qty=nil)
-    ((promo = current_promo) && promo.price_effective(qty)) \
-      || price(qty)
+    price = price_qty(qty)
+    if((promo = current_promo) && (discount = promo.discount(qty)))
+      price *= (100.0 - discount) / 100.0
+    end
+    price
   end
   def price_qty(qty=nil)
     ((promo = current_promo) && promo.price_qty(qty)) \
       || price(qty)
   end
   def qty_level(level=nil)
-    if(promo = current_promo) 
+    if((promo = current_promo) && promo.has_price_qty?)
       promo.qty_level(level)
     else
       instance_variable_get("@l#{level}_qty")

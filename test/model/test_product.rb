@@ -195,6 +195,42 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(1, @product.freebies(11))
     assert_equal(3, @product.freebies(12))
   end
+  def test_discount__use_normal_price_levels
+    @product.l1_qty = 1
+    @product.l1_price = 99.50
+    @product.l2_qty = 3
+    @product.l2_price = 94.50
+    @product.l3_qty = 6
+    @product.l3_price = 88.50
+    @product.sale = promo = Promotion.new
+    promo.start_date = Date.today - 1
+    promo.end_date = Date.today + 1
+    promo.l1_qty = 1
+    promo.l1_discount = 50
+    promo.l1_price = 0
+    promo.l1_free = 0
+    assert_equal(99.50, @product.price_qty(1))
+    assert_equal(99.50, @product.price_qty(2))
+    assert_equal(94.50, @product.price_qty(3))
+    assert_equal(94.50, @product.price_qty(5))
+    assert_equal(88.50, @product.price_qty(6))
+    assert_equal(49.75, @product.price_effective(1))
+  end
+  def test_qty_level__promo
+    @product.l1_qty = 1
+    @product.l2_qty = 10
+    @product.promotion = promo = Promotion.new
+    promo.start_date = Date.today - 1
+    promo.end_date = Date.today + 1
+    assert_equal(1, @product.qty_level(1))
+    assert_equal(10, @product.qty_level(2))
+    promo.l1_qty = 5
+    assert_equal(1, @product.qty_level(1))
+    assert_equal(10, @product.qty_level(2))
+    promo.l1_price = 2
+    assert_equal(5, @product.qty_level(1))
+    assert_equal(nil, @product.qty_level(2))
+  end
 end
   end
 end
