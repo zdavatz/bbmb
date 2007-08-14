@@ -46,7 +46,7 @@ class ProductInfo < Subject
   end
   def price_effective(qty=nil)
     ((promo = current_promo) && promo.price_effective(qty)) \
-      || price(qty)
+      || price(qty) || Util::Money.new(0)
   end
   def price_qty(qty=nil)
     ((promo = current_promo) && promo.price_qty(qty)) \

@@ -58,7 +58,9 @@ class TestProduct < Test::Unit::TestCase
   end
   def test_price
     assert_equal(nil, @product.price)
+    assert_equal(0, @product.price_effective)
     assert_equal(nil, @product.price(1))
+    assert_equal(0, @product.price_effective(1))
     @product.l1_price = 11.50
     assert_equal(11.50, @product.price)
     assert_equal(11.50, @product.price(1))
