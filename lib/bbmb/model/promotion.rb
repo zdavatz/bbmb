@@ -27,15 +27,11 @@ class Promotion < Subject
   def freebies(qty)
     data_qty(qty, "free")
   end
+  def has_price_qty?
+    !@l1_price.nil?
+  end
   def price_qty(qty)
     data_qty(qty, "price")
-  end
-  def price_effective(qty)
-    price = price_qty(qty)
-    if(price && (discount = discount(qty)))
-      price = price * (100.0 - discount) / 100.0
-    end
-    price
   end
   def qty_level(level)
     instance_variable_get("@l#{level}_qty")
