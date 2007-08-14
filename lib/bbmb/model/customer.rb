@@ -73,7 +73,7 @@ class Customer
   def protects?(key)
     @protected.fetch(key, false)
   end
-  def turnaround
+  def turnover
     orders.inject(0) { |memo, order| order.total + memo }
   end
 end

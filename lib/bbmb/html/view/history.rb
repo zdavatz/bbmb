@@ -44,12 +44,12 @@ end
 class HistoryComposite < HtmlGrid::DivComposite
   COMPONENTS = {
     [0,0]  =>  HistoryProducts,
-    [0,1]  =>  :turnaround,
+    [0,1]  =>  :turnover,
   }
   CSS_MAP = { 1 => 'right' }
   CSS_ID_MAP = { 1 => 'order-total' }
-  def turnaround(model)
-    @lookandfeel.lookup(:history_turnaround, model.turnaround)
+  def turnover(model)
+    @lookandfeel.lookup(:history_turnover, model.turnover)
   end
 end
 class History < Template
