@@ -76,7 +76,7 @@ class TestInvoicer < Test::Unit::TestCase
       assert_equal(session, client)
     }
     range = Time.local(2006,9)...Time.local(2006,10)
-    result = Invoicer.create_invoice(range, [order1, order2], today)
+    result = Invoicer.create_invoice(range, 24, [order1, order2], today)
     assert_equal(invoice, result)
     assert_equal("01.09.2006 - 30.09.2006", invoice.description)
     assert_equal(today, invoice.date)
@@ -120,6 +120,8 @@ class TestInvoicer < Test::Unit::TestCase
     BBMB.config.should_receive(:invoice_percentage).and_return(1)
     BBMB.config.should_receive(:invoice_format).and_return("%s - %s")
     BBMB.config.should_receive(:invoice_item_format).and_return("%.2f -> %i")
+    BBMB.config.should_receive(:invoice_baseline).and_return(20)
+    BBMB.config.should_receive(:invoice_newyear).and_return('1.1.')
     session = flexmock('session')
     @ydim_server.should_receive(:login).and_return(session)
     invoice = OpenStruct.new
@@ -130,9 +132,9 @@ class TestInvoicer < Test::Unit::TestCase
     }
     today = Date.new(2006,10)
     data = {
-      :price    => 0.30,
+      :price    => 0.21,
       :quantity => 1,
-      :text     => "30.00 -> 2",
+      :text     => "21.00 -> 2",
       :time     => Time.local(2006,10),
       :unit     => "1.0%",
     }

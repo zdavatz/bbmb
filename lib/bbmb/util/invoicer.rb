@@ -10,13 +10,32 @@ module BBMB
 module Invoicer
   class << self
     def run(range, date=Date.today)
-      orders = BBMB.persistence.all(Model::Order).select { |order|
-        order.commit_time && range.include?(order.commit_time)
-      }
-      invoice = create_invoice(range, orders, date)
-      send_invoice(invoice.unique_id)
+      orders = orders(range)
+      turnover = deduction = Util::Money.new(0)
+      baseline = Util::Money.new(BBMB.config.invoice_baseline)
+      total = orders.inject(turnover) { |memo, order| order.total + memo }
+      if(total == 0 || baseline > 0)
+        all_orders = orders(fiscal_year(range))
+        turnover = all_orders.inject(turnover) { |memo, order| 
+          order.total + memo }
+        deduction = [deduction, baseline - turnover].max
+      end
+      owed = total - deduction
+      if(owed > 0)
+        invoice = create_invoice(range, owed, orders, date)
+        send_invoice(invoice.unique_id)
+      else
+        body = sprintf(<<-EOS, baseline, turnover + total, total, deduction - total)
+Baseline:      %10.2f
+Turnover:      %10.2f
+Current Month: %10.2f
+-------------------------
+Outstanding:   %10.2f
+        EOS
+        Util::Mail.notify_debug("No invoice necessary", body)
+      end
     end
-    def create_invoice(time_range, orders, date, currency='CHF')
+    def create_invoice(time_range, owed, orders, date, currency='CHF')
       time = Time.now
       ydim_connect { |client|
         ydim_inv = client.create_invoice(BBMB.config.ydim_id)
@@ -26,17 +45,31 @@ module Invoicer
         ydim_inv.date = date
         ydim_inv.currency = currency
         ydim_inv.payment_period = 30
-        total = orders.inject(0) { |memo, order| order.total + memo }
         item_data = {
-          :price    =>  total.to_f * BBMB.config.invoice_percentage / 100,
+          :price    =>  owed.to_f * BBMB.config.invoice_percentage / 100,
           :quantity =>  1,
           :text     =>  sprintf(BBMB.config.invoice_item_format, 
-                                total, orders.size),
+                                owed, orders.size),
           :time			=>	Time.local(date.year, date.month, date.day),
           :unit     =>  "%0.1f%" % BBMB.config.invoice_percentage,
         }
         client.add_items(ydim_inv.unique_id, [item_data])
         ydim_inv
+      }
+    end
+    def fiscal_year(range)
+      day, month, = BBMB.config.invoice_newyear.split('.', 3)
+      time = range.first
+      year = time.year
+      first = Time.local(year, month, day)
+      if(first > time)
+        first = Time.local(year - 1, month, day)
+      end
+      first...time
+    end
+    def orders(range)
+      BBMB.persistence.all(Model::Order).select { |order|
+        order.commit_time && range.include?(order.commit_time)
       }
     end
     def send_invoice(invoice_id)

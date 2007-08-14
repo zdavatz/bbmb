@@ -9,6 +9,17 @@ require 'pp'
 module BBMB
   module Util
 module Mail
+  def Mail.notify_debug(subject, body)
+    config = BBMB.config
+    message = RMail::Message.new
+    header = message.header
+    from = header.from = config.mail_order_from
+    to = header.to = config.error_recipients
+    header.subject = sprintf "%s: %s", BBMB.config.name, subject
+    header.add('User-Agent', BBMB.config.name)
+    message.body = body
+    Mail.sendmail(message, from, to)
+  end
   def Mail.notify_error(error)
     config = BBMB.config
     message = RMail::Message.new
