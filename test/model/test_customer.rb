@@ -52,6 +52,21 @@ class TestCustomer < Test::Unit::TestCase
   def test_commit_order
     assert_equal(true, @customer.current_order.empty?)
   end
+  def test_inject_order__empty
+    assert_raises(RuntimeError) {
+      @customer.inject_order(Model::Order.new(@customer))
+    }
+    assert_equal({}, @customer.archive)
+  end
+  def test_inject_order
+    order = flexmock(Model::Order.new(@customer))
+    time = Time.now
+    order.should_receive(:commit!).with(1, time).times(1)
+    assert_nothing_raised {
+      @customer.inject_order(order, time)
+    }
+    assert_equal({1 => order}, @customer.archive)
+  end
 end
   end
 end

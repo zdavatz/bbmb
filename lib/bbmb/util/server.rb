@@ -18,6 +18,23 @@ module BBMB
 	    SESSION = Html::Util::Session
 	    VALIDATOR = Html::Util::Validator
       attr_reader :updater
+      def inject_order(customer_id, products, infos)
+        customer = Model::Customer.find_by_customer_id(customer_id) \
+          || Model::Customer.find_by_ean13(customer_id)
+        raise "Unknown Customer #{customer_id}" if customer.nil?
+        order = Model::Order.new(customer)
+        products.each { |info|
+          if(product = Model::Product.find_by_pcode(info[:pcode]) \
+             || Model::Product.find_by_ean13(info[:ean13]) \
+             || Model::Product.find_by_article_number(info[:article_number]))
+            order.add(info[:quantity], product)
+          end
+        }
+        infos.each { |key, value|
+          order.send("#{key}=", value)
+        }
+        customer.inject_order(order)
+      end
       def invoice(range)
         Invoicer.run(range)
       rescue Exception => e
