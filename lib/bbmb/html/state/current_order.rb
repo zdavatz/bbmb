@@ -32,7 +32,7 @@ class CurrentOrder < Global
     do_update 
     _customer.commit_order!
     BBMB::Util::Mail.send_order(@model)
-    BBMB::Util::FtpDir.send_order(@model)
+    BBMB::Util::TargetDir.send_order(@model)
     @model = _customer.current_order
     Info.new(@session, :message => :order_sent, 
              :event => :current_order)
