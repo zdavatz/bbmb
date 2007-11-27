@@ -4,9 +4,11 @@
 require 'bbmb'
 require 'bbmb/util/mail'
 require 'fileutils'
+require 'net/ftp'
+require 'net/pop'
+require 'tmpdir'
 require 'uri'
 require 'yaml'
-require 'net/pop'
 
 module BBMB
   module Util
@@ -68,6 +70,49 @@ class PopMission
     elsif(match = @@ptrn.match(message.header["Content-Type"]))
       block.call(match["file"], message.decode)
     end
+  end
+end
+class FtpMission
+  attr_accessor :backup_dir, :delete, :pattern, :directory
+  def initialize(*args)
+    super
+    @regexp = Regexp.new('.*')
+  end
+  def poll(&block)
+    @backup_dir ||= Dir.tmpdir
+    FileUtils.mkdir_p(@backup_dir)
+    @regexp = Regexp.new(@pattern || '.*')
+    uri = URI.parse(@directory)
+    locals = []
+    Net::FTP.open(uri.host) do |ftp|
+      ftp.login uri.user, uri.password
+      ftp.chdir uri.path
+      ftp.nlst.each do |file|
+        if(local = poll_remote ftp, file)
+          locals.push local
+        end
+      end
+    end
+    locals.each do |path|
+      poll_file path, &block
+    end
+  end
+  def poll_file(path, &block)
+    File.open(path) { |io|
+      block.call(File.basename(path), io)
+    }
+  rescue StandardError => err
+    BBMB::Util::Mail.notify_error(err)
+  end
+  def poll_remote(ftp, file)
+    if(@regexp.match file)
+      local = File.join(@backup_dir, file)
+      ftp.get file, local
+      ftp.delete file if @delete
+      local
+    end
+  end
+  def regexp
   end
 end
 class PollingManager

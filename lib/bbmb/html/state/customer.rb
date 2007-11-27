@@ -51,22 +51,6 @@ class Customer < Global
     end
     mandatory
   end
-  def update_user(input)
-    email = input.delete(:email)
-    @model.email = email
-    @model.protect!(:email)
-    if(passhash = input.delete(:confirm_pass))
-      begin
-        @session.user.grant(email, 'login', 
-                          BBMB.config.auth_domain + '.Customer')
-        @session.user.set_password(email, passhash)
-      rescue Yus::YusError => e 
-        @errors.store(:pass, create_error(:e_pass_not_set, :email, email))
-      end
-    end
-  rescue Yus::YusError
-    @errors.store(:email, create_error(:e_duplicate_email, :email, email))
-  end
   def save
     _save
     self
@@ -99,6 +83,22 @@ class Customer < Global
     model.address_lines = @model.address_lines
     @cleartext = nil
     ShowPass.new(@session, model)
+  end
+  def update_user(input)
+    email = input.delete(:email)
+    @model.email = email
+    @model.protect!(:email)
+    if(passhash = input.delete(:confirm_pass))
+      begin
+        @session.user.grant(email, 'login', 
+                          BBMB.config.auth_domain + '.Customer')
+        @session.user.set_password(email, passhash)
+      rescue Yus::YusError => e 
+        @errors.store(:pass, create_error(:e_pass_not_set, :email, email))
+      end
+    end
+  rescue Yus::YusError => e
+    @errors.store(:email, create_error(:e_duplicate_email, :email, email))
   end
 end
     end

@@ -23,6 +23,9 @@ class Result < Global
     def ordered_quantity(article_number)
       @order.quantity(article_number)
     end
+    def quota(article_id)
+      @order.quota(article_id)
+    end
     def reverse!
       @products.reverse!
     end
@@ -41,7 +44,10 @@ class Result < Global
   def init
     @query = @session.persistent_user_input(:query)
     products = Model::Product.search_by_description(@query)
-    @model = Result.new _order, products.select { |product| product.price }
+    unless(@session.lookandfeel.enabled? :free_products, false)
+      products = products.select { |product| product.price }
+    end
+    @model = Result.new _order, products
   end
   def direct_argument_keys
     [:query]

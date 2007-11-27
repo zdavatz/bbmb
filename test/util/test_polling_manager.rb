@@ -89,6 +89,62 @@ module BBMB
         assert_equal("data\n", File.read(bpath))
       end
     end
+    class TestFtpMission < Test::Unit::TestCase
+      include FlexMock::TestCase
+      def setup
+        @datadir = File.expand_path('../data', File.dirname(__FILE__))
+        BBMB.config = flexmock('config')
+        BBMB.config.should_receive(:bbmb_dir).and_return(@datadir)
+        @mission = FtpMission.new
+        @mission.directory = "ftp://user:pass@ftp.server.com/path/to/dir"
+      end
+      def test_poll
+        session = flexmock 'ftp'
+        session.should_receive(:login).with('user', 'pass').times(2)
+        session.should_receive(:chdir).with('/path/to/dir').times(2)
+        session.should_receive(:nlst).and_return %w{test.csv test.txt}
+        session.should_receive(:get).and_return { |remote, local|
+          assert_equal('test.txt', remote)
+          File.open(local, 'w') { |fh| fh.puts "data" }
+        }
+        flexmock(Net::FTP).should_receive(:open).and_return { |host, block| 
+          assert_equal('ftp.server.com', host)
+          block.call session
+        }
+        @mission.pattern = '.*\.txt'
+        @mission.poll { |name, io|
+          assert_equal('test.txt', name)
+          assert_equal("data\n", io.read)
+        }
+
+        @mission.pattern = '.*\.xls'
+        @mission.poll { |name, io|
+          flunk "pattern .*\.xls should not match any files, matched #{name}"
+        }
+      end
+      def test_poll_remote
+        @mission.backup_dir = '/backup/dir'
+        session = flexmock 'ftp'
+        session.should_receive(:get).and_return { |remote, local|
+          assert_equal('test.txt', remote)
+          assert_equal('/backup/dir/test.txt', local)
+        }
+        assert_equal('/backup/dir/test.txt', 
+                     @mission.poll_remote(session, 'test.txt'))
+      end
+      def test_poll_remote__delete
+        @mission.backup_dir = '/backup/dir'
+        @mission.delete = true
+        session = flexmock 'ftp'
+        session.should_receive(:get).and_return { |remote, local|
+          assert_equal('test.txt', remote)
+          assert_equal('/backup/dir/test.txt', local)
+        }
+        session.should_receive(:delete).with('test.txt').times(1)
+        assert_equal('/backup/dir/test.txt', 
+                     @mission.poll_remote(session, 'test.txt'))
+      end
+    end
     class TestPopMission < Test::Unit::TestCase
       include FlexMock::TestCase
       def setup

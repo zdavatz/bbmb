@@ -2,6 +2,8 @@
 # Html::View::Login -- bbmb.ch -- 15.09.2006 -- hwyss@ywesee.com
 
 require 'bbmb/html/view/template'
+require 'htmlgrid/dojotoolkit'
+require 'htmlgrid/errormessage'
 require 'htmlgrid/form'
 require 'htmlgrid/pass'
 
@@ -31,8 +33,13 @@ class LoginForm < HtmlGrid::Form
     link
   end
 end
+class LoginComposite < HtmlGrid::DivComposite
+  COMPONENTS = {
+    [0,0] => LoginForm,
+  }
+end
 class Login < Template
-  CONTENT = LoginForm
+  CONTENT = LoginComposite
 end
     end
   end

@@ -22,7 +22,7 @@ module BBMB
 module ActiveX
   def other_html_headers(context)
     html = ''
-    if @session.client_activex?
+    if(@session.client_activex? && !@lookandfeel.disabled?(:barcode_reader))
       cab = 'BbmbBarcodeReader.CAB#version=1,3,0,0'
       cid = "CLSID:1311F1ED-198B-11D6-8FF9-000103484A9A"
       if(@session.client_nt5?) 
@@ -276,25 +276,29 @@ class CurrentOrderForm < HtmlGrid::DivForm
   SYMBOL_MAP = {
     :order_total => HtmlGrid::LabelText, 
   }
+  def toggle_status(model)
+    model.additional_info.empty? ? 'closed' : 'open'
+  end
   def toggle(model)
     ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"
     ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:additional_info)}"
-    status = 'open'
-    unless(model.additional_info.empty?)
-      status = 'closed'
-    end
     attrs = {
+      'css_class'     => 'toggler',
       'message_open'  => ms_open, 
       'message_close' => ms_close, 
-      'status'        => status
+      'status'        => toggle_status(model),
+      'togglee'       => 'info',
     }
-    dojo_tag('infotoggler', attrs)
+    dojo_tag('contenttoggler', attrs)
   end
   def total(model)
     span = HtmlGrid::Span.new(model, @session, self)
     span.css_id = 'total'
     span.value = model.total
     span
+  end
+  def submit(model)
+    super unless(model.empty?)
   end
 end
 class Unavailables < HtmlGrid::List
@@ -346,23 +350,25 @@ class CurrentOrderComposite < HtmlGrid::DivComposite
     [0,2] => :unavailables,
   }
   CSS_ID_MAP = [ 'toolbar' ]
-  SYMBOL_MAP = {
-    :order_transfer => TransferDat,
-  }
   def init
-    unless(@model.empty?)
+    if(!@model.empty? || @lookandfeel.enabled?(:additional_info_first))
       components.store([1,2], CurrentOrderForm)
     end
     super
   end
   def barcode_reader(model)
-    if(@session.client_activex?)
+    if(@session.client_activex? && !@lookandfeel.disabled?(:barcode_reader))
       BarcodeReader.new(model, @session, self)
     end
   end
   def clear_order(model)
     unless(model.empty?)
       ClearOrder.new(model, @session, self)
+    end
+  end
+  def order_transfer(model)
+    unless(@lookandfeel.disabled?(:transfer_dat))
+      TransferDat.new(:order_transfer, model, @session, self)
     end
   end
   def position_count(model)
@@ -381,7 +387,7 @@ class CurrentOrder < Template
     'ywesee' => '../javascript',
   }
   DOJO_REQUIRE = [ 'dojo.widget.*', 'ywesee.widget.*', 
-    'ywesee.widget.InfoToggler' ] #, 'dojo.widget.Tooltip' ]
+    'ywesee.widget.ContentToggler' ] #, 'dojo.widget.Tooltip' ]
   JAVASCRIPTS = [
     "bcreader",
     "order",

@@ -9,6 +9,17 @@ require 'pp'
 module BBMB
   module Util
 module Mail
+  def Mail.notify_debug(subject, body)
+    config = BBMB.config
+    message = RMail::Message.new
+    header = message.header
+    from = header.from = config.mail_order_from
+    to = header.to = config.error_recipients
+    header.subject = sprintf "%s: %s", BBMB.config.name, subject
+    header.add('User-Agent', BBMB.config.name)
+    message.body = body
+    Mail.sendmail(message, from, to)
+  end
   def Mail.notify_error(error)
     config = BBMB.config
     message = RMail::Message.new
@@ -17,7 +28,8 @@ module Mail
     to = header.to = config.error_recipients
     header.subject = sprintf "%s: %s", BBMB.config.name, error.message
     header.add('User-Agent', BBMB.config.name)
-    message.body = [ error.class, error.message, error.backtrace ].pretty_inspect
+    message.body = [ error.class, error.message, 
+      error.backtrace.pretty_inspect ].join("\n")
     Mail.sendmail(message, from, to)
   end
   def Mail.sendmail(message, from, to, cc=[])
@@ -45,6 +57,23 @@ module Mail
     header.add('Content-Disposition', 'inline')
     message.body = order.to_i2
 
+    Mail.sendmail(message, from, to, cc)
+  end
+  def Mail.send_request(email, organisation, body)
+    message = RMail::Message.new
+    config = BBMB.config
+    header = message.header
+    header.add('Date', Time.now.rfc822)
+    from = header.from = config.mail_request_from
+    to = header.to = config.mail_request_to
+    cc = header.cc = config.mail_request_cc
+    header.subject = config.mail_request_subject % organisation
+    header.add('Reply-To', email)
+    header.add('Mime-Version', '1.0')
+    header.add('User-Agent', BBMB.config.name)
+    header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
+    header.add('Content-Disposition', 'inline')
+    message.body = body
     Mail.sendmail(message, from, to, cc)
   end
 end

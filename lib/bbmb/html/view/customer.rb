@@ -16,7 +16,7 @@ class CustomerForm < HtmlGrid::Form
     [0,0]   =>  :organisation,
     [2,0]   =>  :customer_id,
     [0,1]   =>  :ean13,
-    [2,1,0] =>  :turnaround,
+    [2,1,0] =>  :turnover,
     [3,1,0] =>  ' - ', 
     [3,1,1] =>  :history, 
     [0,2]   =>  'contact',
@@ -66,10 +66,10 @@ class CustomerForm < HtmlGrid::Form
   end
   def change_pass(model)
     unless(set_pass?)
-      button = HtmlGrid::Button.new(:change_password, model, @session, self)
+      button = HtmlGrid::Button.new(:change_pass, model, @session, self)
       form = "document.#{formname}"
       button.onclick = "#{form}.event.value='change_pass';#{form}.submit();"
-      button.value = @lookandfeel.lookup("change_password")
+      button.value = @lookandfeel.lookup("change_pass")
       matrix = components.index(:change_pass)
       @grid.set_colspan(*matrix)
       button
@@ -120,11 +120,11 @@ class CustomerForm < HtmlGrid::Form
     @session.event == :change_pass \
       || @session.error(:pass) || @session.error(:confirm_pass)
   end
-  def turnaround(model)
-    link = HtmlGrid::Link.new(:turnaround, model, @session, self)
+  def turnover(model)
+    link = HtmlGrid::Link.new(:turnover, model, @session, self)
     args = { :customer_id => model.customer_id }
     link.href = @lookandfeel._event_url(:orders, args)
-    link.value = sprintf(@lookandfeel.lookup(:currency_format), model.turnaround)
+    link.value = sprintf(@lookandfeel.lookup(:currency_format), model.turnover)
     link.label = true
     link
   end

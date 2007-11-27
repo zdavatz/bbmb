@@ -10,6 +10,7 @@ module BBMB
       ODBA_PREFETCH = true
       ODBA_SERIALIZABLE = ['@protected']
       odba_index :customer_id
+      odba_index :ean13
       odba_index :email
       alias :__old_current_order__ :current_order
       def current_order
@@ -22,6 +23,13 @@ module BBMB
       alias :__old_commit_order__ :commit_order!
       def commit_order!(*args)
         order = __old_commit_order__(*args)
+        @archive.odba_store
+        odba_store
+        order
+      end
+      alias :__old_inject_order__ :inject_order
+      def inject_order(*args)
+        order = __old_inject_order__(*args)
         @archive.odba_store
         odba_store
         order

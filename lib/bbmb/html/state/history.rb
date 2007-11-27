@@ -69,7 +69,7 @@ class History < Global
     def sort!(*args, &block)
       @positions.sort!(*args, &block)
     end
-    def turnaround
+    def turnover
       @positions.inject(0) { |inj, position| 
         position.total + inj
       }

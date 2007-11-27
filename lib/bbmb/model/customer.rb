@@ -61,6 +61,14 @@ class Customer
   def favorites 
     @favorites ||= Order.new(self)
   end
+  def inject_order(order, commit_time = Time.now)
+    Thread.exclusive {
+      id = @archive.keys.max.to_i.next
+      order.commit!(id, commit_time)
+      @archive.store(id, order)
+      order
+    }
+  end
   def order(commit_id)
     @archive[commit_id.to_i]
   end
@@ -73,7 +81,7 @@ class Customer
   def protects?(key)
     @protected.fetch(key, false)
   end
-  def turnaround
+  def turnover
     orders.inject(0) { |memo, order| order.total + memo }
   end
 end

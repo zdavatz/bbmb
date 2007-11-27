@@ -14,13 +14,17 @@ class Head < HtmlGrid::DivComposite
     [0,1] => :logged_in_as, # has float-right, needs to be before 'welcome'
   }
   CSS_ID_MAP = {2 => 'welcome', 1 => 'logged-in-as'}
-  SYMBOL_MAP = {
-    :logo => HtmlGrid::Image,
-  }
   def logged_in_as(model)
     if(@session.logged_in?)
       @lookandfeel.lookup(:logged_in_as, @session.user.name)
     end
+  end
+  def logo(model)
+    img = HtmlGrid::Image.new(:logo, model, @session, self)
+    link = HtmlGrid::Link.new(:home, model, @session, self)
+    link.href = @lookandfeel._event_url(:home)
+    link.value = img
+    link
   end
 end
     end

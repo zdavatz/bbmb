@@ -3,6 +3,7 @@
 
 require 'bbmb/html/view/backorder'
 require 'bbmb/html/view/list_prices'
+require 'bbmb/html/view/multilingual'
 require 'bbmb/html/view/search'
 require 'bbmb/html/view/template'
 require 'htmlgrid/formlist'
@@ -13,6 +14,7 @@ module BBMB
 class Products < HtmlGrid::FormList
   include Backorder
   include ListPrices
+  include Multilingual
   COMPONENTS = {
     [0,0]	=>	:quantity,
     [1,0]	=>	:description,

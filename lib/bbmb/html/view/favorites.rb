@@ -44,6 +44,7 @@ class FavoritesPositions < Positions
     [5,0] => 'right',
     [8,0] => 'right',
   }
+  SORT_DEFAULT = :description
   def delete_position(model)
     super(model, :favorite_product)
   end
@@ -97,17 +98,19 @@ class FavoritesComposite < OrderComposite
     [0,1] => FavoritesForm,
   }
   CSS_ID_MAP = [ 'toolbar' ]
-  SYMBOL_MAP = {
-    :favorite_transfer => TransferDat,
-  }
   def barcode_reader(model)
-    if(@session.client_activex?)
+    if(@session.client_activex? && !@lookandfeel.disabled?(:barcode_reader))
       BarcodeReader.new(model, @session, self)
     end
   end
   def clear_favorites(model)
     unless(model.empty?)
       ClearFavorites.new(model, @session, self)
+    end
+  end
+  def favorite_transfer(model)
+    unless(@lookandfeel.disabled?(:transfer_dat))
+      TransferDat.new(:favorite_transfer, model, @session, self)
     end
   end
   def position_count(model)

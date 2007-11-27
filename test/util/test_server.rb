@@ -2,10 +2,12 @@
 # Util::TestServer -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
+$: << File.expand_path('..', File.dirname(__FILE__))
 
 require 'test/unit'
 require 'bbmb'
 require 'bbmb/util/server'
+require 'stub/persistence'
 require 'flexmock'
 
 module BBMB
@@ -14,6 +16,88 @@ class TestServer < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
     @server = Server.new
+    Model::Customer.instances.clear
+    Model::Product.instances.clear
+  end
+  def test_inject_order__unknown_customer
+    assert_raises(RuntimeError) {
+      @server.inject_order('12345', [], {})
+    }
+  end
+  def test_inject_order
+    pr1 = Model::Product.new 1
+    pr1.pcode = '1234567'
+    pr2 = Model::Product.new 2
+    pr2.ean13 = '1234567890123'
+    pr3 = Model::Product.new 3
+    pr3.ean13 = '2345678901234'
+    pr3.pcode = '2345678'
+    customer = Model::Customer.new('12345')
+    flexmock(customer).should_receive(:inject_order).times(1).and_return { |order|
+      assert_instance_of(Model::Order, order)
+      ps1, ps2, ps3 = order.positions
+      assert_instance_of(Model::Order::Position, ps1)
+      assert_instance_of(Model::Order::Position, ps2)
+      assert_instance_of(Model::Order::Position, ps3)
+      assert_equal(3, ps1.quantity)
+      assert_equal(pr1, ps1.product)
+      assert_equal(4, ps2.quantity)
+      assert_equal(pr2, ps2.product)
+      assert_equal(5, ps3.quantity)
+      assert_equal(pr3, ps3.product)
+      assert_equal('My Comment', order.comment)
+      assert_equal('76543', order.reference)
+    }
+    prods = [
+      {:quantity => 3, :pcode => '1234567'},
+      {:quantity => 4, :ean13 => '1234567890123'},
+      {:quantity => 5, :pcode => '2345678', :ean13 => '2345678901234'},
+    ]
+    infos = {
+      :comment => 'My Comment',
+      :reference => '76543',
+    }
+    assert_nothing_raised {
+      @server.inject_order('12345', prods, infos)
+    }
+  end
+  def test_inject_order__customer_by_ean13
+    pr1 = Model::Product.new 1
+    pr1.pcode = '1234567'
+    pr2 = Model::Product.new 2
+    pr2.ean13 = '1234567890123'
+    pr3 = Model::Product.new 3
+    pr3.ean13 = '2345678901234'
+    pr3.pcode = '2345678'
+    customer = Model::Customer.new('12345')
+    customer.ean13 = '1234567890123'
+    flexmock(customer).should_receive(:inject_order).times(1).and_return { |order|
+      assert_instance_of(Model::Order, order)
+      ps1, ps2, ps3 = order.positions
+      assert_instance_of(Model::Order::Position, ps1)
+      assert_instance_of(Model::Order::Position, ps2)
+      assert_instance_of(Model::Order::Position, ps3)
+      assert_equal(3, ps1.quantity)
+      assert_equal(pr1, ps1.product)
+      assert_equal(4, ps2.quantity)
+      assert_equal(pr2, ps2.product)
+      assert_equal(5, ps3.quantity)
+      assert_equal(pr3, ps3.product)
+      assert_equal('My Comment', order.comment)
+      assert_equal('76543', order.reference)
+    }
+    prods = [
+      {:quantity => 3, :pcode => '1234567'},
+      {:quantity => 4, :ean13 => '1234567890123'},
+      {:quantity => 5, :pcode => '2345678', :ean13 => '2345678901234'},
+    ]
+    infos = {
+      :comment => 'My Comment',
+      :reference => '76543',
+    }
+    assert_nothing_raised {
+      @server.inject_order('1234567890123', prods, infos)
+    }
   end
   def test_rename_user__new
     BBMB.config = flexmock('config')
