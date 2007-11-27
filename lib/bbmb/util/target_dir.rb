@@ -24,7 +24,8 @@ module TargetDir
           }
         }
       else
-        File.open(uri.path, 'w') { |fh|
+        path = File.expand_path(uri.path, BBMB.config.bbmb_dir)
+        File.open(path, 'w') { |fh|
           fh.puts content
         }
       end
