@@ -69,7 +69,7 @@ module BBMB
           assert_equal('test.csv', name)
           assert_equal("data\n", io.read)
         }
-        assert_equal(false, File.exist?(path))
+        assert_equal(true, File.exist?(path))
         assert_equal(true, File.exist?(bpath))
         assert_equal("data\n", File.read(bpath))
       end
@@ -84,7 +84,7 @@ module BBMB
           assert_equal("data\n", io.read)
           raise "some error"
         }
-        assert_equal(false, File.exist?(path))
+        assert_equal(true, File.exist?(path))
         assert_equal(true, File.exist?(bpath))
         assert_equal("data\n", File.read(bpath))
       end

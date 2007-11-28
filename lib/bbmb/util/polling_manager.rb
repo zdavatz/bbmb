@@ -36,8 +36,9 @@ class FileMission
     if(@backup_dir)
       dir = File.expand_path(@backup_dir, BBMB.config.bbmb_dir)
       FileUtils.mkdir_p(dir)
-      FileUtils.mv(path, dir)
-    elsif(@delete)
+      FileUtils.cp(path, dir)
+    end
+    if(@delete)
       FileUtils.rm(path)
     end
   end
