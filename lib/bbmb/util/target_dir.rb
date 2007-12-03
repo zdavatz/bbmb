@@ -10,7 +10,7 @@ module BBMB
   module Util
 module TargetDir
   def TargetDir.send_order(order)
-    content = order.to_i2
+    content = order.to_target_format
     basename = BBMB.config.tmpfile_basename
     BBMB.config.order_destinations.each { |destination|
       uri = URI.parse(File.join(destination, order.filename))

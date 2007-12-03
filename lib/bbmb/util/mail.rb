@@ -55,7 +55,7 @@ module Mail
     header.add('User-Agent', BBMB.config.name)
     header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
     header.add('Content-Disposition', 'inline')
-    message.body = order.to_i2
+    message.body = order.to_target_format
 
     Mail.sendmail(message, from, to, cc)
   end
