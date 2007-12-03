@@ -4,6 +4,7 @@
 require 'encoding/character/utf-8'
 require 'bbmb/config'
 require 'bbmb/util/numbers'
+require 'csv'
 
 module BBMB
   module Model
@@ -206,8 +207,34 @@ class Order
   def total
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }
   end
+  def to_csv
+    result = ''
+    CSV::Writer.generate(result, 
+                         BBMB.config.target_format_fs,
+                         BBMB.config.target_format_rs) { |writer|
+      @positions.each { |position|
+        writer << [
+          @customer.customer_id,
+          @customer.ean13,
+          @commit_time.strftime('%d%m%Y'),
+          @commit_id, 
+          position.pcode,
+          position.ean13,
+          position.article_number,
+          position.quantity,
+          position.price,
+          @reference,
+          @comment,
+        ]
+      }
+    }
+    result
+  end
   def to_i2
     i2_header << "\n" << i2_body << "\n"
+  end
+  def to_target_format
+    self.send("to_#{BBMB.config.target_format}")
   end
 end
   end
