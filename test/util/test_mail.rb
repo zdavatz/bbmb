@@ -68,7 +68,7 @@ error-message
       end
       def test_send_order
         order = flexmock('order')
-        order.should_receive(:to_i2).and_return('i2-data')
+        order.should_receive(:to_target_format).and_return('i2-data')
         order.should_receive(:order_id).and_return('order-id')
         order.should_receive(:filename).and_return('filename')
         config = setup_config

@@ -37,6 +37,13 @@ class Template < HtmlGrid::DivTemplate
       "content"     =>  "nofollow, noindex",
     },
   ]
+  def css_links(context)
+    if(@lookandfeel.enabled?(:external_css, false))
+      css_link(context, @lookandfeel.resource_external(:external_css))
+    else
+      super
+    end
+  end
   def http_headers(*args)
     headers = super
     headers.store('Refresh', 

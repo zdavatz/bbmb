@@ -152,7 +152,7 @@ class Order
       "231:%s" % @customer.organisation,
     ]
     if(@comment && !@comment.empty?)
-      lines.push "236:%s" % u(@comment.gsub(/[\r\n]+/, ';'))[0,60]
+      lines.push "236:%s" % _formatted_comment
     end
     lines.push "237:61"
     if(@priority)
@@ -224,7 +224,7 @@ class Order
           position.quantity,
           position.price,
           @reference,
-          @comment,
+          _formatted_comment(' '),
         ]
       }
     }
@@ -235,6 +235,10 @@ class Order
   end
   def to_target_format
     self.send("to_#{BBMB.config.target_format}")
+  end
+  private
+  def _formatted_comment(replacement=';')
+    u(@comment.gsub(/[\r\n]+/, replacement))[0,60]
   end
 end
   end

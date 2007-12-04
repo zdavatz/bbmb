@@ -32,7 +32,7 @@ class TestTargetDir < Test::Unit::TestCase
     config.should_receive(:order_destinations).and_return([ftp])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
-    order.should_receive(:to_i2).and_return('data')
+    order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open)\
       .and_return { |host, user, pass, block|
@@ -53,7 +53,7 @@ class TestTargetDir < Test::Unit::TestCase
     config.should_receive(:order_destinations).and_return([@dir])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
-    order.should_receive(:to_i2).and_return('data')
+    order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open).times(0)
 
@@ -68,7 +68,7 @@ class TestTargetDir < Test::Unit::TestCase
     config.should_receive(:order_destinations).and_return(['data/destination'])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
-    order.should_receive(:to_i2).and_return('data')
+    order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open).times(0)
 
