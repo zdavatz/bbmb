@@ -238,7 +238,7 @@ class Order
   end
   private
   def _formatted_comment(replacement=';')
-    u(@comment.gsub(/[\r\n]+/, replacement))[0,60]
+    u(@comment.to_s.gsub(/[\r\n]+/, replacement))[0,60] if @comment
   end
 end
   end
