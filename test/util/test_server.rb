@@ -95,8 +95,12 @@ class TestServer < Test::Unit::TestCase
       :comment => 'My Comment',
       :reference => '76543',
     }
+    flexmock(BBMB::Util::Mail).should_receive(:send_order)\
+      .with(BBMB::Model::Order).times(1)
+    flexmock(BBMB::Util::TargetDir).should_receive(:send_order)\
+      .with(BBMB::Model::Order).times(1)
     assert_nothing_raised {
-      @server.inject_order('1234567890123', prods, infos)
+      @server.inject_order('1234567890123', prods, infos, :deliver => true)
     }
   end
   def test_rename_user__new

@@ -18,7 +18,7 @@ module BBMB
 	    SESSION = Html::Util::Session
 	    VALIDATOR = Html::Util::Validator
       attr_reader :updater
-      def inject_order(customer_id, products, infos)
+      def inject_order(customer_id, products, infos, opts={})
         customer = Model::Customer.find_by_customer_id(customer_id) \
           || Model::Customer.find_by_ean13(customer_id)
         raise "Unknown Customer #{customer_id}" if customer.nil?
@@ -34,6 +34,11 @@ module BBMB
           order.send("#{key}=", value)
         }
         customer.inject_order(order)
+        if opts[:deliver]
+          BBMB::Util::Mail.send_order(order)
+          BBMB::Util::TargetDir.send_order(order)
+        end
+        order
       end
       def invoice(range)
         Invoicer.run(range)
