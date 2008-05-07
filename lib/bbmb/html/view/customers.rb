@@ -61,6 +61,13 @@ class CustomersList < HtmlGrid::List
   SYMBOL_MAP = {
     :email  => HtmlGrid::MailLink,
   }
+  def customer_id(model)
+    link = HtmlGrid::Link.new(:customer_id, model, @session, self)
+    link.value = model.customer_id
+    link.href = @lookandfeel._event_url(:customer, 
+                                        {:customer_id => model.customer_id})
+    link
+  end
   def organisation(model)
     link = HtmlGrid::Link.new(:organisation, model, @session, self)
     link.value = model.organisation
