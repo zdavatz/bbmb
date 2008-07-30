@@ -37,6 +37,7 @@ class CurrentOrder < Global
     Info.new(@session, :message => :order_sent, 
              :event => :current_order)
   rescue StandardError => err
+    err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
     BBMB::Util::Mail.notify_error(err)
     Info.new(@session, :message => :order_problem, 
              :event => :current_order)
