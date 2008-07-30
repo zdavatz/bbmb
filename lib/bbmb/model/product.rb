@@ -9,7 +9,7 @@ module BBMB
   module Model
 class ProductInfo < Subject
   include Util::Numbers
-  attr_reader :article_number
+  attr_reader :article_number, :backorder
   attr_accessor :backorder_date, :commit_date, :ean13, :expiry_date,
     :partner_index, :pcode, :promotion, :sale, :status
   multilingual :description, :catalogue1, :catalogue2, :catalogue3
@@ -70,7 +70,6 @@ class ProductInfo < Subject
   end
 end
 class Product < ProductInfo
-  attr_reader :backorder
   def backorder=(value)
     case value
     when true, 1, /^(ja?|y(es)?|1)$/i
