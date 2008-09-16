@@ -8,6 +8,7 @@ require 'bbmb/html/view/current_order'
 require 'bbmb/util/mail'
 require 'bbmb/util/target_dir'
 require 'bbmb/util/transfer_dat'
+require 'timeout'
 
 module BBMB
   module Html
@@ -31,15 +32,20 @@ class CurrentOrder < Global
     ## update most recent values and ensure @model = _customer.current_order
     do_update 
     _customer.commit_order!
-    BBMB::Util::Mail.send_order(@model)
-    BBMB::Util::TargetDir.send_order(@model)
+    order = @model
+    @session.async {
+      begin
+        Timeout.timeout(300) {
+          BBMB::Util::Mail.send_order(order)
+          BBMB::Util::TargetDir.send_order(order)
+        }
+      rescue StandardError => err
+        err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
+        BBMB::Util::Mail.notify_error(err)
+      end
+    }
     @model = _customer.current_order
     Info.new(@session, :message => :order_sent, 
-             :event => :current_order)
-  rescue StandardError => err
-    err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
-    BBMB::Util::Mail.notify_error(err)
-    Info.new(@session, :message => :order_problem, 
              :event => :current_order)
   end
   def do_update
