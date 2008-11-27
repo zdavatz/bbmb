@@ -52,6 +52,8 @@ class TestInvoicer < Test::Unit::TestCase
     BBMB.config.should_receive(:invoice_percentage).and_return(1)
     BBMB.config.should_receive(:invoice_format).and_return("%s - %s")
     BBMB.config.should_receive(:invoice_item_format).and_return("%.2f -> %i")
+    BBMB.config.should_receive(:invoice_monthly_baseline)
+    BBMB.config.should_receive(:invoice_monthly_baseamount)
     session = flexmock('session')
     @ydim_server.should_receive(:login).and_return(session)
     invoice = OpenStruct.new
@@ -76,7 +78,7 @@ class TestInvoicer < Test::Unit::TestCase
       assert_equal(session, client)
     }
     range = Time.local(2006,9)...Time.local(2006,10)
-    result = Invoicer.create_invoice(range, 24, [order1, order2], today)
+    result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today)
     assert_equal(invoice, result)
     assert_equal("01.09.2006 - 30.09.2006", invoice.description)
     assert_equal(today, invoice.date)
@@ -122,6 +124,8 @@ class TestInvoicer < Test::Unit::TestCase
     BBMB.config.should_receive(:invoice_item_format).and_return("%.2f -> %i")
     BBMB.config.should_receive(:invoice_baseline).and_return(20)
     BBMB.config.should_receive(:invoice_newyear).and_return('1.1.')
+    BBMB.config.should_receive(:invoice_monthly_baseline)
+    BBMB.config.should_receive(:invoice_monthly_baseamount)
     session = flexmock('session')
     @ydim_server.should_receive(:login).and_return(session)
     invoice = OpenStruct.new
@@ -152,6 +156,33 @@ class TestInvoicer < Test::Unit::TestCase
     assert_equal(today, invoice.date)
     assert_equal('CHF', invoice.currency)
     assert_equal(30, invoice.payment_period)
+  end
+  def test_number_format
+    assert_equal "155",  Invoicer.number_format('155')
+    assert_equal "15.5", Invoicer.number_format('15.5')
+    assert_equal '1.55', Invoicer.number_format('1.55')
+    assert_equal "1'555", Invoicer.number_format('1555')
+    assert_equal "155.5", Invoicer.number_format('155.5')
+    assert_equal '15.55', Invoicer.number_format('15.55')
+    assert_equal '1.555', Invoicer.number_format('1.555')
+    assert_equal "15'555",  Invoicer.number_format('15555')
+    assert_equal "1'555.5", Invoicer.number_format('1555.5')
+    assert_equal '155.55',  Invoicer.number_format('155.55')
+    assert_equal '15.555',  Invoicer.number_format('15.555')
+    assert_equal '1.5555',  Invoicer.number_format('1.5555')
+    assert_equal "155'555",  Invoicer.number_format('155555')
+    assert_equal "15'555.5", Invoicer.number_format('15555.5')
+    assert_equal "1'555.55", Invoicer.number_format('1555.55')
+    assert_equal "155.555",  Invoicer.number_format('155.555')
+    assert_equal "15.5555",  Invoicer.number_format('15.5555')
+    assert_equal "1.55555",  Invoicer.number_format('1.55555')
+    assert_equal "1'555'555", Invoicer.number_format('1555555')
+    assert_equal "155'555.5", Invoicer.number_format('155555.5')
+    assert_equal "15'555.55", Invoicer.number_format('15555.55')
+    assert_equal "1'555.555", Invoicer.number_format('1555.555')
+    assert_equal "155.5555",  Invoicer.number_format('155.5555')
+    assert_equal "15.55555",  Invoicer.number_format('15.55555')
+    assert_equal "1.555555",  Invoicer.number_format('1.555555')
   end
 end
   end

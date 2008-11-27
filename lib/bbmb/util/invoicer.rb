@@ -37,6 +37,8 @@ Outstanding:   %10.2f
     end
     def create_invoice(time_range, owed, orders, date, currency='CHF')
       time = Time.now
+      baseline = Util::Money.new(BBMB.config.invoice_monthly_baseline)
+      baseamount = Util::Money.new(BBMB.config.invoice_monthly_baseamount)
       ydim_connect { |client|
         ydim_inv = client.create_invoice(BBMB.config.ydim_id)
         ydim_inv.description = sprintf(BBMB.config.invoice_format, 
@@ -45,15 +47,37 @@ Outstanding:   %10.2f
         ydim_inv.date = date
         ydim_inv.currency = currency
         ydim_inv.payment_period = 30
-        item_data = {
-          :price    =>  owed.to_f * BBMB.config.invoice_percentage / 100,
-          :quantity =>  1,
-          :text     =>  sprintf(BBMB.config.invoice_item_format, 
-                                owed, orders.size),
-          :time			=>	Time.local(date.year, date.month, date.day),
-          :unit     =>  "%0.1f%" % BBMB.config.invoice_percentage,
-        }
-        client.add_items(ydim_inv.unique_id, [item_data])
+        items = []
+        item_format = BBMB.config.invoice_item_format
+        item_args = [orders.size]
+        time = Time.local(date.year, date.month, date.day)
+        if baseamount > 0
+          item_format = BBMB.config.invoice_item_overrun_format
+          basepart = [baseline, owed].min
+          text = sprintf(BBMB.config.invoice_item_baseline_format,
+                         basepart, owed, *item_args)
+          item_data = {
+            :price    => baseamount.to_f,
+            :quantity => 1,
+            :text     => number_format(text),
+            :time			=> time,
+            :unit     => BBMB.config.invoice_item_baseamount_unit,
+          }
+          item_args.unshift owed
+          items.push item_data
+        end
+        if owed > baseline
+          owed -= baseline
+          item_data = {
+            :price    =>  owed.to_f * BBMB.config.invoice_percentage / 100,
+            :quantity =>  1,
+            :text     =>  number_format(sprintf(item_format, owed, *item_args)),
+            :time			=>	Time.local(date.year, date.month, date.day),
+            :unit     =>  "%0.1f%" % BBMB.config.invoice_percentage,
+          }
+          items.push item_data
+        end
+        client.add_items(ydim_inv.unique_id, items)
         ydim_inv
       }
     end
@@ -66,6 +90,11 @@ Outstanding:   %10.2f
         first = Time.local(year - 1, month, day)
       end
       first...time
+    end
+    def number_format(string)
+      string.reverse.gsub(/\d{3}(?=\d)(?!\d*\.)/) do |match|
+        match << "'"
+      end.reverse
     end
     def orders(range)
       BBMB.persistence.all(Model::Order).select { |order|
