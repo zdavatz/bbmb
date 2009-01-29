@@ -52,7 +52,7 @@ class Order
   end
   include Enumerable
   include Util::Numbers
-  attr_reader :commit_id, :commit_time, :positions, :unavailable
+  attr_reader :commit_id, :commit_time, :customer, :positions, :unavailable
   attr_accessor :comment, :reference
   int_accessor :priority
   money_accessor :shipping

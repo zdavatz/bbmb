@@ -21,6 +21,7 @@ module BBMB
       def inject_order(customer_id, products, infos, opts={})
         customer = Model::Customer.find_by_customer_id(customer_id) \
           || Model::Customer.find_by_ean13(customer_id)
+        needed_create = false
         unless customer
           if idtype = opts[:create_missing_customer] && !customer_id.empty?
             customer = Model::Customer.new(customer_id)
@@ -28,6 +29,7 @@ module BBMB
               customer.ean13 = customer_id
             end
             BBMB.persistence.save(customer)
+            needed_create = true
           else
             raise "Unknown Customer #{customer_id}"
           end
@@ -48,6 +50,7 @@ module BBMB
           BBMB::Util::Mail.send_order(order)
           BBMB::Util::TargetDir.send_order(order)
         end
+        BBMB::Util::Mail.notify_inject_error(customer, order) if needed_create
         order
       end
       def invoice(range)

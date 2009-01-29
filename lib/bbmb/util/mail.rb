@@ -32,6 +32,31 @@ module Mail
       error.backtrace.pretty_inspect ].join("\n")
     Mail.sendmail(message, from, to)
   end
+  def Mail.notify_inject_error(order)
+    config = BBMB.config
+    if recipients = config.inject_error_to
+      customer = order.customer
+      message = RMail::Message.new
+      header = message.header
+      header.add('Date', Time.now.rfc822)
+      from = header.from = config.inject_error_from
+      to = header.to = config.inject_error_to
+      cc = header.cc = config.inject_error_cc
+      header.subject = config.inject_error_subject % [ order.order_id,
+                                                       customer.customer_id ]
+      header.add('Mime-Version', '1.0')
+      header.add('User-Agent', BBMB.config.name)
+      header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
+      header.add('Content-Disposition', 'inline')
+      message.body = config.inject_error_body % [
+        order.order_id,
+        order.commit_time.strftime('%d.%m.%Y %H:%M:%S'),
+        customer.customer_id,
+      ]
+      Mail.sendmail message, config.inject_error_from, recipients,
+                    config.inject_error_cc
+    end
+  end
   def Mail.sendmail(message, from, to, cc=[])
     config = BBMB.config
     Net::SMTP.start(config.smtp_server, config.smtp_port, config.smtp_helo,
