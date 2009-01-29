@@ -14,7 +14,7 @@ class Customer
     :status, :title
   def initialize(customer_id, email=nil)
     @archive = {}
-    @customer_id = customer_id
+    self.customer_id = customer_id if customer_id
     @email = email
     @favorites = Order.new(self)
     @protected = {}
@@ -46,6 +46,13 @@ class Customer
   end
   def current_order
     @current_order ||= Order.new(self)
+  end
+  def customer_id=(customer_id)
+    if other = Customer.find_by_customer_id(customer_id)
+      raise "Duplicate customer_id #{customer_id}"
+    else
+      @customer_id = customer_id
+    end
   end
   def quota(article_id)
     @quotas.find { |quota| quota.article_number == article_id }

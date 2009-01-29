@@ -21,7 +21,17 @@ module BBMB
       def inject_order(customer_id, products, infos, opts={})
         customer = Model::Customer.find_by_customer_id(customer_id) \
           || Model::Customer.find_by_ean13(customer_id)
-        raise "Unknown Customer #{customer_id}" if customer.nil?
+        unless customer
+          if idtype = opts[:create_missing_customer] && !customer_id.empty?
+            customer = Model::Customer.new(customer_id)
+            if idtype.to_s == 'ean13'
+              customer.ean13 = customer_id
+            end
+            BBMB.persistence.save(customer)
+          else
+            raise "Unknown Customer #{customer_id}"
+          end
+        end
         order = Model::Order.new(customer)
         products.each { |info|
           if(product = Model::Product.find_by_pcode(info[:pcode]) \
