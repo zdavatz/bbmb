@@ -32,7 +32,7 @@ module Mail
       error.backtrace.pretty_inspect ].join("\n")
     Mail.sendmail(message, from, to)
   end
-  def Mail.notify_inject_error(order)
+  def Mail.notify_inject_error(order, opts={})
     config = BBMB.config
     if recipients = config.inject_error_to
       customer = order.customer
@@ -49,7 +49,7 @@ module Mail
       header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
       header.add('Content-Disposition', 'inline')
       message.body = config.inject_error_body % [
-        order.order_id,
+        opts[:customer_name] || customer.customer_id,
         order.commit_time.strftime('%d.%m.%Y %H:%M:%S'),
         customer.customer_id,
       ]

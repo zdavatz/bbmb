@@ -50,7 +50,9 @@ module BBMB
           BBMB::Util::Mail.send_order(order)
           BBMB::Util::TargetDir.send_order(order)
         end
-        BBMB::Util::Mail.notify_inject_error(customer, order) if needed_create
+        if needed_create
+          BBMB::Util::Mail.notify_inject_error(order, opts)
+        end
         order
       end
       def invoice(range)
