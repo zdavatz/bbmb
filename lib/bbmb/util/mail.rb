@@ -42,8 +42,10 @@ module Mail
       from = header.from = config.inject_error_from
       to = header.to = config.inject_error_to
       cc = header.cc = config.inject_error_cc
-      header.subject = config.inject_error_subject % [ order.order_id,
-                                                       customer.customer_id ]
+      header.subject = config.inject_error_subject % [
+        opts[:customer_name] || order.order_id,
+        customer.customer_id,
+      ]
       header.add('Mime-Version', '1.0')
       header.add('User-Agent', BBMB.config.name)
       header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
