@@ -40,6 +40,13 @@ module BBMB
              || Model::Product.find_by_ean13(info[:ean13]) \
              || Model::Product.find_by_article_number(info[:article_number]))
             order.add(info[:quantity], product)
+            [:article_number, :backorder].each do |key|
+              info.store key, product.send(key)
+            end
+            info.store :description, product.description.de
+            info[:deliverable] = info[:quantity]
+          else
+            info[:deliverable] = 0
           end
         }
         infos.each { |key, value|
@@ -53,7 +60,7 @@ module BBMB
         if needed_create
           BBMB::Util::Mail.notify_inject_error(order, opts)
         end
-        order
+        { :order_id => order.order_id, :products => products }
       end
       def invoice(range)
         Invoicer.run(range)
