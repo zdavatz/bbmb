@@ -6,6 +6,7 @@ require 'bbmb/html/view/list_prices'
 require 'bbmb/html/view/multilingual'
 require 'bbmb/html/view/search'
 require 'bbmb/html/view/template'
+require 'htmlgrid/errormessage'
 require 'htmlgrid/formlist'
 
 module BBMB
@@ -15,6 +16,7 @@ class Products < HtmlGrid::FormList
   include Backorder
   include ListPrices
   include Multilingual
+  include HtmlGrid::ErrorMessage
   COMPONENTS = {
     [0,0]	=>	:quantity,
     [1,0]	=>	:description,
@@ -42,6 +44,10 @@ class Products < HtmlGrid::FormList
   HEAD_OFFSET_STEP = [0,1]
   OFFSET_STEP = [0,2]
   SORT_DEFAULT = :description
+  def init
+    super
+    error_message
+  end
   def compose_footer(matrix)
     super unless(@model.empty?)
   end
