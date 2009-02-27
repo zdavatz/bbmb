@@ -20,7 +20,7 @@ class Search < HtmlGrid::DivForm
   def init
     super
     url = @lookandfeel._event_url(event, :query => nil)
-    self.onsubmit = "document.location.href='#{url}'+encodeURLPart(this.query.value); return false;"
+    self.onsubmit = "document.location.href='#{url}'+this.query.value; return false"
   end
 end
     end

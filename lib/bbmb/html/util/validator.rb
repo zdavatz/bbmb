@@ -7,6 +7,7 @@ module BBMB
   module Html
     module Util
 class Validator < SBSM::Validator
+  BOOLEAN = [ :accept_terms ]
   ENUMS = {
     :canton				=>	[
       nil, "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR", "JU",

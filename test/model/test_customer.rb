@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 # Model::TestCustomer -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
 
+$: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 require 'test/unit'
 require 'bbmb'
 require 'bbmb/model/customer'
 require 'bbmb/model/order'
+require 'stub/persistence'
 require 'flexmock'
 
 module BBMB
@@ -14,6 +16,7 @@ module BBMB
 class TestCustomer < Test::Unit::TestCase
   include FlexMock::TestCase
   def setup
+    Customer.clear_instances
     @customer = Customer.new('007')
   end
   def test_email_writer

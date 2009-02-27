@@ -31,22 +31,34 @@ class CurrentOrder < Global
   def commit
     ## update most recent values and ensure @model = _customer.current_order
     do_update 
-    _customer.commit_order!
-    order = @model
-    @session.async {
-      begin
-        Timeout.timeout(300) {
-          BBMB::Util::Mail.send_order(order)
-          BBMB::Util::TargetDir.send_order(order)
-        }
-      rescue StandardError => err
-        err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
-        BBMB::Util::Mail.notify_error(err)
+    if @session.lookandfeel.enabled?(:terms_of_service, false)
+      if @session.user_input(:accept_terms)
+        _customer.terms_last_accepted ||= Time.now
+      else
+        @errors.store :terms_accepted,
+                      create_error(:e_terms_of_service, :terms_accepted, nil)
+        _customer.terms_last_accepted = nil
       end
-    }
-    @model = _customer.current_order
-    Info.new(@session, :message => :order_sent, 
-             :event => :current_order)
+      BBMB.persistence.save(_customer)
+    end
+    unless error?
+      _customer.commit_order!
+      order = @model
+      @session.async {
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::Mail.send_order(order)
+            BBMB::Util::TargetDir.send_order(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
+      }
+      @model = _customer.current_order
+      Info.new(@session, :message => :order_sent,
+               :event => :current_order)
+    end
   end
   def do_update
     @model = _customer.current_order

@@ -11,7 +11,7 @@ class Customer
   attr_accessor :address1, :address2, :address3, :canton, :city,
     :drtitle, :ean13, :fax, :firstname, :language, :lastname,
     :organisation, :phone_business, :phone_mobile, :phone_private, :plz,
-    :status, :title
+    :status, :title, :terms_last_accepted
   def initialize(customer_id, email=nil)
     @archive = {}
     self.customer_id = customer_id if customer_id

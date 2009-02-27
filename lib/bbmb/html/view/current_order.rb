@@ -8,6 +8,8 @@ require 'bbmb/html/view/search'
 require 'bbmb/html/view/template'
 require 'htmlgrid/divform'
 require 'htmlgrid/dojotoolkit'
+require 'htmlgrid/errormessage'
+require 'htmlgrid/inputcheckbox'
 require 'htmlgrid/inputfile'
 require 'htmlgrid/inputradio'
 require 'htmlgrid/inputtext'
@@ -261,7 +263,23 @@ class CurrentPositions < HtmlGrid::List
     position_modifier(model, :description, :search)
   end
 end
+class TermsOfService < HtmlGrid::Composite
+  COMPONENTS = {
+    [0,0] => :accept_terms,
+    [1,0] => "terms_of_service",
+  }
+  SYMBOL_MAP = {
+    :accept_terms => HtmlGrid::InputCheckbox,
+  }
+  def accept_terms(model)
+    model = @session.state._customer
+    check = HtmlGrid::InputCheckbox.new(:accept_terms, model, @session, self)
+    check.attributes['checked'] = !model.terms_last_accepted.nil?
+    check
+  end
+end
 class CurrentOrderForm < HtmlGrid::DivForm
+  include HtmlGrid::ErrorMessage
   COMPONENTS = {
     [0,0] => :toggle,
     [0,1] => CurrentToggleable,
@@ -276,8 +294,14 @@ class CurrentOrderForm < HtmlGrid::DivForm
   SYMBOL_MAP = {
     :order_total => HtmlGrid::LabelText, 
   }
-  def toggle_status(model)
-    model.additional_info.empty? ? 'closed' : 'open'
+  def init
+    if @lookandfeel.enabled?(:terms_of_service, false)
+      components.update [0,3] => :toggle_terms,
+                        [0,4] => TermsOfService, [0,5] => :submit
+      css_id_map.update 4 => 'terms-of-service'
+    end
+    super
+    error_message
   end
   def toggle(model)
     ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"
@@ -290,6 +314,24 @@ class CurrentOrderForm < HtmlGrid::DivForm
       'togglee'       => 'info',
     }
     dojo_tag('contenttoggler', attrs)
+  end
+  def toggle_status(model)
+    model.additional_info.empty? ? 'closed' : 'open'
+  end
+  def toggle_terms(model)
+    ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:terms)}"
+    ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:terms)}"
+    attrs = {
+      'css_class'     => 'toggler',
+      'message_open'  => ms_open,
+      'message_close' => ms_close,
+      'status'        => toggle_terms_status,
+      'togglee'       => 'terms-of-service',
+    }
+    dojo_tag('contenttoggler', attrs)
+  end
+  def toggle_terms_status
+    @session.state._customer.terms_last_accepted ? 'closed' : 'open'
   end
   def total(model)
     span = HtmlGrid::Span.new(model, @session, self)
