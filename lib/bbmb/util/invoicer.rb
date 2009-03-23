@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Util::Invoicer -- bbmb.ch -- 03.10.2006 -- hwyss@ywesee.com
 
+require 'iconv'
 require 'ydim/config'
 require 'ydim/client'
 require 'openssl'
@@ -8,6 +9,7 @@ require 'openssl'
 module BBMB
   module Util
 module Invoicer
+  @iconv = Iconv.new('ISO-8859-1//TRANSLIT//IGNORE', 'UTF-8')
   class << self
     def run(range, date=Date.today)
       orders = orders(range)
@@ -41,37 +43,38 @@ Outstanding:   %10.2f
       baseamount = Util::Money.new(BBMB.config.invoice_monthly_baseamount)
       ydim_connect { |client|
         ydim_inv = client.create_invoice(BBMB.config.ydim_id)
-        ydim_inv.description = sprintf(BBMB.config.invoice_format, 
+        ydim_inv.description = sprintf(@iconv.iconv(BBMB.config.invoice_format),
                                        time_range.first.strftime("%d.%m.%Y"),
                                        (time_range.last - 1).strftime("%d.%m.%Y"))
         ydim_inv.date = date
         ydim_inv.currency = currency
         ydim_inv.payment_period = 30
         items = []
-        item_format = BBMB.config.invoice_item_format
+        item_format = @iconv.iconv(BBMB.config.invoice_item_format)
         item_args = [orders.size]
         time = Time.local(date.year, date.month, date.day)
         if baseamount > 0
-          item_format = BBMB.config.invoice_item_overrun_format
+          item_format = @iconv.iconv(BBMB.config.invoice_item_overrun_format)
           basepart = [baseline, owed].min
           text = sprintf(BBMB.config.invoice_item_baseline_format,
                          basepart, owed, *item_args)
           item_data = {
             :price    => baseamount.to_f,
             :quantity => 1,
-            :text     => number_format(text),
+            :text     => @iconv.iconv(number_format(text)),
             :time			=> time,
-            :unit     => BBMB.config.invoice_item_baseamount_unit,
+            :unit     => @iconv.iconv(BBMB.config.invoice_item_baseamount_unit),
           }
           item_args.unshift owed
           items.push item_data
         end
         if owed > baseline
           owed -= baseline
+          text = sprintf(item_format, owed, *item_args)
           item_data = {
             :price    =>  owed.to_f * BBMB.config.invoice_percentage / 100,
             :quantity =>  1,
-            :text     =>  number_format(sprintf(item_format, owed, *item_args)),
+            :text     =>  @iconv.iconv(number_format(text)),
             :time			=>	Time.local(date.year, date.month, date.day),
             :unit     =>  "%0.1f%" % BBMB.config.invoice_percentage,
           }
