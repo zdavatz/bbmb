@@ -45,15 +45,7 @@ class CurrentOrder < Global
       _customer.commit_order!
       order = @model
       @session.async {
-        begin
-          Timeout.timeout(300) {
-            BBMB::Util::Mail.send_order(order)
-            BBMB::Util::TargetDir.send_order(order)
-          }
-        rescue StandardError => err
-          err.message << " (Email: #{_customer.email} - Customer-Id: #{_customer.customer_id})"
-          BBMB::Util::Mail.notify_error(err)
-        end
+        @session.send_order order, _customer
       }
       @model = _customer.current_order
       Info.new(@session, :message => :order_sent,

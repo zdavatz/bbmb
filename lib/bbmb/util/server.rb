@@ -54,8 +54,9 @@ module BBMB
         }
         customer.inject_order(order)
         if opts[:deliver]
-          BBMB::Util::Mail.send_order(order)
-          BBMB::Util::TargetDir.send_order(order)
+          async do
+            send_order order, customer
+          end
         end
         if needed_create
           BBMB::Util::Mail.notify_inject_error(order, opts)
@@ -121,6 +122,24 @@ module BBMB
             update
           }
         }
+      end
+      def send_order order, customer
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::TargetDir.send_order(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::Mail.send_order(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
       end
       def update
         Updater.run
