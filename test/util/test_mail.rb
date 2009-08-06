@@ -166,7 +166,7 @@ request body
           [pos1, pos2].collect(&block)
         end
         order.should_receive(:total).and_return 25.0
-        order.should_receive(:total_inc_vat).and_return 25.6
+        order.should_receive(:total_incl_vat).and_return 25.6
         config = setup_config
         config.should_receive(:mail_confirm_reply_to).and_return('replyto-test@bbmb.ch')
         config.should_receive(:mail_confirm_from).and_return('from-test@bbmb.ch')
@@ -219,6 +219,7 @@ To: customer@bbmb.ch
 Cc: 
 Subject: Confirmation order-id
 Message-ID: <order-id@from-test.bbmb.ch>
+Reply-To: replyto-test@bbmb.ch
 Mime-Version: 1.0
 User-Agent: Application/User Agent
         EOS

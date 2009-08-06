@@ -93,6 +93,7 @@ module Mail
     header.subject = config.mail_confirm_subject % order.order_id
     header.add('Message-ID', sprintf('<%s@%s>', order.order_id,
                                      from.tr('@', '.')))
+    header.add('Reply-To', reply_to)
     header.add('Mime-Version', '1.0')
     header.add('User-Agent', BBMB.config.name)
     header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
