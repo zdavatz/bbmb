@@ -79,7 +79,7 @@ module Mail
         sprintf line, pos.quantity, pos.description, pos.price_qty, pos.price
       end
       parts.push date, content.join("\n"), order.total
-      if vtotal = order.total_inc_vat
+      if vtotal = order.total_incl_vat
         parts.push vtotal
       end
     end
