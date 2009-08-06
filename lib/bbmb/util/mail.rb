@@ -89,7 +89,6 @@ module Mail
     header.add('Date', Time.now.rfc822)
     from = header.from = config.mail_confirm_from
     header.to = to
-    cc = header.cc = config.mail_confirm_cc
     header.subject = config.mail_confirm_subject % order.order_id
     header.add('Message-ID', sprintf('<%s@%s>', order.order_id,
                                      from.tr('@', '.')))
@@ -100,7 +99,7 @@ module Mail
     header.add('Content-Disposition', 'inline')
     message.body = sprintf body, *parts
 
-    Mail.sendmail(message, from, to, cc)
+    Mail.sendmail(message, from, to, config.mail_confirm_cc)
   end
   def Mail.send_order(order)
     message = RMail::Message.new
