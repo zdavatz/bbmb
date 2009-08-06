@@ -67,6 +67,40 @@ module Mail
       smtp.sendmail(message.to_s, from, [to, cc].flatten.compact)
     }
   end
+  def Mail.send_confirmation(order)
+    config = BBMB.config
+    reply_to = config.mail_confirm_reply_to or return nil
+    to = order.customer.email or return nil
+    body = config.mail_confirm_body or return nil
+    date = order.commit_time.strftime("%d.%m.%Y")
+    parts = []
+    config.mail_confirm_lines.collect do |line|
+      content = order.collect do |pos|
+        sprintf line, pos.quantity, pos.description, pos.price_qty, pos.price
+      end
+      parts.push date, content.join("\n"), order.total
+      if vtotal = order.total_inc_vat
+        parts.push vtotal
+      end
+    end
+
+    message = RMail::Message.new
+    header = message.header
+    header.add('Date', Time.now.rfc822)
+    from = header.from = config.mail_confirm_from
+    header.to = to
+    cc = header.cc = config.mail_confirm_cc
+    header.subject = config.mail_confirm_subject % order.order_id
+    header.add('Message-ID', sprintf('<%s@%s>', order.order_id,
+                                     from.tr('@', '.')))
+    header.add('Mime-Version', '1.0')
+    header.add('User-Agent', BBMB.config.name)
+    header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
+    header.add('Content-Disposition', 'inline')
+    message.body = sprintf body, *parts
+
+    Mail.sendmail(message, from, to, cc)
+  end
   def Mail.send_order(order)
     message = RMail::Message.new
     config = BBMB.config

@@ -140,6 +140,14 @@ module BBMB
           err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
           BBMB::Util::Mail.notify_error(err)
         end
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::Mail.send_confirmation(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
       end
       def update
         Updater.run

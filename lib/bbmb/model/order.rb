@@ -207,6 +207,11 @@ class Order
   def total
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }
   end
+  def total_incl_vat
+    if rate = BBMB.config.vat_rate
+      total * (100 + rate.to_f) / 100
+    end
+  end
   def to_csv
     result = ''
     CSV::Writer.generate(result, 
@@ -235,6 +240,11 @@ class Order
   end
   def to_target_format
     self.send("to_#{BBMB.config.target_format}")
+  end
+  def vat
+    if rate = BBMB.config.vat_rate
+      total * rate.to_f / 100
+    end
   end
   private
   def _formatted_comment(replacement=';')
