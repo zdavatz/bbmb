@@ -13,25 +13,144 @@ module BBMB
     class TestMail < Test::Unit::TestCase
       include FlexMock::TestCase
       def setup_config
-        config = flexmock('config')
-        BBMB.config = config
-        config.should_receive(:error_recipients).and_return(['to.test@bbmb.ch'])
-        config.should_receive(:mail_order_from).and_return('from.test@bbmb.ch')
-        config.should_receive(:mail_order_to).and_return('to.test@bbmb.ch')
-        config.should_receive(:mail_order_cc).and_return('cc.test@bbmb.ch')
-        config.should_receive(:mail_order_subject).and_return('order %s')
-        config.should_receive(:mail_request_from).and_return('from.request.test@bbmb.ch')
-        config.should_receive(:mail_request_to).and_return('to.request.test@bbmb.ch')
-        config.should_receive(:mail_request_cc).and_return('cc.request.test@bbmb.ch')
-        config.should_receive(:mail_request_subject).and_return('Request %s')
-        config.should_receive(:name).and_return('Application/User Agent')
-        config.should_receive(:smtp_authtype).and_return(:plain)
-        config.should_receive(:smtp_helo).and_return('helo.domain')
-        config.should_receive(:smtp_pass).and_return('secret')
-        config.should_receive(:smtp_port).and_return(25)
-        config.should_receive(:smtp_server).and_return('mail.test.com')
-        config.should_receive(:smtp_user).and_return('user')
+        config = BBMB.config
+        config.error_recipients = ['to.test@bbmb.ch']
+        config.mail_order_from = 'from.test@bbmb.ch'
+        config.mail_order_to = 'to.test@bbmb.ch'
+        config.mail_order_cc = 'cc.test@bbmb.ch'
+        config.mail_order_subject = 'order %s'
+        config.mail_request_from = 'from.request.test@bbmb.ch'
+        config.mail_request_to = 'to.request.test@bbmb.ch'
+        config.mail_request_cc = 'cc.request.test@bbmb.ch'
+        config.mail_request_subject = 'Request %s'
+        config.name = 'Application/User Agent'
+        config.smtp_authtype = :plain
+        config.smtp_helo = 'helo.domain'
+        config.smtp_pass = 'secret'
+        config.smtp_port = 25
+        config.smtp_server = 'mail.test.com'
+        config.smtp_user = 'user'
+        config.mail_confirm_reply_to = 'replyto-test@bbmb.ch'
+        config.mail_confirm_from = 'from-test@bbmb.ch'
+        config.mail_confirm_cc = []
+        config.mail_confirm_subject = 'Confirmation %s'
+        config.mail_confirm_body = <<-EOS
+Sie haben am %s folgende Artikel bestellt:
+
+%s
+------------------------------------------------------------------------
+Bestelltotal exkl. Mwst. %10.2f
+Bestelltotal inkl. Mwst. %10.2f
+====================================
+
+En date du %s vous avez commandé les articles suivants
+
+%s
+------------------------------------------------------------------------
+Commande excl. Tva.      %10.2f
+Commande incl. Tva.      %10.2f
+====================================
+
+In data del %s Lei ha ordinato i seguenti prodotti.
+
+%s
+------------------------------------------------------------------------
+Totale dell'ordine escl. %10.2f
+Totale dell'ordine incl. %10.2f
+====================================
+        EOS
+        config.mail_confirm_lines = [
+          "%3i x %-36s à %7.2f, total  %10.2f",
+          "%3i x %-36s à %7.2f, total  %10.2f",
+          "%3i x %-36s a %7.2f, totale %10.2f",
+        ]
+        config.inject_error_to = 'to.test@bbmb.ch'
+        config.confirm_error_to = 'to.test@bbmb.ch'
         config
+      end
+      def test_inject_error
+        config = setup_config
+        customer = flexmock('customer')
+        customer.should_receive(:customer_id).and_return('12345678')
+        order = flexmock('order')
+        order.should_receive(:customer).and_return(customer)
+        order.should_receive(:order_id).and_return('12345678-90')
+        order.should_receive(:commit_time).and_return Time.local(2009, 8, 7, 11, 14, 4)
+        smtp = flexmock('smtp')
+        flexstub(Net::SMTP).should_receive(:start).and_return {
+          |srv, port, helo, user, pass, type, block|
+          assert_equal('mail.test.com', srv)
+          assert_equal(25, port)
+          assert_equal('helo.domain', helo)
+          assert_equal('user', user)
+          assert_equal('secret', pass)
+          assert_equal(:plain, type)
+          block.call(smtp)
+        }
+        headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+From: errors.test@bbmb.ch
+To: to.test@bbmb.ch
+Cc: 
+Subject: Order 12345678-90 with missing customer: Pharmacy Health
+        EOS
+        body = <<-EOS
+The order Pharmacy Health, committed on 07.08.2009 11:14:04, assigned to the unknown customer: 12345678
+        EOS
+        smtp.should_receive(:sendmail).and_return { |message, from, recipients|
+          assert(message.include?(headers),
+                 "missing headers:\n#{headers}\nin message:\n#{message}")
+          assert(message.include?(body),
+                 "missing body:\n#{body}\nin message:\n#{message}")
+          assert_equal('errors.test@bbmb.ch', from)
+          assert_equal(['to.test@bbmb.ch'], recipients)
+        }
+        Mail.notify_inject_error(order, :customer_name => 'Pharmacy Health')
+      end
+      def test_confirm_error
+        config = setup_config
+        customer = flexmock('customer')
+        customer.should_receive(:customer_id).and_return('12345678')
+        order = flexmock('order')
+        order.should_receive(:customer).and_return(customer)
+        order.should_receive(:order_id).and_return('12345678-90')
+        order.should_receive(:commit_time).and_return Time.local(2009, 8, 7, 11, 14, 4)
+        smtp = flexmock('smtp')
+        flexstub(Net::SMTP).should_receive(:start).and_return {
+          |srv, port, helo, user, pass, type, block|
+          assert_equal('mail.test.com', srv)
+          assert_equal(25, port)
+          assert_equal('helo.domain', helo)
+          assert_equal('user', user)
+          assert_equal('secret', pass)
+          assert_equal(:plain, type)
+          block.call(smtp)
+        }
+        headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+From: errors.test@bbmb.ch
+To: to.test@bbmb.ch
+Cc: 
+Subject: Customer 12345678 without email address
+        EOS
+        body = <<-EOS
+Customer 12345678 does not have an email address configured
+        EOS
+        smtp.should_receive(:sendmail).and_return { |message, from, recipients|
+          assert(message.include?(headers),
+                 "missing headers:\n#{headers}\nin message:\n#{message}")
+          assert(message.include?(body),
+                 "missing body:\n#{body}\nin message:\n#{message}")
+          assert_equal('errors.test@bbmb.ch', from)
+          assert_equal(['to.test@bbmb.ch'], recipients)
+        }
+        Mail.notify_confirmation_error(order)
       end
       def test_notify_error
         config = setup_config
@@ -47,10 +166,13 @@ module BBMB
           block.call(smtp) 
         }
         headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
 From: from.test@bbmb.ch
 To: to.test@bbmb.ch
 Subject: Application/User Agent: error-message
-User-Agent: Application/User Agent
         EOS
         body = <<-EOS
 RuntimeError
@@ -84,13 +206,15 @@ error-message
           block.call(smtp) 
         }
         headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
 From: from.test@bbmb.ch
 To: to.test@bbmb.ch
 Cc: cc.test@bbmb.ch
 Subject: order order-id
 Message-ID: <order-id@from.test.bbmb.ch>
-Mime-Version: 1.0
-User-Agent: Application/User Agent
         EOS
         body = <<-EOS
 i2-data
@@ -121,13 +245,15 @@ i2-data
           block.call(smtp) 
         }
         headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
 From: from.request.test@bbmb.ch
 To: to.request.test@bbmb.ch
 Cc: cc.request.test@bbmb.ch
 Subject: Request Organisation
 Reply-To: sender@email.com
-Mime-Version: 1.0
-User-Agent: Application/User Agent
         EOS
         body = <<-EOS
 request body
@@ -168,40 +294,6 @@ request body
         order.should_receive(:total).and_return 25.0
         order.should_receive(:total_incl_vat).and_return 25.6
         config = setup_config
-        config.should_receive(:mail_confirm_reply_to).and_return('replyto-test@bbmb.ch')
-        config.should_receive(:mail_confirm_from).and_return('from-test@bbmb.ch')
-        config.should_receive(:mail_confirm_cc).and_return([])
-        config.should_receive(:mail_confirm_subject).and_return('Confirmation %s')
-        config.should_receive(:mail_confirm_body).and_return(<<-EOS)
-Sie haben am %s folgende Artikel bestellt:
-
-%s
-------------------------------------------------------------------------
-Bestelltotal exkl. Mwst. %10.2f
-Bestelltotal inkl. Mwst. %10.2f
-====================================
-
-En date du %s vous avez commandé les articles suivants
-
-%s
-------------------------------------------------------------------------
-Commande excl. Tva.      %10.2f
-Commande incl. Tva.      %10.2f
-====================================
-
-In data del %s Lei ha ordinato i seguenti prodotti.
-
-%s
-------------------------------------------------------------------------
-Totale dell'ordine escl. %10.2f
-Totale dell'ordine incl. %10.2f
-====================================
-        EOS
-        config.should_receive(:mail_confirm_lines).and_return [
-          "%3i x %-36s à %7.2f, total  %10.2f",
-          "%3i x %-36s à %7.2f, total  %10.2f",
-          "%3i x %-36s a %7.2f, totale %10.2f",
-        ]
         smtp = flexmock('smtp')
         flexstub(Net::SMTP).should_receive(:start).and_return {
           |srv, port, helo, user, pass, type, block|
@@ -214,14 +306,15 @@ Totale dell'ordine incl. %10.2f
           block.call(smtp)
         }
         headers = <<-EOS
+Mime-Version: 1.0
+User-Agent: Application/User Agent
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
 From: from-test@bbmb.ch
 To: customer@bbmb.ch
-Cc: 
 Subject: Confirmation order-id
 Message-ID: <order-id@from-test.bbmb.ch>
 Reply-To: replyto-test@bbmb.ch
-Mime-Version: 1.0
-User-Agent: Application/User Agent
         EOS
         body = <<-EOS
 Sie haben am 06.08.2009 folgende Artikel bestellt:
