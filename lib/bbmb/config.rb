@@ -63,7 +63,7 @@ module BBMB
     'mail_confirm_body'               => nil,
     'mail_confirm_cc'                 => [],
     'mail_confirm_from'               => 'confirm.test@bbmb.ch',
-    'mail_confirm_reply_to'           => 'replyto.test@bbmb.ch',
+    'mail_confirm_reply_to'           => nil, ## used for determining if a confirmation should be sent
     'mail_confirm_lines'              => [],
     'mail_confirm_subject'            => 'Bbmb-Confirm %s',
     'mail_order_cc'                   => [],

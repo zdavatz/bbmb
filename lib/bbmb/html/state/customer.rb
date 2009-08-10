@@ -59,7 +59,7 @@ class Customer < Global
   def _save
     keys = mandatory + [ :ean13, :title, :drtitle, :lastname, :firstname,
                          :address2, :address3, :plz, :city, :canton,
-                         :phone_business, :phone_private, :phone_mobile, :fax ]
+                         :phone_business, :phone_private, :phone_mobile, :fax, :order_confirmation ]
     input = user_input(keys, mandatory)
     update_user(input)
     if(error?)

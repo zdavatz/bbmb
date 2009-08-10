@@ -71,7 +71,11 @@ module Mail
   end
   def Mail.send_confirmation(order)
     config = BBMB.config
+    ## there are two switches that determine whether a confirmation is sent out:
+    #  application-wide: mail_confirm_reply_to must be configured
     reply_to = config.mail_confirm_reply_to or return nil
+    #  per-customer: order_confirmation must be checked
+    order.customer.order_confirmation or return nil
     to = order.customer.email or return notify_confirmation_error(order)
     body = config.mail_confirm_body or return nil
     date = order.commit_time.strftime("%d.%m.%Y")

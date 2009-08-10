@@ -4,6 +4,7 @@
 require 'bbmb/html/view/template'
 require 'htmlgrid/errormessage'
 require 'htmlgrid/form'
+require 'htmlgrid/inputcheckbox'
 require 'htmlgrid/popuplink'
 require 'htmlgrid/select'
 
@@ -32,6 +33,7 @@ class CustomerForm < HtmlGrid::Form
     [0,8,2] =>  :city,
     [2,8]   =>  :canton,
     [0,9]   =>  :email,
+    [2,9]   =>  :order_confirmation,
     [0,10]  =>  :phone_business,
     [2,10]  =>  :phone_private,
     [0,11]  =>  :phone_mobile,
@@ -100,6 +102,12 @@ class CustomerForm < HtmlGrid::Form
     link.href = @lookandfeel._event_url(:history, 
                                         :customer_id => model.customer_id)
     link
+  end
+  def order_confirmation(model)
+    if BBMB.config.mail_confirm_reply_to
+      HtmlGrid::InputCheckbox.new(:order_confirmation,
+                                  model, @session, self)
+    end
   end
   def pass(model)
     _pass(:pass, model)
