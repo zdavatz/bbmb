@@ -17,32 +17,50 @@ class Products < HtmlGrid::FormList
   include ListPrices
   include Multilingual
   include HtmlGrid::ErrorMessage
-  COMPONENTS = {
-    [0,0]	=>	:quantity,
-    [1,0]	=>	:description,
-    [2,0]	=>	:backorder,
-    [3,0] =>  :price,
-    [4,0] =>  :price_levels,
-    [5,0] =>  :price2,
-    [6,0] =>  :price3,
-    [4,1] =>  :price4,
-    [5,1] =>  :price5,
-    [6,1] =>  :price6,
-  }
   CSS_CLASS = 'list'
-  CSS_HEAD_MAP = {
-    [3,0] => 'right',
-    [4,0] => 'right',
-  }
-  CSS_MAP = { 
-    [0,0]     => 'tiny', 
-    [1,0]     => 'description',
-    [3,0,4,2] => 'right'
-  }
+  if BBMB.config.enable_price_levels
+    COMPONENTS = {
+      [0,0]	=>	:quantity,
+      [1,0]	=>	:description,
+      [2,0]	=>	:backorder,
+      [3,0] =>  :price,
+      [4,0] =>  :price_levels,
+      [5,0] =>  :price2,
+      [6,0] =>  :price3,
+      [4,1] =>  :price4,
+      [5,1] =>  :price5,
+      [6,1] =>  :price6
+    }
+    CSS_HEAD_MAP = {
+      [3,0] => 'right',
+      [4,0] => 'right',
+    }
+    CSS_MAP = {
+      [0,0]     => 'tiny',
+      [1,0]     => 'description',
+      [3,0,4,2] => 'right'
+    }
+    OFFSET_STEP = [0,2]
+    HEAD_OFFSET_STEP = [0,1]
+  else
+    COMPONENTS = {
+      [0,0]	=>	:quantity,
+      [1,0]	=>	:description,
+      [2,0]	=>	:backorder,
+      [3,0] =>  :price,
+    }
+    CSS_HEAD_MAP = {
+      [3,0] => 'right',
+    }
+    CSS_MAP = {
+      [0,0] => 'tiny',
+      [1,0] => 'description',
+      [3,0] => 'right'
+    }
+    OFFSET_STEP = [0,1]
+  end
   EVENT = :order_product
   FORM_NAME = 'products'
-  HEAD_OFFSET_STEP = [0,1]
-  OFFSET_STEP = [0,2]
   SORT_DEFAULT = :description
   def init
     super

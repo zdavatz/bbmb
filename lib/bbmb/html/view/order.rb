@@ -64,30 +64,50 @@ end
 class Positions < HtmlGrid::List
   include ListPrices
   CSS_CLASS = 'list'
-  COMPONENTS = {
-    [0,0]  =>  :quantity,
-    [1,0]  =>  :description,
-    [2,0]  =>  :price_base,
-    [3,0]  =>  :price_levels,
-    [4,0]  =>  :price2,
-    [5,0]  =>  :price3,
-    [3,1]  =>  :price4,
-    [4,1]  =>  :price5,
-    [5,1]  =>  :price6,
-    [6,0]  =>  :total,
-  }
-  CSS_MAP = {
-    [0,0]     => 'tiny right',
-    [1,0]     => 'description',
-    [2,0,4,2] => 'right',
-    [6,0]     => 'total',
-  }
-  CSS_HEAD_MAP = {
-    [0,0] => 'right',
-    [2,0] => 'right',
-    [3,0] => 'right',
-    [6,0] => 'right',
-  }
+  if BBMB.config.enable_price_levels
+    COMPONENTS = {
+      [0,0]  =>  :quantity,
+      [1,0]  =>  :description,
+      [2,0]  =>  :price_base,
+      [3,0]  =>  :price_levels,
+      [4,0]  =>  :price2,
+      [5,0]  =>  :price3,
+      [3,1]  =>  :price4,
+      [4,1]  =>  :price5,
+      [5,1]  =>  :price6,
+      [6,0]  =>  :total,
+    }
+    CSS_HEAD_MAP = {
+      [0,0] => 'right',
+      [2,0] => 'right',
+      [3,0] => 'right',
+      [6,0] => 'right',
+    }
+    CSS_MAP = {
+      [0,0]     => 'tiny right',
+      [1,0]     => 'description',
+      [2,0,4,2] => 'right',
+      [6,0]     => 'total',
+    }
+  else
+    COMPONENTS = {
+      [0,0]  =>  :quantity,
+      [1,0]  =>  :description,
+      [2,0]  =>  :price_base,
+      [3,0]  =>  :total,
+    }
+    CSS_HEAD_MAP = {
+      [0,0] => 'right',
+      [2,0] => 'right',
+      [3,0] => 'right',
+    }
+    CSS_MAP = {
+      [0,0] => 'tiny right',
+      [1,0] => 'description',
+      [2,0] => 'right',
+      [3,0] => 'total',
+    }
+  end
 end
 class OrderComposite < HtmlGrid::DivComposite
   COMPONENTS = {

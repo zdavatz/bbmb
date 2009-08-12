@@ -35,6 +35,7 @@ module BBMB
     'db_auth'                         => 'bbmb',
     'db_backend'                      => :psql,
     'debug'                           => true,
+    'enable_price_levels'             => false,
     'error_recipients'                => [],
     'http_server'                     => 'http://www.bbmb.ch',
     'importers'                       => {

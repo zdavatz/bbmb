@@ -17,33 +17,56 @@ class FavoritesPositions < Positions
   include Backorder
   include PositionMethods
   CSS_ID = 'favorites'
-  COMPONENTS = {
-    [0,0]  =>  :delete_position,
-    [1,0]  =>  :quantity,
-    [2,0]  =>  :description,
-    [3,0]  =>  :backorder,
-    [4,0]  =>  :price_base,
-    [5,0]  =>  :price_levels,
-    [6,0]  =>  :price2,
-    [7,0]  =>  :price3,
-    [5,1]  =>  :price4,
-    [6,1]  =>  :price5,
-    [7,1]  =>  :price6,
-    [8,0]  =>  :total,
-  }
-  CSS_MAP = {
-    [0,0]     => 'delete',
-    [1,0]     => 'tiny right',
-    [2,0]     => 'description',
-    [4,0,4,2] => 'right',
-    [8,0]     => 'total',
-  }
-  CSS_HEAD_MAP = {
-    [1,0] => 'right',
-    [4,0] => 'right',
-    [5,0] => 'right',
-    [8,0] => 'right',
-  }
+  if BBMB.config.enable_price_levels
+    COMPONENTS = {
+      [0,0]  =>  :delete_position,
+      [1,0]  =>  :quantity,
+      [2,0]  =>  :description,
+      [3,0]  =>  :backorder,
+      [4,0]  =>  :price_base,
+      [5,0]  =>  :price_levels,
+      [6,0]  =>  :price2,
+      [7,0]  =>  :price3,
+      [5,1]  =>  :price4,
+      [6,1]  =>  :price5,
+      [7,1]  =>  :price6,
+      [8,0]  =>  :total,
+    }
+    CSS_MAP = {
+      [0,0]     => 'delete',
+      [1,0]     => 'tiny right',
+      [2,0]     => 'description',
+      [4,0,4,2] => 'right',
+      [8,0]     => 'total',
+    }
+    CSS_HEAD_MAP = {
+      [1,0] => 'right',
+      [4,0] => 'right',
+      [5,0] => 'right',
+      [8,0] => 'right',
+    }
+  else
+    COMPONENTS = {
+      [0,0]  =>  :delete_position,
+      [1,0]  =>  :quantity,
+      [2,0]  =>  :description,
+      [3,0]  =>  :backorder,
+      [4,0]  =>  :price_base,
+      [5,0]  =>  :total,
+    }
+    CSS_MAP = {
+      [0,0] => 'delete',
+      [1,0] => 'tiny right',
+      [2,0] => 'description',
+      [4,0] => 'right',
+      [5,0] => 'total',
+    }
+    CSS_HEAD_MAP = {
+      [1,0] => 'right',
+      [4,0] => 'right',
+      [5,0] => 'right',
+    }
+  end
   SORT_DEFAULT = :description
   def delete_position(model)
     super(model, :favorite_product)
