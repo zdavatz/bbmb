@@ -278,6 +278,15 @@ class TermsOfService < HtmlGrid::Composite
     check
   end
 end
+class OrderConfirmation < HtmlGrid::Composite
+  COMPONENTS = {
+    [0,0] => :order_confirmation,
+    [1,0] => "order_confirmation_text",
+  }
+  SYMBOL_MAP = {
+    :order_confirmation => HtmlGrid::InputCheckbox,
+  }
+end
 class CurrentOrderForm < HtmlGrid::DivForm
   include HtmlGrid::ErrorMessage
   COMPONENTS = {
@@ -285,7 +294,6 @@ class CurrentOrderForm < HtmlGrid::DivForm
     [0,1] => CurrentToggleable,
     [0,2] => :order_total,
     [1,2] => :total,
-    [0,3] => :submit,
   }
   CSS_ID_MAP = { 1 => 'info', 2 => 'order-total' }
   EVENT = :commit
@@ -295,13 +303,24 @@ class CurrentOrderForm < HtmlGrid::DivForm
     :order_total => HtmlGrid::LabelText, 
   }
   def init
+    submit = 3
     if @lookandfeel.enabled?(:terms_of_service, false)
-      components.update [0,3] => :toggle_terms,
-                        [0,4] => TermsOfService, [0,5] => :submit
-      css_id_map.update 4 => 'terms-of-service'
+      components.update [0,submit] => :toggle_terms,
+                        [0,submit + 1] => TermsOfService
+      css_id_map.update submit + 1 => 'terms-of-service'
+      submit += 2
     end
+    if BBMB.config.mail_confirm_reply_to && !@model.empty?
+      components.store [0,submit], :order_confirmation
+      css_id_map.update submit => 'order-confirmation'
+      submit += 1
+    end
+    components.store [0,submit], :submit
     super
     error_message
+  end
+  def order_confirmation(model)
+    OrderConfirmation.new(@session.state._customer, @session, self)
   end
   def toggle(model)
     ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"

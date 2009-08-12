@@ -59,7 +59,10 @@ class Customer < Global
   def _save
     keys = mandatory + [ :ean13, :title, :drtitle, :lastname, :firstname,
                          :address2, :address3, :plz, :city, :canton,
-                         :phone_business, :phone_private, :phone_mobile, :fax, :order_confirmation ]
+                         :phone_business, :phone_private, :phone_mobile, :fax ]
+    if BBMB.config.mail_confirm_reply_to
+      keys.push :order_confirmation
+    end
     input = user_input(keys, mandatory)
     update_user(input)
     if(error?)

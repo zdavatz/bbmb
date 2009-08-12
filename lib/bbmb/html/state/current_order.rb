@@ -53,6 +53,10 @@ class CurrentOrder < Global
     end
   end
   def do_update
+    if BBMB.config.mail_confirm_reply_to
+      _customer.order_confirmation = @session.user_input(:order_confirmation)
+      BBMB.persistence.save(_customer)
+    end
     @model = _customer.current_order
     keys = [ :comment, :priority, :reference ]
     input = user_input(keys)
