@@ -21,7 +21,10 @@ Kernel.trap('INT') {
   end
 }
 
-prompt = 'bbmb> '
+auth_domain = BBMB.config.auth_domain
+$0 = "#{auth_domain} (Admin-Tool)"
+prompt = "#{auth_domain}> "
+
 DRb.start_service('druby://localhost:0')
 bbmb = DRbObject.new(nil, BBMB.config.server_url)
 last_error = nil
@@ -31,9 +34,7 @@ while(line = readline(prompt, true))
   result.extend(DRb::DRbUndumped)
   line.strip!
   $stdout.print "-> "
-  if(match = /puts\s+(.*)/.match(line))
-    line = "BBMB.logger.debug('admin') { #{match[1]} }"
-  end
+  line.gsub! /puts\s+((.(?!end|;))*.)/, "BBMB.logger.error('admin') { \\1 }"
   case line.downcase
   when 'exit', 'quit'
     $stdout.puts 'Goodbye'
@@ -47,7 +48,7 @@ while(line = readline(prompt, true))
   when /^last_error/
     begin
       $stdout.puts eval(line)
-    rescue Exception => last_error
+    rescue StandardError, SyntaxError => last_error
       $stdout.puts last_error
     end
   when /sp\s+(-?\d+)/, /set_priority\s+(-?\d+)/ 
@@ -61,7 +62,7 @@ while(line = readline(prompt, true))
         $current.join
       end
       $stdout.puts result
-    rescue Exception => last_error
+    rescue StandardError, SyntaxError => last_error
       $stdout.puts last_error
     end
   end
