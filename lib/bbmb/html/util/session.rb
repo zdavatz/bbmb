@@ -38,7 +38,7 @@ class Session < SBSM::Session
       if(@user.is_a?(KnownUser) && @user.auth_session.expired?)
         logout
       end
-    rescue DRb::DRbError, RangeError
+    rescue DRb::DRbError, RangeError, NoMethodError
       logout
     end
     super
