@@ -26,7 +26,7 @@ class CopyLeft < HtmlGrid::DivComposite
   }
   external_link :lgpl, 'http://www.gnu.org/copyleft/lesser.html'
   external_link :ywesee, 'http://www.ywesee.com'
-  external_link :version, 'http://scm.ywesee.com/?p=vetoquinol.bbmb.ch'
+  external_link :version, BBMB.config.scm_link
   def current_year(model)
     Time.now.year.to_s
   end

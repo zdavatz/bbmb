@@ -80,6 +80,7 @@ module BBMB
     'pagestep'                        => 20,
     'persistence'                     => 'odba',
     'polling_file'                    => File.expand_path('polling.yml', default_dir),
+    'scm_link'                        => 'http://scm.ywesee.com/?p=bbmb/.git',
     'server_url'                      => 'druby://localhost:12000',
     'session_timeout'                 => 3600,
     'smtp_authtype'                   => nil,
