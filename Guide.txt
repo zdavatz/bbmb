@@ -64,16 +64,28 @@ this is an example config
 == Setup /etc/apache2/vhosts.d/04_bbmb_vhost.conf 
 
   <Directory /home/masa/ywesee/bbmb/doc>
-   Options ExecCGI FollowSymlinks Indexes
-   AllowOverride None
-   Order allow,deny
-   Allow from all
+    Options ExecCGI FollowSymlinks Indexes
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+    #  SSLRequireSSL
+    #  ErrorDocument 403 https://masa.bbmb.ch
   </Directory>
+
   <VirtualHost *:80>
-   DocumentRoot /home/masa/ywesee/bbmb/doc
-   ServerName bbmb.masa.ch
-   DirectoryIndex index.rbx
-   SetEnv DRB_SERVER druby://localhost:12000
+    DocumentRoot /home/masa/ywesee/bbmb/doc
+    ServerName bbmb.masa.ch
+    DirectoryIndex index.rbx
+    RubyAddPath /home/masa/ywesee/bbmb/src
+    RubyRequire 'sbsm/trans_handler'
+    SetHandler ruby-object
+    RubyTransHandler SBSM::TransHandler.instance
+    #  ErrorLog "|/usr/sbin/cronolog -l /home/masa/ywesee/bbmb/log/error_log
+    #  /home/masa/ywesee/bbmb/log/%Y/%m/%d/error_log"
+    #  CustomLog "|/usr/sbin/cronolog -l /home/masa/ywesee/bbmb/log/access_log
+    #  /home/masa/ywesee/bbmb/log/%Y/%m/%d/access_log" combined
+    #  SetEnv DEFAULT_FLAVOR masa_bbmb
+    SetEnv DRB_SERVER druby://localhost:12000
   </VirtualHost>
 
 == Setting up and configuring yus server
