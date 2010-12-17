@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
-# Bbmb -- bbmb.ch -- 15.09.2006 -- hwyss@ywesee.com
+# Bbmb -- bbmb.ch -- 17.12.2019 -- zdavatz@ywesee.com
 
 module BBMB
+  VERSION = '2.0.0'
   class << self
     attr_accessor :auth, :config, :logger, :persistence, :server
   end
