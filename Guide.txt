@@ -1,6 +1,6 @@
 =How to setup bbmb on your localhost or on a server
 
-== Getting started, see this link:
+== Getting started
 
 * http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop
 
@@ -20,7 +20,7 @@ production.
 
 See
 
-  http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop#configyaml
+* http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop#configyaml
 
 this is an example config
 
