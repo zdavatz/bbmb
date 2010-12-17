@@ -4,6 +4,17 @@
 
 * http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop
 
+== Gems you will need
+
+* ruby-json
+* sbsm
+* htmlgrid
+* yus
+
+== Look and Feel dependencies
+
+* lib/bbmb/util/csv_importer.rb
+
 == Using daemontools
 
 I makes sense to run bbmb with deamontools once everything is ready for
@@ -88,7 +99,30 @@ this is an example config
     SetEnv DRB_SERVER druby://localhost:12000
   </VirtualHost>
 
+== Installing the database in Postgresql
+
+  sudo -u postgres createdb -E UTF8 -T template0 bbmb
+  su
+  su postgres
+  createuser bbmb
+
+  psql bbmb
+  \password bbmb
+  enter the password
+
+Also see this if Postgresql drives you nuts:
+
+* https://help.ubuntu.com/community/PostgreSQL
+
+checking your local DB's
+
+  psql -U postgres
+  postgres=# \l
+
 == Setting up and configuring yus server
+
+* yus_grant --server_url="druby://localhost:12001" zrr@ywesee.com login ch.bbmb.Admin
+* yus_grant --server_url="druby://localhost:12001" zrr@ywesee.com login ch.bbmb.Customer
 
 See this link:
 
