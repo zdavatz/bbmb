@@ -1,6 +1,5 @@
-=== 1.0.0 / 2010-12-17
+=== 2.0.0 / 17.12.2010
 
-* 1 major enhancement
+* gem package for bbmb is ready.
 
   * Birthday!
-
