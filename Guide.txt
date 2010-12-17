@@ -1,8 +1,8 @@
 =How to setup bbmb on your localhost or on a server
 
-See this link:
+== Getting started, see this link:
 
-  http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop
+* http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop
 
 == Using daemontools
 
@@ -16,7 +16,7 @@ production.
  exec sudo -u xxx /usr/bin/ruby -rubygems $DIR/bin/bbmbd
  config=$DIR/etc/config.yml
 
-== config.yml in /var/www/bbmb/etc/ directory
+== Setup config.yml in /var/www/bbmb/etc/ directory
 
 See
 
