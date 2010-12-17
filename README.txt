@@ -14,6 +14,7 @@ Browserbasierte Medikamenten Bestellung (bbmb).
 == INSTALL:
 
 * sudo gem install bbmb
+* For configuration see Guide.txt
 
 == DEVELOPERS:
 
