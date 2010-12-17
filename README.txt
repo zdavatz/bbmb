@@ -8,7 +8,7 @@ Browserbasierte Medikamenten Bestellung (bbmb).
 
 == FEATURES/PROBLEMS:
 
-* Switch to use the Google SMPTP.
+* Switch to use the Google SMTP.
 * only runs on Ruby 1.8
 
 == INSTALL:
