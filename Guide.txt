@@ -1,0 +1,78 @@
+=How to setup bbmb on your localhost or on a server
+
+See this link:
+
+  http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop
+
+== Using daemontools
+
+I makes sense to run bbmb with deamontools once everything is ready for
+production.
+
+ /service/bbmb $ cat run
+ #!/bin/sh
+ DIR=/var/.../bbmb/
+ exec 2>&1
+ exec sudo -u xxx /usr/bin/ruby -rubygems $DIR/bin/bbmbd
+ config=$DIR/etc/config.yml
+
+== config.yml in /var/www/bbmb/etc/ directory
+
+See
+
+  http://dev.ywesee.com/wiki.php/Masa/20101109-setup-eshop#configyaml
+
+this is an example config
+
+  ---
+ error_recipients:
+ - mhatakeyama@ywesee.com
+ bbmb_dir: /home/masa/ywesee/bbmb
+ db_name: sanxxx_bbmb
+ db_user: sanxxx
+ db_pass: sanxxx
+ log_level: DEBUG
+ mail_order_to: mhatakeyama@ywesee.com
+ mail_order_from: mhatakeyama@ywesee.com
+ name: "Bbmb(Masa)"
+ smtp_server: mail.ywesee.com
+ smtp_authtype: :plain
+ smtp_user: 'mhatakeyama@ywesee.com'
+ smtp_pass: xxxx
+ target_format: csv
+ inject_error_body: |
+   inject_error_body
+ inject_error_subject: 'Bestellung "%s" mit fehlendem Kunden: "%s"'
+ inject_error_from: 'mhatakeyama@ywesee.com'
+ inject_error_to: 'mhatakeyama@ywesee.com'
+ mail_confirm_from: 'mhatakeyama@ywesee.com'
+ mail_confirm_reply_to: 'mhatakeyama@ywesee.com'
+ mail_confirm_subject: "Masa: Auftragsbestätigung %s"
+ mail_confirm_lines:
+  - "%3i x %-40s à %6.2f, total  %7.2f"
+  - "%3i x %-40s à %6.2f, total  %7.2f"
+  - "%3i x %-40s a %6.2f, totale %7.2f"
+ mail_confirm_body: |
+   mail_confirm_body
+ confirm_error_body: |
+   confirm_error_body
+ confirm_error_subject: Kunde "%s" ohne hinterlegte Email-Adresse im Sandoz
+ E-shop
+ confirm_error_from: 'mhatakeyama@ywesee.com'
+ confirm_error_to: 'mhatakeyama@ywesee.com'
+
+== Setup /etc/apache2/vhosts.d/04_bbmb_vhost.conf 
+
+  <Directory /home/masa/ywesee/bbmb/doc>
+   Options ExecCGI FollowSymlinks Indexes
+   AllowOverride None
+   Order allow,deny
+   Allow from all
+  </Directory>
+  <VirtualHost *:80>
+   DocumentRoot /home/masa/ywesee/bbmb/doc
+   ServerName bbmb.masa.ch
+   DirectoryIndex index.rbx
+   SetEnv DRB_SERVER druby://localhost:12000
+  </VirtualHost>
+ 
