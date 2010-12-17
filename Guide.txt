@@ -75,4 +75,9 @@ this is an example config
    DirectoryIndex index.rbx
    SetEnv DRB_SERVER druby://localhost:12000
   </VirtualHost>
- 
+
+== Setting up and configuring yus server
+
+See this link:
+
+* http://dev.ywesee.com/wiki.php/Masa/20101111-setup-eshopUpdate-customer-data#yus
