@@ -71,6 +71,7 @@ lib/bbmb/util/numbers.rb
 lib/bbmb/util/password_generator.rb
 lib/bbmb/util/polling_manager.rb
 lib/bbmb/util/server.rb
+lib/bbmb/util/smtp_tls.rb
 lib/bbmb/util/target_dir.rb
 lib/bbmb/util/transfer_dat.rb
 lib/bbmb/util/updater.rb

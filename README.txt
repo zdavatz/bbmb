@@ -2,6 +2,10 @@
 
 * http://scm.ywesee.com/?p=bbmb/.git;a=summary
 
+You can find a graphical overview here
+
+* http://bbmb.rubyforge.org/bbmb.jpeg
+
 == DESCRIPTION:
 
 Browserbasierte Medikamenten Bestellung (bbmb).
