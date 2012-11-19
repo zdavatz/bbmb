@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
+# Util::Mail -- bbmb.ch -- 19.11.2012 -- yasaka@ywesee.com
 # Util::Mail -- bbmb.ch -- 27.09.2006 -- hwyss@ywesee.com
 
 require 'bbmb/config'
 require 'net/smtp'
 require 'rmail'
 require 'pp'
-#require 'bbmb/util/smtp_tls'
+require 'bbmb/util/smtp_tls'
 
 module BBMB
   module Util
