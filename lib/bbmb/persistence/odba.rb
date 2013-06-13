@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Persistence::ODBA -- bbmb.ch -- 13.06.2013 -- yasaka@ywesee.com
 # Persistence::ODBA -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
 
 require 'bbmb/config'
@@ -35,7 +36,7 @@ module BBMB
       end
     end
   end
-  ODBA.storage.dbi = ODBA::ConnectionPool.new("DBI:pg:#{@config.db_name}",
+  ODBA.storage.dbi = ODBA::ConnectionPool.new("DBI:Pg:#{@config.db_name}",
                                              @config.db_user, @config.db_auth)
   ODBA.cache.setup
   ODBA.cache.prefetch
