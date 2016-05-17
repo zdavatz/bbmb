@@ -2,7 +2,7 @@
 # Html::View::Json -- bbmb.ch -- 26.09.2006 -- hwyss@ywesee.com
 
 require 'htmlgrid/component'
-require 'json/objects'
+require 'json'
 
 module BBMB
   module Html

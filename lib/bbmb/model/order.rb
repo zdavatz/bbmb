@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # Model::Order -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
 
-require 'encoding/character/utf-8'
 require 'bbmb/config'
 require 'bbmb/util/numbers'
 require 'csv'
@@ -214,9 +213,10 @@ class Order
   end
   def to_csv
     result = ''
-    CSV::Writer.generate(result, 
-                         BBMB.config.target_format_fs,
-                         BBMB.config.target_format_rs) { |writer|
+    BBMB.config.target_format_fs ||= ','
+    BBMB.config.target_format_rs ||= "\n"
+    CSV.generate(result, { :col_sep => BBMB.config.target_format_fs,
+                           :row_sep => BBMB.config.target_format_rs}) { |writer|
       @positions.each { |position|
         writer << [
           @customer.customer_id,
@@ -248,7 +248,7 @@ class Order
   end
   private
   def _formatted_comment(replacement=';')
-    u(@comment.to_s.gsub(/[\r\n]+/, replacement))[0,60] if @comment
+    @comment.to_s.gsub(/[\r\n]+/, replacement)[0,60] if @comment
   end
 end
   end

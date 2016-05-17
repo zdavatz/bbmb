@@ -3,14 +3,14 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
-require 'flexmock'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/util/polling_manager'
 require 'fileutils'
 
 module BBMB
   module Util
-    class TestFileMission < Test::Unit::TestCase
+    class TestFileMission < Minitest::Test
       include FlexMock::TestCase
       def setup
         @datadir = File.expand_path('../data', File.dirname(__FILE__))
@@ -89,7 +89,7 @@ module BBMB
         assert_equal("data\n", File.read(bpath))
       end
     end
-    class TestFtpMission < Test::Unit::TestCase
+    class TestFtpMission < Minitest::Test
       include FlexMock::TestCase
       def setup
         @datadir = File.expand_path('../data', File.dirname(__FILE__))
@@ -101,7 +101,7 @@ module BBMB
       def test_poll
         session = flexmock 'ftp'
         session.should_receive(:login).with('user', 'pass').times(2)
-        session.should_receive(:chdir).with('/path/to/dir').times(2)
+        session.should_receive(:chdir).with('path/to/dir').times(2)
         session.should_receive(:nlst).and_return %w{test.csv test.txt}
         session.should_receive(:get).and_return { |remote, local|
           assert_equal('test.txt', remote)
@@ -145,7 +145,7 @@ module BBMB
                      @mission.poll_remote(session, 'test.txt'))
       end
     end
-    class TestPopMission < Test::Unit::TestCase
+    class TestPopMission < Minitest::Test
       include FlexMock::TestCase
       def setup
         @mission = PopMission.new
@@ -273,7 +273,7 @@ attached data
         }
       end
     end
-    class TestPollingManager < Test::Unit::TestCase
+    class TestPollingManager < Minitest::Test
       include FlexMock::TestCase
       def setup
         @manager = PollingManager.new

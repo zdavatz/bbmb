@@ -4,7 +4,8 @@
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 $: << File.expand_path('..', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb'
 require 'bbmb/util/server'
 require 'stub/persistence'
@@ -12,7 +13,7 @@ require 'flexmock'
 
 module BBMB
   module Util
-class TestServer < Test::Unit::TestCase
+class TestServer < Minitest::Test
   include FlexMock::TestCase
   def setup
     @server = Server.new
@@ -57,9 +58,7 @@ class TestServer < Test::Unit::TestCase
       :comment => 'My Comment',
       :reference => '76543',
     }
-    assert_nothing_raised {
-      @server.inject_order('12345', prods, infos)
-    }
+    @server.inject_order('12345', prods, infos)
   end
   def test_inject_order__customer_by_ean13
     pr1 = Model::Product.new 1
@@ -71,7 +70,7 @@ class TestServer < Test::Unit::TestCase
     pr3.pcode = '2345678'
     customer = Model::Customer.new('12345')
     customer.ean13 = '1234567890123'
-    flexmock(customer).should_receive(:inject_order).times(1).and_return { |order|
+    flexmock(customer).should_receive(:inject_order).once.and_return { |order|
       assert_instance_of(Model::Order, order)
       ps1, ps2, ps3 = order.positions
       assert_instance_of(Model::Order::Position, ps1)
@@ -95,13 +94,10 @@ class TestServer < Test::Unit::TestCase
       :comment => 'My Comment',
       :reference => '76543',
     }
-    flexmock(BBMB::Util::Mail).should_receive(:send_order)\
-      .with(BBMB::Model::Order).times(1)
-    flexmock(BBMB::Util::TargetDir).should_receive(:send_order)\
-      .with(BBMB::Model::Order).times(1)
-    assert_nothing_raised {
-      @server.inject_order('1234567890123', prods, infos, :deliver => true)
-    }
+    flexmock(BBMB::Util::Mail).should_receive(:send_order).with(BBMB::Model::Order)
+    res = @server.inject_order('1234567890123', prods, infos, :deliver => true)
+    assert_equal("12345-", res[:order_id])
+    assert_equal(3, res[:products].size)
   end
   def test_rename_user__new
     BBMB.config = flexmock('config')
@@ -133,15 +129,14 @@ class TestServer < Test::Unit::TestCase
     @server.rename_user('old@bbmb.ch', 'test@bbmb.ch')
   end
   def test_rename_user__same
-    assert_nothing_raised { 
-      @server.rename_user('test@bbmb.ch', 'test@bbmb.ch')
-    }
+    @server.rename_user('test@bbmb.ch', 'test@bbmb.ch')
   end
   def test_run_invoicer
     BBMB.logger = flexmock('logger')
     BBMB.logger.should_ignore_missing
-    flexstub(Mail).should_receive(:notify_error).times(1).and_return { |error|
-      assert_instance_of(RuntimeError, error)
+    error_mock = flexmock(RuntimeError.new, 'error')
+    flexstub(Mail).should_receive(:notify_error).at_least.once.and_return { |error|
+      assert_instance_of(RuntimeError, error_mock)
     }
     flexstub(Invoicer).should_receive(:run).times(1).and_return { |range|
       assert_instance_of(Range, range)

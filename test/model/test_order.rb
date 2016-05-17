@@ -3,19 +3,27 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/model/order'
 require 'date'
-require 'flexmock'
-require 'test/unit'
 
 module BBMB
   module Model
-class TestOrder < Test::Unit::TestCase
+class TestOrder <  Minitest::Test
   include FlexMock::TestCase
   def setup
     @customer = flexmock("customer")
     @customer.should_receive(:quota)
     @order = Order.new(@customer)
+    @position = flexmock('position')
+    @position.should_receive(:pcode).and_return(nil).by_default
+    @position.should_receive(:price).and_return(nil).by_default
+    @position.should_receive(:ean13).and_return("EAN13").by_default
+    @position.should_receive(:article_number).and_return("ArticleNumber").by_default
+    @position.should_receive(:quantity).and_return(17).by_default
+    @position.should_receive(:freebies).and_return(nil).by_default
+    BBMB.config.i2_100 = 'YWESEE'
   end
   def test_add
     assert_equal(true, @order.empty?)
@@ -128,12 +136,8 @@ class TestOrder < Test::Unit::TestCase
   def test_to_i2
     @customer.should_receive(:customer_id).and_return(7)
     @customer.should_receive(:organisation).and_return('Organisation')
-    position = flexmock('position')
-    position.should_receive(:ean13).and_return("EAN13")
-    position.should_receive(:article_number).and_return("ArticleNumber")
-    position.should_receive(:quantity).and_return(17)
-    position.should_ignore_missing
-    @order.positions.push(position)
+    @position.should_ignore_missing
+    @order.positions.push(@position)
     @order.reference = "Reference"
     @order.comment = "Comment"
     @order.commit!('8', Time.local(2006,9,27,9,50,12))
@@ -170,12 +174,8 @@ class TestOrder < Test::Unit::TestCase
   def test_to_i2__no_comment
     @customer.should_receive(:customer_id).and_return(7)
     @customer.should_receive(:organisation).and_return('Organisation')
-    position = flexmock('position')
-    position.should_receive(:ean13).and_return("EAN13")
-    position.should_receive(:article_number).and_return("ArticleNumber")
-    position.should_receive(:quantity).and_return(17)
-    position.should_ignore_missing
-    @order.positions.push(position)
+    @position.should_ignore_missing
+    @order.positions.push(@position)
     @order.reference = "Reference"
     @order.commit!('8', Time.local(2006,9,27,9,50,12))
     @order.priority = 41
@@ -210,12 +210,8 @@ class TestOrder < Test::Unit::TestCase
   def test_to_i2__configurable_origin
     @customer.should_receive(:customer_id).and_return(7)
     @customer.should_receive(:organisation).and_return('Organisation')
-    position = flexmock('position')
-    position.should_receive(:ean13).and_return("EAN13")
-    position.should_receive(:article_number).and_return("ArticleNumber")
-    position.should_receive(:quantity).and_return(17)
-    position.should_ignore_missing
-    @order.positions.push(position)
+    @position.should_ignore_missing
+    @order.positions.push(@position)
     @order.reference = "Reference"
     @order.comment = "Comment"
     @order.commit!('8', Time.local(2006,9,27,9,50,12))
@@ -322,6 +318,8 @@ class TestOrder < Test::Unit::TestCase
     @customer.should_receive(:ean13).and_return(1234567890123)
     @customer.should_receive(:organisation).and_return('Organisation')
     position = flexmock('position')
+    position.should_receive(:pcode).and_return(nil)
+    position.should_receive(:price).and_return(nil)
     position.should_receive(:ean13).and_return("EAN13")
     position.should_receive(:article_number).and_return("ArticleNumber")
     position.should_receive(:quantity).and_return(17)
@@ -341,12 +339,8 @@ class TestOrder < Test::Unit::TestCase
     @customer.should_receive(:customer_id).and_return(7)
     @customer.should_receive(:ean13).and_return(1234567890123)
     @customer.should_receive(:organisation).and_return('Organisation')
-    position = flexmock('position')
-    position.should_receive(:ean13).and_return("EAN13")
-    position.should_receive(:article_number).and_return("ArticleNumber")
-    position.should_receive(:quantity).and_return(17)
-    position.should_ignore_missing
-    @order.positions.push(position, position)
+    @position.should_ignore_missing
+    @order.positions.push(@position, @position)
     @order.reference = "Reference"
     @order.commit!('8', Time.local(2006,9,27,9,50,12))
     @order.priority = 41
@@ -360,12 +354,8 @@ class TestOrder < Test::Unit::TestCase
     @customer.should_receive(:customer_id).and_return(7)
     @customer.should_receive(:ean13).and_return(1234567890123)
     @customer.should_receive(:organisation).and_return('Organisation')
-    position = flexmock('position')
-    position.should_receive(:ean13).and_return("EAN13")
-    position.should_receive(:article_number).and_return("ArticleNumber")
-    position.should_receive(:quantity).and_return(17)
-    position.should_ignore_missing
-    @order.positions.push(position)
+    @position.should_ignore_missing
+    @order.positions.push(@position)
     @order.reference = "Reference"
     @order.comment = "Comment"
     @order.commit!('8', Time.local(2006,9,27,9,50,12))
@@ -405,7 +395,7 @@ class TestOrder < Test::Unit::TestCase
     assert_equal(expected, @order.to_target_format)
   end
 end
-class TestOrderPosition < Test::Unit::TestCase
+class TestOrderPosition < Minitest::Test
   include FlexMock::TestCase
   def setup
     @product = flexmock('product')

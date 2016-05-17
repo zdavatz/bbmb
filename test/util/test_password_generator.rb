@@ -3,13 +3,13 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/util/password_generator'
-require 'flexmock'
 
 module BBMB
   module Util
-class TestPasswordGenerator < Test::Unit::TestCase
+class TestPasswordGenerator < Minitest::Test
   include FlexMock::TestCase
   def test_generate
     customer = flexmock('Customer')

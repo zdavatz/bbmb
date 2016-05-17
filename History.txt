@@ -1,3 +1,12 @@
+=== 2.0.1 / 17.05.2016
+
+* Update for ruby 2.3.1
+** Some utf-8 issues
+** Use new minitest syntax
+** remove encodings
+* Moved from using hoe to rubygems
+* Prepared for travis-ci
+
 === 2.0.0 / 17.12.2010
 
 * gem package for bbmb is ready.

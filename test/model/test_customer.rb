@@ -4,16 +4,16 @@
 $: << File.expand_path('..', File.dirname(__FILE__))
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb'
 require 'bbmb/model/customer'
 require 'bbmb/model/order'
 require 'stub/persistence'
-require 'flexmock'
 
 module BBMB
   module Model
-class TestCustomer < Test::Unit::TestCase
+class TestCustomer < Minitest::Test
   include FlexMock::TestCase
   def setup
     Customer.clear_instances
@@ -39,9 +39,7 @@ class TestCustomer < Test::Unit::TestCase
   end
   def test_email_writer__both_nil
     BBMB.server = flexmock('server')
-    assert_nothing_raised { 
-      @customer.email = nil
-    }
+    @customer.email = nil
     assert_equal(nil, @customer.email)
   end
   def test_protect
@@ -65,9 +63,7 @@ class TestCustomer < Test::Unit::TestCase
     order = flexmock(Model::Order.new(@customer))
     time = Time.now
     order.should_receive(:commit!).with(1, time).times(1)
-    assert_nothing_raised {
-      @customer.inject_order(order, time)
-    }
+    @customer.inject_order(order, time)
     assert_equal({1 => order}, @customer.archive)
   end
 end

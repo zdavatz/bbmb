@@ -3,11 +3,11 @@
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
 require 'bbmb'
 
 module BBMB
-  class TestBbmb < Test::Unit::TestCase
+  class TestBbmb < Minitest::Test
     def test_global_readers
       assert_respond_to(BBMB, :config)
       assert_respond_to(BBMB, :persistence)

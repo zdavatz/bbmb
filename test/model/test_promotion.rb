@@ -3,12 +3,13 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/model/promotion'
 
 module BBMB
   module Model
-class TestPromotion < Test::Unit::TestCase
+class TestPromotion < Minitest::Test
   def setup
     @promo = Promotion.new
   end

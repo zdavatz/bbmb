@@ -4,14 +4,14 @@
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require 'minitest/autorun'
+require 'flexmock/test_unit'
 require 'bbmb/util/target_dir'
-require 'flexmock'
 require 'fileutils'
 
 module BBMB
   module Util
-class TestTargetDir < Test::Unit::TestCase
+class TestTargetDir < Minitest::Test
   include FlexMock::TestCase
   def setup
     super
@@ -41,7 +41,7 @@ class TestTargetDir < Test::Unit::TestCase
       assert_equal('pass', pass)
       fsession = flexmock('ftp')
       fsession.should_receive(:put).and_return { |local, remote|
-        assert_equal(File.join(@dir, 'order.csv'), remote)
+        assert_equal(File.join(@dir, 'order.csv').sub(/^\//, ''), remote)
       }
       block.call(fsession)
     }

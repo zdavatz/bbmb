@@ -3,13 +3,14 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/model/product'
 require 'bbmb/model/promotion'
 
 module BBMB
   module Model
-class TestProduct < Test::Unit::TestCase
+class TestProduct < Minitest::Test
   def setup
     @product = Product.new("article_number")
   end
@@ -50,11 +51,11 @@ class TestProduct < Test::Unit::TestCase
     assert_equal(false, @product.backorder)
   end
   def test_equals
-    assert_not_equal(@product, 'article_number')
+    refute_equal(@product, 'article_number')
     other = Product.new("article_number")
     assert_equal(@product, other)
     other = Product.new("foobar")
-    assert_not_equal(@product, other)
+    refute_equal(@product, other)
   end
   def test_price
     assert_equal(nil, @product.price)

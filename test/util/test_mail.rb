@@ -4,13 +4,13 @@
 
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/util/mail'
-require 'flexmock'
-require 'test/unit'
 
 module BBMB
   module Util
-    class TestMail < Test::Unit::TestCase
+    class TestMail < Minitest::Test
       include FlexMock::TestCase
       def setup_config
         config = BBMB.config
@@ -270,16 +270,18 @@ request body
         Mail.send_request('sender@email.com', 'Organisation', 'request body')
       end
       def test_send_confirmation
-        pos1 = flexmock('position')
+        pos1 = flexmock('position1')
         pos1.should_receive(:quantity).and_return(2)
         pos1.should_receive(:description).and_return('Product1')
         pos1.should_receive(:price_qty).and_return(10.0)
         pos1.should_receive(:price).and_return(20.0)
-        pos2 = flexmock('position')
+        pos1.should_receive(:total).and_return(20.0)
+        pos2 = flexmock('position2')
         pos2.should_receive(:quantity).and_return(3)
         pos2.should_receive(:description).and_return('Product2')
         pos2.should_receive(:price_qty).and_return(5.0)
         pos2.should_receive(:price).and_return(15.0)
+        pos2.should_receive(:total).and_return(15.0)
         customer = flexmock('customer')
         customer.should_receive(:email).and_return('customer@bbmb.ch')
         order = flexmock('order')
@@ -344,6 +346,7 @@ Totale dell'ordine escl.      25.00
 Totale dell'ordine incl.      25.60
 ====================================
         EOS
+        customer.should_receive(:order_confirmation).and_return('order_confirmation')
         smtp.should_receive(:sendmail).and_return { |message, from, recipients|
           assert(message.include?(headers),
                  "missing headers:\n#{headers}\nin message:\n#{message}")

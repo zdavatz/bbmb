@@ -3,12 +3,13 @@
 
 $: << File.expand_path('../../lib', File.dirname(__FILE__))
 
-require 'test/unit'
+require "minitest/autorun"
+require 'flexmock/test_unit'
 require 'bbmb/util/numbers'
 
 module BBMB
   module Util
-    class TestMoney < Test::Unit::TestCase
+    class TestMoney < Minitest::Test
       def test_initialize_integer
         m = Money.new(15)
         assert_equal(1500, m.credits)
@@ -34,11 +35,11 @@ module BBMB
         o = Money.new(15.56)
         assert_equal(m, m)
         assert_equal(m, n)
-        assert_not_equal(m, o)
+        refute_equal(m, o)
         assert_equal(m, 15.55)
-        assert_not_equal(m, 15.56)
+        refute_equal(m, 15.56)
         assert_equal(m, "15.55")
-        assert_not_equal(m, "15.56")
+        refute_equal(m, "15.56")
       end
       def test_add
         m = Money.new(15.55)

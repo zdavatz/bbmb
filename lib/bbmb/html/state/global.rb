@@ -3,7 +3,6 @@
 
 require 'sbsm/state'
 require 'bbmb/html/state/login'
-require 'encoding/character/utf-8'
 
 module BBMB
   module Html
