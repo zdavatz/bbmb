@@ -15,7 +15,7 @@ Find.find(here) do |file|
       require file
     else
       log = short + '.log'
-      cmd = "bundle exec #{file} --seed 62766  2>&1 | tee #{log}; ( exit ${PIPESTATUS[0]} )"
+      cmd = "bash -c 'bundle exec #{file} --seed 62766  2>&1 | tee #{log}; ( exit ${PIPESTATUS[0]} )'"
       puts cmd
       res = system(cmd)
       if res
