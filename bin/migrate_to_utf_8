@@ -3,16 +3,22 @@
 puts "#{Time.now}: Loading #{__FILE__}"
 STDOUT.sync = true
 
+require 'syck'
+
+
 begin
 require 'pry'
 rescue LoadError
 end
 
-$: << File.expand_path(File.join(File.dirname(__FILE__), 'lib'))
+here = File.expand_path(File.join(File.dirname(File.dirname(__FILE__)), 'lib'))
+$: << here
 require 'logger'
 require 'needle'
 require 'odba/id_server'
 require 'rrba/server'
+require 'yus/entity'
+require 'yus/privilege'
 require 'ydim/autoinvoicer'
 require 'ydim/client'
 require 'ydim/currency_converter'
@@ -21,38 +27,13 @@ require 'ydim/factory'
 require 'ydim/root_user'
 require 'ydim/server'
 require 'ydim/util'
-require 'odba/18_19_loading_compatibility'
-require 'odba/persistable'
-require 'odba'
-
 require 'odba/connection_pool'
 require 'odba/drbwrapper'
 require 'ydim/odba'
 require 'ydim/root_session'
 require 'ydim/root_user'
-require 'bbmb/model/order'
-require 'bbmb/model/customer'
 
-# Some monkey patching for
-module YDIM
-  class RootSession
-    def debitors
-      @serv.logger.debug(whoami) { "debitors" } if @serv &&  @serv.respond_to?(:logger)
-      BBMB::Model::Order.odba_extent
-    end
-  end
-end
-
-module BBMB
-  module Model
-    class Order
-      include ODBA::Persistable
-      class << self
-        alias :all :odba_extent
-      end
-    end
-  end
-end
+require File.join(here, 'bbmb/persistence/odba.rb')
 
 module YDIM
   class Server
@@ -147,6 +128,8 @@ module YDIM
         # child = child.force_encoding
         end
       when
+        Yus::Entity,
+        Yus::Privilege,
         YDIM::AutoInvoice,
         YDIM::Debitor,
         YDIM::Debitor,
@@ -161,7 +144,6 @@ module YDIM
         YDIM::MobileCurrencyConverter
         # do nothing
       else
-        $stderr.puts "Ignoring #{child.class}"
         @ignored ||= {}
         unless @ignored[child.class]
           @ignored.store child.class, true
@@ -176,38 +158,85 @@ module YDIM
   end
 end
 
-@logger = Logger.new('migrate_to_utf8.log')
+@logger = Logger.new('/tmp/ migrate_to_utf8.log')
 @logger.level = Logger::DEBUG
 config = YDIM::Server.config
-if false
-unless config.respond_to?(:db_name)
-  puts "refusing to convert when no db_name found in the configuration"
-  exit 3
+module Yus
+  class Entity
+    include ODBA::Persistable
+    class << self
+      alias :all :odba_extent
+    end
+  end
+  class Privilege
+    include ODBA::Persistable
+    class << self
+      alias :all :odba_extent
+    end
+  end
 end
-unless /bbmb/i.match(config.db_name)
-  puts "refusing to convert database #{config.db_name} which does not contain bbmb"
-  exit 3
+module BBMB
+  module Model
+    class Order
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+    class ProductInfo
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+    class Customer
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+    class Promotion
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+    class Quota
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+    class Subject
+      include ODBA::Persistable
+      class << self
+        alias :all :odba_extent
+      end
+    end
+  end
 end
-end
-puts "#{Time.now}: Calling migrate_to_utf8"
-pp config.db_name
-pp config.db_user
-pp config.db_auth
-pp config.db_server
+
 ODBA.storage.dbi = ODBA::ConnectionPool.new(config.db_driver_url,
   config.db_user, config.db_auth, :client_encoding => 'LATIN1')
 ODBA.cache.setup
 DRb.install_id_conv ODBA::DRbIdConv.new
 
 @server = YDIM::Server.new(config, @logger)
+puts "DB used is #{config.db_name} user: #{config.db_user} auth: #{config.db_auth}"
 @server.extend(DRbUndumped)
 session = YDIM::RootSession.new(YDIM::RootUser.new(1))
 session.serv = @server
-{ #:autoinvoices => session.autoinvoices,
-  # :invoices => session.invoices,
-  # :debitors => session.debitors,
-  :orders => BBMB::Model::Order.odba_extent,
-
+{ # :orders => BBMB::Model::Order.odba_extent,
+  # :products => BBMB::Model::ProductInfo.odba_extent,
+  # :customers => BBMB::Model::Customer.odba_extent,
+  # :promotions => BBMB::Model::Promotion.odba_extent,
+  # :quota => BBMB::Model::Quota.odba_extent,
+  # :subject => BBMB::Model::Subject.odba_extent,
+  :entitites => Yus::Entity.odba_extent,
+  :privileges => Yus::Privilege.odba_extent,
+  :debitors => YDIM::Debitor.odba_extent,
+  :invoices => YDIM::Invoice.odba_extent,
+  :autoinvoices => YDIM::AutoInvoice.odba_extent,
   }.each do |name, to_migrate|
   puts "#{Time.now}: Start migrating #{to_migrate.size} #{name}"
   @server._migrate_to_utf8(to_migrate, {})

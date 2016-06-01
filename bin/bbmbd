@@ -8,7 +8,6 @@ require 'drb'
 require 'logger'
 require 'bbmb/config'
 require 'bbmb/util/server'
-require 'encoding/character/utf-8'
 require 'pp'
 
 module BBMB
