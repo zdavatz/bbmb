@@ -1,3 +1,8 @@
+=== 2.0.1 / 01.06.2016
+
+* Fixed getting git version
+* Moved bin/migrate_to_utf_8  bin/migrate_bbmb_to_utf_8 to avoid name conflict with ydim
+
 === 2.0.1 / 17.05.2016
 
 * Update for ruby 2.3.1
