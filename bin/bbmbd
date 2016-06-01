@@ -31,7 +31,7 @@ module BBMB
   @logger.level = Logger.const_get(@config.log_level)
   @logger.debug('config') { @config.pretty_inspect }
 
-	VERSION = `cg-object-id`
+  VERSION = `git rev-parse HEAD`
 
   @auth = DRb::DRbObject.new(nil, @config.auth_url)
 
