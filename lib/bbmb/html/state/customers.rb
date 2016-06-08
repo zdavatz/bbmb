@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # Html::State::Customers -- bbmb.ch -- 18.09.2006 -- hwyss@ywesee.com
 
-require 'bbmb/html/state/global'
+require 'bbmb/html/state/global_predefine'
+require 'bbmb/html/state/customer'
 require 'bbmb/html/view/customers'
 require 'bbmb/model/customer'
 require 'ostruct'

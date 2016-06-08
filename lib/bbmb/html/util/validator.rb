@@ -47,7 +47,7 @@ class Validator < SBSM::Validator
     match[0]
   end
   def perform_validation(key, value)
-    super(key, u(value))
+    super(key, value)
   end
 end
     end

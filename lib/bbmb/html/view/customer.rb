@@ -72,7 +72,7 @@ class CustomerForm < HtmlGrid::Form
       form = "document.#{formname}"
       button.onclick = "#{form}.event.value='change_pass';#{form}.submit();"
       button.value = @lookandfeel.lookup("change_pass")
-      matrix = components.index(:change_pass)
+      matrix = components.key(:change_pass)
       @grid.set_colspan(*matrix)
       button
     end
@@ -91,7 +91,7 @@ class CustomerForm < HtmlGrid::Form
         button = HtmlGrid::Button.new(:generate_pass, model, @session, self)
         form = "document.#{formname}"
         button.onclick = "#{form}.event.value='generate_pass';#{form}.submit();"
-        matrix = components.index(:change_pass)
+        matrix = components.key(:change_pass)
         @grid.set_colspan(*matrix)
         button
       end

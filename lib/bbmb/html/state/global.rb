@@ -1,19 +1,29 @@
 #!/usr/bin/env ruby
 # Html::State::Global -- bbmb.ch -- 18.09.2006 -- hwyss@ywesee.com
-
 require 'sbsm/state'
+require 'bbmb/html/state/global_predefine'
+require 'bbmb/html/state/init'
+require 'bbmb/html/state/change_password'
+require 'bbmb/html/state/current_order'
+require 'bbmb/html/state/customer'
+require 'bbmb/html/state/customers'
+require 'bbmb/html/state/favorites'
+require 'bbmb/html/state/favorites_result'
+require 'bbmb/html/state/history'
+require 'bbmb/html/state/info'
+require 'bbmb/html/state/json'
 require 'bbmb/html/state/login'
+require 'bbmb/html/state/order'
+require 'bbmb/html/state/orders'
+require 'bbmb/html/state/result'
+require 'bbmb/html/state/show_pass'
 
 module BBMB
   module Html
     module State
 class Global < SBSM::State
-  class << self
-    def mandatory(*keys)
-      define_method(:_mandatory) { keys }
-      define_method(:mandatory) { _mandatory }
-      define_method(:mandatory?) { |key| mandatory.include?(key) }
-    end
+  def initialize(first, second)
+    super(first, second)
   end
   def logout
     @session.logout

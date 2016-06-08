@@ -5,12 +5,6 @@ STDOUT.sync = true
 
 require 'syck'
 
-
-begin
-require 'pry'
-rescue LoadError
-end
-
 here = File.expand_path(File.join(File.dirname(File.dirname(__FILE__)), 'lib'))
 $: << here
 require 'logger'
@@ -111,7 +105,6 @@ module YDIM
           child = child.force_encoding(Encoding::ISO_8859_1).clone.encode(Encoding::UTF_8)
           puts "force_encoding from ISO_8859_1 #{old}. is now #{child}"
         end
-        binding.pry unless child.valid_encoding?
         case child.encoding.to_s
         when /ASCII-8BIT|US-ASCII/
           # nothing todo
@@ -124,7 +117,6 @@ module YDIM
           puts "force_encoding from #{old}. is now #{child}"
         else
           puts "Unhandeled encoding #{child.encoding}"
-          # require 'pry'; binding.pry
         # child = child.force_encoding
         end
       when

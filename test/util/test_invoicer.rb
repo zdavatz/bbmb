@@ -3,7 +3,7 @@
 
 
 $: << File.expand_path('..', File.dirname(__FILE__))
-$: << File.expand_path('../lib', File.dirname(__FILE__))
+$: << File.expand_path('../../lib', File.dirname(__FILE__))
 
 
 require "minitest/autorun"
@@ -80,7 +80,6 @@ class TestInvoicer < Minitest::Test
     }
     range = Time.local(2006,9)...Time.local(2006,10)
     result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today)
-    skip('Why does this test fail?')
     assert_equal(invoice, result)
     assert_equal("01.09.2006 - 30.09.2006", invoice.description)
     assert_equal(today, invoice.date)
@@ -99,7 +98,7 @@ class TestInvoicer < Minitest::Test
     @ydim_server.should_receive(:logout).and_return { |client|
       assert_equal(session, client)
     }
-    skip('this test failes')
+    skip('this test fails')
     Invoicer.send_invoice(123)
   end
   def test_run
