@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-
 $: << File.expand_path('../lib', File.dirname(__FILE__))
 
 require 'drb'
@@ -36,21 +35,9 @@ module BBMB
   begin
     @server = BBMB::Util::Server.new(@persistence)
     @server.extend(DRbUndumped)
-    if(@config.update?)
-      @server.run_updater
-    end
-    if(@config.invoice?)
-      @server.run_invoicer
-    end
-
-    url = @config.server_url
-    url.untaint
-    DRb.start_service(url, @server)
-    $SAFE = 1
-    $0 = @config.name
-    @logger.info('start') { 
-      sprintf("starting bbmb-server on %s", url) }
-    DRb.thread.join
+    puts "#{Time.now}: Calling update"
+    @server.update
+    puts "#{Time.now}: Finished update"
   rescue Exception => error
     @logger.error('fatal') { error }
     raise
