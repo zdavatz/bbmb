@@ -5,7 +5,7 @@ require 'drb'
 require 'sbsm/drb'
 require 'bbmb'
 require 'bbmb/config'
-require 'encoding/character/utf-8'
+require 'bbmb/util/invoicer'
 require 'readline'
 include Readline
 
