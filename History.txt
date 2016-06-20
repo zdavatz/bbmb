@@ -1,3 +1,8 @@
+=== 2.0.4 / 20.06.2016
+
+* Use gem 'mail' to send e-mails
+* Added config.mail_suppress_sending
+
 === 2.0.3 / 08.06.2016
 
 * Added a DEFAULT_FLAVOR sandoz to work without rockit
