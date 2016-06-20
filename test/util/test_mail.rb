@@ -10,25 +10,40 @@ require 'bbmb/util/mail'
 module BBMB
   module Util
     class TestMail < Minitest::Test
+      SendRealMail = false
+      if SendRealMail
+        TestRecipient = 'ngiger@ywesee.com'
+      else
+        TestRecipient = 'to.test@bbmb.ch'
+      end
       include FlexMock::TestCase
       def setup_config
         config = BBMB.config
-        config.error_recipients = ['to.test@bbmb.ch']
+        config.mail_suppress_sending = true
+        config.error_recipients = [TestRecipient]
         config.mail_order_from = 'from.test@bbmb.ch'
-        config.mail_order_to = 'to.test@bbmb.ch'
-        config.mail_order_cc = 'cc.test@bbmb.ch'
+        config.mail_order_to = TestRecipient
         config.mail_order_subject = 'order %s'
         config.mail_request_from = 'from.request.test@bbmb.ch'
         config.mail_request_to = 'to.request.test@bbmb.ch'
         config.mail_request_cc = 'cc.request.test@bbmb.ch'
         config.mail_request_subject = 'Request %s'
         config.name = 'Application/User Agent'
-        config.smtp_authtype = :plain
-        config.smtp_helo = 'helo.domain'
         config.smtp_pass = 'secret'
         config.smtp_port = 25
         config.smtp_server = 'mail.test.com'
         config.smtp_user = 'user'
+        if SendRealMail
+          config.mail_suppress_sending = false
+          config.mail_order_cc = 'ngiger@ywesee.com'
+          config.mail_order_cc = 'ngiger@ywesee.com'
+          config.smtp_server = 'smtp.gmail.com'
+          config.smtp_domain = 'ywesee.com'
+          config.smtp_user =  'ngiger@ywesee.com'
+          config.smtp_pass =  'topsecret'
+          config.smtp_port = 587
+        end
+
         config.mail_confirm_reply_to = 'replyto-test@bbmb.ch'
         config.mail_confirm_from = 'from-test@bbmb.ch'
         config.mail_confirm_cc = []
@@ -63,8 +78,8 @@ Totale dell'ordine incl. %10.2f
           "%3i x %-36s à %7.2f, total  %10.2f",
           "%3i x %-36s a %7.2f, totale %10.2f",
         ]
-        config.inject_error_to = 'to.test@bbmb.ch'
-        config.confirm_error_to = 'to.test@bbmb.ch'
+        config.inject_error_to = TestRecipient
+        config.confirm_error_to = TestRecipient
         config
       end
       def test_inject_error
@@ -75,39 +90,26 @@ Totale dell'ordine incl. %10.2f
         order.should_receive(:customer).and_return(customer)
         order.should_receive(:order_id).and_return('12345678-90')
         order.should_receive(:commit_time).and_return Time.local(2009, 8, 7, 11, 14, 4)
-        smtp = flexmock('smtp')
-        flexstub(Net::SMTP).should_receive(:start).and_return {
-          |srv, port, helo, user, pass, type, block|
-          assert_equal('mail.test.com', srv)
-          assert_equal(25, port)
-          assert_equal('helo.domain', helo)
-          assert_equal('user', user)
-          assert_equal('secret', pass)
-          assert_equal(:plain, type)
-          block.call(smtp)
-        }
         headers = <<-EOS
 Mime-Version: 1.0
 User-Agent: Application/User Agent
 Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: errors.test@bbmb.ch
-To: to.test@bbmb.ch
+To: #{TestRecipient}
 Cc: 
 Subject: Order 12345678-90 with missing customer: Pharmacy Health
         EOS
         body = <<-EOS
 The order Pharmacy Health, committed on 07.08.2009 11:14:04, assigned to the unknown customer: 12345678
         EOS
-        smtp.should_receive(:sendmail).and_return { |message, from, recipients|
-          assert(message.include?(headers),
-                 "missing headers:\n#{headers}\nin message:\n#{message}")
-          assert(message.include?(body),
-                 "missing body:\n#{body}\nin message:\n#{message}")
-          assert_equal('errors.test@bbmb.ch', from)
-          assert_equal(['to.test@bbmb.ch'], recipients)
-        }
+        saved_length = ::Mail::TestMailer.deliveries.length
         Mail.notify_inject_error(order, :customer_name => 'Pharmacy Health')
+        unless SendRealMail
+          assert_equal(saved_length + 1, ::Mail::TestMailer.deliveries.length)
+          assert_equal(['errors.test@bbmb.ch'], ::Mail::TestMailer.deliveries.last.from)
+          assert(body.match ::Mail::TestMailer.deliveries.last.body.raw_source)
+        end
       end
       def test_confirm_error
         config = setup_config
@@ -134,7 +136,7 @@ User-Agent: Application/User Agent
 Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: errors.test@bbmb.ch
-To: to.test@bbmb.ch
+To: #{TestRecipient}
 Cc: 
 Subject: Customer 12345678 without email address
         EOS
@@ -147,7 +149,7 @@ Customer 12345678 does not have an email address configured
           assert(message.include?(body),
                  "missing body:\n#{body}\nin message:\n#{message}")
           assert_equal('errors.test@bbmb.ch', from)
-          assert_equal(['to.test@bbmb.ch'], recipients)
+          assert_equal([TestRecipient], recipients)
         }
         Mail.notify_confirmation_error(order)
       end
@@ -170,7 +172,7 @@ User-Agent: Application/User Agent
 Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: from.test@bbmb.ch
-To: to.test@bbmb.ch
+To: #{TestRecipient}
 Subject: Application/User Agent: error-message
         EOS
         body = <<-EOS
@@ -183,7 +185,7 @@ error-message
           assert(message.include?(body), 
                  "missing body:\n#{body}\nin message:\n#{message}")
           assert_equal('from.test@bbmb.ch', from)
-          assert_equal(['to.test@bbmb.ch'], recipients)
+          assert_equal([TestRecipient], recipients)
         }
         Mail.notify_error(RuntimeError.new("error-message"))
       end
@@ -210,7 +212,7 @@ User-Agent: Application/User Agent
 Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: from.test@bbmb.ch
-To: to.test@bbmb.ch
+To: #{TestRecipient}
 Cc: cc.test@bbmb.ch
 Subject: order order-id
 Message-ID: <order-id@from.test.bbmb.ch>
@@ -226,7 +228,7 @@ i2-data
           #assert(message.include?(attachment), 
                  #"missing attachment:\n#{attachment}\nin message:\n#{message}")
           assert_equal('from.test@bbmb.ch', from)
-          assert_equal(['to.test@bbmb.ch', 'cc.test@bbmb.ch'], recipients)
+          assert_equal([TestRecipient, 'cc.test@bbmb.ch'], recipients)
         }
         Mail.send_order(order)
       end

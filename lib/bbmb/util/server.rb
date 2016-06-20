@@ -8,13 +8,15 @@ require 'bbmb/html/util/validator'
 require 'bbmb/util/invoicer'
 require 'bbmb/util/mail'
 require 'bbmb/util/updater'
+require 'bbmb/model/order' # needed to be enable to invoice later
+require 'bbmb/model/customer'
 require 'date'
 require 'sbsm/drbserver'
 
 module BBMB
   module Util
     class Server < SBSM::DRbServer
-      ENABLE_ADMIN = true 
+      ENABLE_ADMIN = true
 	    SESSION = Html::Util::Session
 	    VALIDATOR = Html::Util::Validator
       attr_reader :updater
@@ -87,6 +89,7 @@ module BBMB
         }
       end
       def run_invoicer
+        BBMB.logger.debug("run_invoicer starting")
         @invoicer ||= Thread.new {
           Thread.current.abort_on_exception = true
           loop {
@@ -96,11 +99,13 @@ module BBMB
             now = Time.now
             at = Time.local(day.year, day.month)
             secs = at - now
-            BBMB.logger.debug("invoicer") { 
+            BBMB.logger.debug("invoicer") {
               "sleeping %.2f seconds" % secs
             }
             sleep(secs)
+            BBMB.logger.debug("invoice starting")
             invoice(start...at)
+            BBMB.logger.debug("invoice finished")
           }
         }
       end
@@ -115,11 +120,11 @@ module BBMB
             at = Time.local(day.year, day.month, day.day, 
                             BBMB.config.update_hour)
             secs = at - now
-            BBMB.logger.debug("updater") { 
-              "sleeping %.2f seconds" % secs
-            }
+            BBMB.logger.debug("updater") { "sleeping %.2f seconds" % secs }
             sleep(secs)
+            BBMB.logger.debug("update starting")
             update
+            BBMB.logger.debug("update finished")
           }
         }
       end

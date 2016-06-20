@@ -2,11 +2,9 @@
 # Util::Mail -- bbmb.ch -- 19.11.2012 -- yasaka@ywesee.com
 # Util::Mail -- bbmb.ch -- 27.09.2006 -- hwyss@ywesee.com
 
+require 'mail'
 require 'bbmb/config'
-require 'net/smtp'
-require 'rmail'
 require 'pp'
-require 'bbmb/util/smtp_tls'
 
 module BBMB
   module Util
@@ -14,62 +12,77 @@ module Mail
   def Mail.notify_confirmation_error(order)
     config = BBMB.config
     if to = config.confirm_error_to
-      header, message = setup
       customer = order.customer
-      from = header.from = config.confirm_error_from
-      header.to = to
-      cc = header.cc = config.confirm_error_cc
-      header.subject = config.confirm_error_subject % customer.customer_id
-      message.body = config.confirm_error_body % customer.customer_id
-      Mail.sendmail message, from, to, cc
+      from = config.confirm_error_from
+      cc = config.confirm_error_cc
+      subject = config.confirm_error_subject % customer.customer_id
+      body = config.confirm_error_body % customer.customer_id
+      Mail.sendmail body, subject, from, to, cc
     end
   end
   def Mail.notify_debug(subject, body)
-    header, message = setup
     config = BBMB.config
-    from = header.from = config.mail_order_from
-    to = header.to = config.error_recipients
-    header.subject = sprintf "%s: %s", BBMB.config.name, subject
-    message.body = body
-    Mail.sendmail(message, from, to)
+    from = config.mail_order_from
+    to = config.error_recipients
+    subject = sprintf "%s: %s", BBMB.config.name, subject
+    Mail.sendmail(body, subject, from, to)
   end
   def Mail.notify_error(error)
-    header, message = setup
     config = BBMB.config
-    from = header.from = config.mail_order_from
-    to = header.to = config.error_recipients
-    header.subject = sprintf "%s: %s", BBMB.config.name, error.message
-    message.body = [ error.class, error.message, 
-      error.backtrace.pretty_inspect ].join("\n")
-    Mail.sendmail(message, from, to)
+    from = config.mail_order_from
+    to = config.error_recipients
+    subject = sprintf "%s: %s", BBMB.config.name, error.message
+    body = [ error.class, error.message,
+    error.backtrace.pretty_inspect ].join("\n")
+    Mail.sendmail(body, subject, from, to)
   end
   def Mail.notify_inject_error(order, opts={})
     config = BBMB.config
     if to = config.inject_error_to
       customer = order.customer
-      header, message = setup
-      from = header.from = config.inject_error_from
-      header.to = to
-      cc = header.cc = config.inject_error_cc
-      header.subject = config.inject_error_subject % [
+      from = config.inject_error_from
+      cc = config.inject_error_cc
+      subject = config.inject_error_subject % [
         order.order_id,
         opts[:customer_name] || customer.customer_id,
       ]
-      message.body = config.inject_error_body % [
+      body = config.inject_error_body % [
         opts[:customer_name] || customer.customer_id,
         order.commit_time.strftime('%d.%m.%Y %H:%M:%S'),
         customer.customer_id,
       ]
-      Mail.sendmail message, from, to, cc
+      Mail.sendmail body, subject, from, to, cc
     end
   end
-  def Mail.sendmail(message, from, to, cc=[])
+  def Mail.sendmail(my_body, my_subject, from_addr, to_addr, cc_addrs=[], my_reply_to = nil)
     config = BBMB.config
-    Net::SMTP.start(config.smtp_server, config.smtp_port, config.smtp_helo,
-                    config.smtp_user, config.smtp_pass, 
-                    config.smtp_authtype) { |smtp|
-      smtp.sendmail(message.to_s, from, [to, cc].flatten.compact)
-    }
+    if config.mail_suppress_sending
+      puts "#{__FILE__}:#{__LINE__} Suppress sending mail with subject: #{my_subject}"
+      puts "    from #{from_addr} to: #{to_addr} cc: #{cc_addrs} reply_to: #{my_reply_to}"
+
+      ::Mail.defaults do  delivery_method :test end
+    else
+      puts "Mail.sendmail #{config.smtp_server} #{config.smtp_port} #{config.smtp_helo} smtp_user: #{ config.smtp_user}  #{ config.smtp_pass}  #{ config.smtp_authtype}"
+      puts "Mail.sendmail from #{from_addr} to #{to_addr} cc #{cc_addrs} message: #{my_body.class}"
+      ::Mail.defaults do
+      options = { :address              => config.smtp_server,
+                  :port                 => config.smtp_port,
+                  :domain               => config.smtp_domain,
+                  :user_name            => config.smtp_user,
+                  :password             => config.smtp_pass,
+                  :authentication       => 'plain',
+                  :enable_starttls_auto => true  }
+        delivery_method :smtp, options
+      end
+    end
+    ::Mail.deliver do
+      from from_addr
+      to to_addr
+      cc cc_addrs
+      reply_to (my_reply_to ? my_reply_to : from_addr)
+      subject my_subject
+      body my_body
+    end
   end
   def Mail.send_confirmation(order)
     config = BBMB.config
@@ -92,50 +105,28 @@ module Mail
       end
     end
 
-    header, message = setup
-    from = header.from = config.mail_confirm_from
-    header.to = to
-    header.subject = config.mail_confirm_subject % order.order_id
-    header.add('Message-ID', sprintf('<%s@%s>', order.order_id,
-                                     from.tr('@', '.')))
-    header.add('Reply-To', reply_to)
-    message.body = sprintf body, *parts
+    from = config.mail_confirm_from
+    subject = config.mail_confirm_subject % order.order_id
+    body = sprintf *parts
 
-    Mail.sendmail(message, from, to, config.mail_confirm_cc)
+    Mail.sendmail(body, subject, from, to, config.mail_confirm_cc, reply_to)
   end
   def Mail.send_order(order)
-    header, message = setup
     config = BBMB.config
-    from = header.from = config.mail_order_from
-    to = header.to = config.mail_order_to
-    cc = header.cc = config.mail_order_cc
-    header.subject = config.mail_order_subject % order.order_id
-    header.add('Message-ID', sprintf('<%s@%s>', order.order_id, 
-                                     from.tr('@', '.')))
-    message.body = order.to_target_format
-
-    Mail.sendmail(message, from, to, cc)
+    from = config.mail_order_from
+    to = config.mail_order_to
+    cc = config.mail_order_cc
+    subject = config.mail_order_subject % order.order_id
+    body = order.to_target_format
+    Mail.sendmail(body, subject, from, to, cc)
   end
   def Mail.send_request(email, organisation, body)
-    header, message = setup
     config = BBMB.config
-    from = header.from = config.mail_request_from
-    to = header.to = config.mail_request_to
-    cc = header.cc = config.mail_request_cc
-    header.subject = config.mail_request_subject % organisation
-    header.add('Reply-To', email)
-    message.body = body
-    Mail.sendmail(message, from, to, cc)
-  end
-  def Mail.setup
-    message = RMail::Message.new
-    header = message.header
-    header.add('Date', Time.now.rfc822)
-    header.add('Mime-Version', '1.0')
-    header.add('User-Agent', BBMB.config.name)
-    header.add('Content-Type', 'text/plain', nil, 'charset' => 'utf-8')
-    header.add('Content-Disposition', 'inline')
-    [header, message]
+    from = config.mail_request_from
+    to = config.mail_request_to
+    cc = config.mail_request_cc
+    subject = config.mail_request_subject % organisation
+    Mail.sendmail("", subject, from, to, cc, email)
   end
 end
   end
