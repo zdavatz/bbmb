@@ -7,6 +7,7 @@ require 'logger'
 require 'ydim/invoice'
 require 'bbmb/config'
 require 'bbmb/util/server'
+require 'mail'
 
 module BBMB
   @config.load_files.each { |local|

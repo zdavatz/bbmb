@@ -13,7 +13,7 @@ module BBMB
     module Util
 class Session < SBSM::Session
   DEFAULT_LANGUAGE = 'de'
-  DEFAULT_FLAVOR = "sandoz"
+  DEFAULT_FLAVOR = 'bbmb'
   DEFAULT_STATE = State::Login
   EXPIRES = BBMB.config.session_timeout
   PERSISTENT_COOKIE_NAME = "bbmb-barcodereader"
