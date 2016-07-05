@@ -1,3 +1,10 @@
+=== 2.0.5 / 05.07.2016
+
+* Adapted to htmlgrid 1.0.9 and dojo 1.11 (Tooltip, ContentToggler)
+* Fixed "NoMethodError undefined method `article_number" in favorites
+* Fixed polling for pop3 using mail gem (instead of rmail)
+* Renamed flavor to bbmb
+
 === 2.0.4 / 20.06.2016
 
 * Use gem 'mail' to send e-mails
