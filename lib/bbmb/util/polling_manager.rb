@@ -44,32 +44,39 @@ class FileMission
   end
 end
 class PopMission 
-  attr_accessor :host, :port, :user, :pass, :delete
-  @@ptrn = /name=(?:(?:(?<quote>['"])(?:=\?.+?\?[QB]\?)?(?<file>.*?)(\?=)?(?<!\\)\k<quote>)|(?:(?<file>.+?)(?:;|$)))/i
+  attr_accessor :host, :port, :user, :pass, :content_type
   def poll(&block)
-    Net::POP3.start(@host, @port || 110, @user, @pass) { |pop|
-      pop.each_mail { |mail|
-        poll_mail(mail, &block)
+    # puts "PopMission starts polling host #{@host}:#{@port} u: #{@user} pw: #{@pass}"
+    options = {
+                      :address    => @host,
+                      :port       => @port,
+                      :user_name  => @user,
+                      :password   => @pass,
+                      :enable_ssl => true
       }
-    }
-  end
-  def poll_mail(mail, &block)
-    source = mail.pop
-    ## work around a bug in RMail::Parser that cannot deal with
-    ## RFC-2822-compliant CRLF..
-    source.gsub!(/\r\n/, "\n")
-    poll_message(RMail::Parser.read(source), &block)
-    mail.delete if(@delete)
-  rescue StandardError => err
-    BBMB::Util::Mail.notify_error(err)
+    ::Mail.defaults do retriever_method :pop3, options  end
+    all_mails = ::Mail.delivery_method.is_a?(::Mail::TestMailer) ? ::Mail::TestMailer.deliveries : ::Mail.all
+    all_mails.each do |mail|
+        begin
+          poll_message(mail, &block)
+        ensure
+          time = Time.now
+          name = sprintf("%s.%s.%s", @user, time.strftime("%Y%m%d%H%M%S"), time.usec)
+          FileUtils.mkdir_p(@backup_dir)
+          path = File.join(@backup_dir, name)
+          File.open(path, 'w') { |fh| fh.puts(mail) }
+          mail.mark_for_delete = true
+          # mail.delete # Not necessary with gem mail, as delete_after_find is set to true by default
+        end
+    end
   end
   def poll_message(message, &block)
     if(message.multipart?)
-      message.each_part { |part|
+      message.parts.each do |part|
         poll_message(part, &block)
-      }
-    elsif(match = @@ptrn.match(message.header["Content-Type"]))
-      block.call(match["file"], message.decode)
+      end
+    elsif(/text\/xml/.match(message.content_type))
+      filtered_transaction(message.decoded, sprintf('pop3:%s@%s:%s', @user, @host, @port), &block)
     end
   end
 end
