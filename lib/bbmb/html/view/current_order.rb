@@ -345,32 +345,26 @@ class CurrentOrderForm < HtmlGrid::DivForm
   def order_confirmation(model)
     OrderConfirmation.new(@session.state._customer, @session, self)
   end
+  def content_toggler(model, key,  togglee, status=false)
+    link = HtmlGrid::Link.new("#{key}", model, @session, self)
+    link.css_id = key
+    link.value = @lookandfeel.lookup(key)
+    script = "event.preventDefault();
+// console.log('onclick: key #{key} togglee #{togglee}');
+var element = document.getElementById('#{togglee}');
+element.hidden = !element.hidden;
+"
+    link.set_attribute("onclick", script)
+    link
+  end
   def toggle(model)
-    ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:additional_info)}"
-    ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:additional_info)}"
-    attrs = {
-      'css_class'     => 'toggler',
-      'message_open'  => ms_open, 
-      'message_close' => ms_close, 
-      'status'        => toggle_status(model),
-      'togglee'       => 'info',
-    }
-    dojo_tag('contenttoggler', attrs)
+    content_toggler(model, 'additional_info', 'info')
   end
   def toggle_status(model)
     model.additional_info.empty? ? 'closed' : 'open'
   end
   def toggle_terms(model)
-    ms_open = "&nbsp;+&nbsp;#{@lookandfeel.lookup(:terms)}"
-    ms_close = "&nbsp;&minus;&nbsp;#{@lookandfeel.lookup(:terms)}"
-    attrs = {
-      'css_class'     => 'toggler',
-      'message_open'  => ms_open,
-      'message_close' => ms_close,
-      'status'        => toggle_terms_status,
-      'togglee'       => 'terms-of-service',
-    }
-    dojo_tag('contenttoggler', attrs)
+    content_toggler(model, 'terms', 'terms-of-service')
   end
   def toggle_terms_status
     @session.state._customer.terms_last_accepted ? 'closed' : 'open'
@@ -467,11 +461,8 @@ class CurrentOrder < Template
   include ActiveX
   CONTENT = CurrentOrderComposite
   DOJO_DEBUG = BBMB.config.debug
-  DOJO_PREFIX = {
-    'ywesee' => '../javascript',
-  }
-  DOJO_REQUIRE = [ 'dojo.widget.*', 'ywesee.widget.*', 
-    'ywesee.widget.ContentToggler' ] #, 'dojo.widget.Tooltip' ]
+  DOJO_PREFIX = { }
+  DOJO_REQUIRE = [ 'dojo/parser', 'dijit/Tooltip', ]
   JAVASCRIPTS = [
     "bcreader",
     "order",
