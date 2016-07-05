@@ -31,7 +31,7 @@ class Order
       end
     end
     def method_missing(name, *args, &block)
-      @product.send(name, *args, &block)
+      @product.send(name, *args, &block) if @product
     end
     def price
       @price_effective || price_effective
@@ -40,7 +40,7 @@ class Order
       @product.price_effective(qty)
     end
     def price_qty(qty = @quantity)
-      @product.price_qty(qty)
+      @product.price_qty(qty) if @product
     end
     def total
       price * @quantity
