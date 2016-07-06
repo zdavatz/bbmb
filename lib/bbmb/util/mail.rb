@@ -33,7 +33,7 @@ module Mail
     to = config.error_recipients
     subject = sprintf "%s: %s", BBMB.config.name, error.message
     body = [ error.class, error.message,
-    error.backtrace.pretty_inspect ].join("\n")
+    error.backtrace ].flatten.join("\n")
     Mail.sendmail(body, subject, from, to)
   end
   def Mail.notify_inject_error(order, opts={})
@@ -59,7 +59,7 @@ module Mail
     if config.mail_suppress_sending
       puts "#{__FILE__}:#{__LINE__} Suppress sending mail with subject: #{my_subject}"
       puts "    from #{from_addr} to: #{to_addr} cc: #{cc_addrs} reply_to: #{my_reply_to}"
-
+      puts my_body.to_s[0..10240]
       ::Mail.defaults do  delivery_method :test end
     else
       puts "Mail.sendmail #{config.smtp_server} #{config.smtp_port} #{config.smtp_helo} smtp_user: #{ config.smtp_user}  #{ config.smtp_pass}  #{ config.smtp_authtype}"
