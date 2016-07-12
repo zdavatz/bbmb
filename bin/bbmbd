@@ -49,8 +49,7 @@ module BBMB
     DRb.start_service(url, @server)
     $SAFE = 1
     $0 = @config.name
-    @logger.info('start') { 
-      sprintf("starting bbmb-server on %s", url) }
+    @logger.info('start') { sprintf("starting bbmb-server on %s", url) }
     DRb.thread.join
   rescue Exception => error
     @logger.error('fatal') { error }

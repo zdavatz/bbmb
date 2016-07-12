@@ -78,15 +78,15 @@ module BBMB
         BBMB.auth.logout(session)
       rescue DRb::DRbError, RangeError, NameError
       end
-      def rename_user(old, new)
-        return if(old == new)
-        BBMB.auth.autosession(BBMB.config.auth_domain) { |session|
-          if(old.nil?)
-            session.create_entity(new)
+      def rename_user(old_name, new_name)
+        return if old_name.eql?(new_name)
+        BBMB.auth.autosession(BBMB.config.auth_domain) do |session|
+          if(old_name.nil?)
+            session.create_entity(new_name)
           else
-            session.rename(old, new)
+            session.rename(old_name, new_name)
           end
-        }
+        end
       end
       def run_invoicer
         BBMB.logger.debug("run_invoicer starting")
@@ -110,6 +110,8 @@ module BBMB
         }
       end
       def run_updater
+        run_only_once_at_startup = false
+        BBMB.logger.debug("updater") { "run_updater run_only_once_at_startup? #{run_only_once_at_startup} " }
         @updater ||= Thread.new {
           loop {
             day = Date.today
@@ -117,14 +119,15 @@ module BBMB
             if(now.hour >= BBMB.config.update_hour)
               day += 1
             end
-            at = Time.local(day.year, day.month, day.day, 
-                            BBMB.config.update_hour)
+            at = Time.local(day.year, day.month, day.day, BBMB.config.update_hour)
             secs = at - now
-            BBMB.logger.debug("updater") { "sleeping %.2f seconds" % secs }
-            sleep(secs)
+            BBMB.logger.debug("updater") { "sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs  }
+            if run_only_once_at_startup then puts "Skipped sleeping #{secs}" else sleep(secs) end
+
             BBMB.logger.debug("update starting")
             update
             BBMB.logger.debug("update finished")
+            Thread.abort if run_only_once_at_startup
           }
         }
       end

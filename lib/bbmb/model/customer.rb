@@ -55,7 +55,8 @@ class Customer
     end
   end
   def quota(article_id)
-    @quotas.find { |quota| quota.article_number == article_id }
+    
+    @quotas.compact.find { |quota| quota.article_number == article_id }
   end
   def email=(email)
     if(@email || email)
