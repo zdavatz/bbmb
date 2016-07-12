@@ -60,6 +60,8 @@ class Customer
   def email=(email)
     if(@email || email)
       raise "Invalid email address: nil" unless email
+      return if @email.eql?(email)
+      email = email.encode('UTF-8')
       ## notify the server of this change, as it affects the user-data
       BBMB.server.rename_user(@email, email)
       @email = email
