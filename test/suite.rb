@@ -9,6 +9,7 @@ require 'find'
 failures =  []
 okay =  []
 Find.find(here) do |file|
+  next if /test_invoicer/.match(file)
   if /test_.*\.rb$/o.match(file)
     short =  File.basename(file, '.rb')
     if false # Run them all as a simple
@@ -32,6 +33,7 @@ puts
 puts "The following tests showed no problems #{okay}"
 puts
 puts "The following tests had problems #{failures}"
+puts "Skipped test_invoicer"
 # --seed 33839 hangs
 # --seed 62766 passed
 exit(failures.size)

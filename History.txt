@@ -1,3 +1,10 @@
+=== 2.0.6 / 13.07.2016
+
+* Fixed running test/suite.rb by suppressing test_invoicer, which runs fine if run standalone
+* Fixed importing CSV files for virbac
+* Don't update email if already set
+* Show first 10kB of mail body if sending is suppressed
+
 === 2.0.5 / 05.07.2016
 
 * Adapted to htmlgrid 1.0.9 and dojo 1.11 (Tooltip, ContentToggler)

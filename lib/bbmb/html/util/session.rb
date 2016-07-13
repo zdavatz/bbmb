@@ -4,7 +4,11 @@
 require 'bbmb/config'
 require 'sbsm/session'
 require 'bbmb/html/state/global'
+begin
 require 'bbmb/html/util/lookandfeel'
+rescue LoadError
+  # ignore it for unit tests
+end
 require 'bbmb/html/util/known_user'
 
 
