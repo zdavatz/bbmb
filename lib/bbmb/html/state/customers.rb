@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Html::State::Customers -- bbmb.ch -- 18.09.2006 -- hwyss@ywesee.com
 
 require 'bbmb/html/state/global_predefine'
@@ -18,15 +17,24 @@ class Customers < Global
     start = Time.now
     @model = BBMB.persistence.all(Model::Customer)
     @sortby = [:organisation]
-    BBMB.logger.debug('State') { 
-      sprintf("Customers#init: loaded %i customers in %1.5fs", 
+    BBMB.logger.debug('State') {
+      sprintf("Customers#init: loaded %i customers in %1.5fs",
               @model.size, Time.now - start)
     }
     @filter = Proc.new { |model|
-      if(filter = @session.event_bound_user_input(:filter))
-        pattern = Regexp.new(filter.gsub("*", ".*"), 'i')
-        model = model.select { |customer| 
-          FILTER.any? { |key| pattern.match(customer.send(key).to_s) }
+      input = @session.event_bound_user_input(:filter)
+      if input
+        pattern = Regexp.new(input.gsub('*', '.*'), 'ui')
+        model = model.select { |customer|
+          FILTER.any? { |key|
+            value = customer.send(key).to_s
+            next if value.empty?
+            begin
+              pattern.match(value)
+            rescue ArgumentError
+              false
+            end
+          }
         }
       end
       get_sortby!
