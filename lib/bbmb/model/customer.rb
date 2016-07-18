@@ -7,6 +7,8 @@ require 'bbmb/model/order'
 module BBMB
   module Model
 class Customer
+  MUTEX = Mutex.new
+
   attr_reader :customer_id, :email, :archive, :quotas
   attr_accessor :address1, :address2, :address3, :canton, :city,
     :drtitle, :ean13, :fax, :firstname, :language, :lastname,
@@ -72,7 +74,7 @@ class Customer
     @favorites ||= Order.new(self)
   end
   def inject_order(order, commit_time = Time.now)
-    Thread.exclusive {
+    MUTEX.synchronize {
       id = @archive.keys.max.to_i.next
       order.commit!(id, commit_time)
       @archive.store(id, order)
