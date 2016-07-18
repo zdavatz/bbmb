@@ -2,5 +2,5 @@
 # Bbmb -- bbmb.ch -- 17.12.2019 -- zdavatz@ywesee.com
 
 module BBMB
-  VERSION = '2.0.6'
+  VERSION = '2.0.7'
 end
