@@ -95,10 +95,18 @@ class CustomersList < HtmlGrid::List
   end
 =end 
   def last_login(model)
-    @session.user.last_login(model.email)
+    if model.respond_to?(:last_login)
+      model.last_login
+    else
+      @session.user.last_login(model.email)
+    end
   end
   def valid(model)
-    @lookandfeel.lookup(@session.user.entity_valid?(model.email).to_s)
+    if model.respond_to?(:valid)
+      @lookandfeel.lookup(model.valid)
+    else
+      @lookandfeel.lookup(@session.user.entity_valid?(model.email).to_s)
+    end
   end
   private
   def sort_link(header_key, matrix, component)
