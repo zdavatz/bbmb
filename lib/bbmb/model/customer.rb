@@ -37,7 +37,7 @@ class Customer
     ].compact
   end
   def commit_order!(commit_time = Time.now)
-    Thread.exclusive {
+    MUTEX.synchronize {
       id = @archive.keys.max.to_i.next
       order = current_order
       order.commit!(id, commit_time)
