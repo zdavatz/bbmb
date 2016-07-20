@@ -1,15 +1,7 @@
-#!/usr/bin/env ruby
-# Model::TestCustomer -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
+require 'test_helper'
 
-$: << File.expand_path('..', File.dirname(__FILE__))
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
-require 'bbmb'
 require 'bbmb/model/customer'
 require 'bbmb/model/order'
-require 'stub/persistence'
 
 module BBMB
   module Model

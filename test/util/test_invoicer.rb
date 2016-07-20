@@ -1,18 +1,8 @@
-#!/usr/bin/env ruby
-# Util::TestInvoicer -- bbmb.ch -- 05.10.2006 -- hwyss@ywesee.com
-
-
-$: << File.expand_path('..', File.dirname(__FILE__))
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
+require 'test_helper'
+require 'ostruct'
 require 'bbmb/config'
 require 'bbmb/util/invoicer'
 require 'bbmb/util/numbers'
-require 'ostruct'
-require 'stub/persistence'
 
 module BBMB
   module Util

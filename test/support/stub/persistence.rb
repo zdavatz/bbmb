@@ -1,6 +1,3 @@
-#!/usr/bin/env ruby
-# Persistence::Test -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
-
 require 'bbmb/model/customer'
 require 'bbmb/model/product'
 

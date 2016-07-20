@@ -1,10 +1,5 @@
-#!/usr/bin/env ruby
-# Util::TestMail -- bbmb.ch -- 27.09.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
+require 'test_helper'
+require 'bbmb/config'
 require 'bbmb/util/mail'
 
 module BBMB

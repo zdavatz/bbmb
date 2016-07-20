@@ -1,10 +1,4 @@
-#!/usr/bin/env ruby
-# TestBbmb -- bbmb.ch -- 15.09.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'bbmb'
+require 'test_helper'
 
 module BBMB
   class TestBbmb < Minitest::Test

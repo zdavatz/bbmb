@@ -1,10 +1,3 @@
-#!/usr/bin/env ruby
-# Model::TestPromotion -- bbmb -- 14.08.2007 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
 require 'bbmb/model/promotion'
 
 module BBMB

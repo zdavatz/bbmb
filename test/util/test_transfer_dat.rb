@@ -1,11 +1,6 @@
-#!/usr/bin/env ruby
-# Util::TestTargetDir -- bbmb -- 19.04.2007 -- hwyss@ywesee.com
-$: << File.expand_path('../lib', File.dirname(__FILE__))
-require 'minitest/autorun'
-require 'flexmock/test_unit'
-require 'bbmb'
-require 'bbmb/util/transfer_dat'
+require 'test_helper'
 require 'stringio'
+require 'bbmb/util/transfer_dat'
 
 module BBMB
   module Util
