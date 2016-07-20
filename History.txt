@@ -1,3 +1,9 @@
+=== 2.0.9 / 20.07.2016
+
+* Add EAN-Code as search target
+* Create test suite by rake
+* Remove unnecessary require and shebang from test files
+
 === 2.0.8 / 18.07.2016
 
 * Replaced Thread.exclusive with Mutex#synchronize
