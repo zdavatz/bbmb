@@ -12,7 +12,7 @@ module BBMB
 class Customers < Global
   DIRECT_EVENT = :customers
   VIEW = View::Customers
-  FILTER = [ :customer_id, :organisation, :plz, :city, :email ]
+  FILTER = [:customer_id, :ean13, :organisation, :plz, :city, :email]
   def init
     start = Time.now
     @model  = BBMB.persistence.all(Model::Customer)
@@ -22,18 +22,6 @@ class Customers < Global
               @model.size, Time.now - start)
     }
     @filter = make_filter
-  end
-  def page(model)
-    page = OpenStruct.new
-    index = @session.user_input(:index).to_i
-    step = @session.user.pagestep || BBMB.config.pagestep
-    page.index = index
-    page.first = index + 1
-    page.step = step
-    page.total = model.size
-    page.customers = model[index, step]
-    page.last = index + page.customers.size
-    page
   end
   private
   def make_filter
@@ -62,6 +50,18 @@ class Customers < Global
       @sort_reverse && model.reverse!
       page(model)
     }
+  end
+  def page(model)
+    page = OpenStruct.new
+    index = @session.user_input(:index).to_i
+    step = @session.user.pagestep || BBMB.config.pagestep
+    page.index = index
+    page.first = index + 1
+    page.step = step
+    page.total = model.size
+    page.customers = model[index, step]
+    page.last = index + page.customers.size
+    page
   end
 end
 class CustomerDecorator < SimpleDelegator
