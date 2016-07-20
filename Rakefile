@@ -1,12 +1,13 @@
-#!/usr/bin/env ruby
-# encoding: utf-8
 lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'bbmb/version'
+$:.unshift(lib) unless $:.include?(lib)
+
+require 'rake/testtask'
+require 'rake/clean'
 require "bundler/gem_tasks"
 require 'rspec/core/rake_task'
+require 'bbmb/version'
 
-RSpec::Core::RakeTask.new(:spec)
+task :default => :test
 
 # dependencies are now declared in bbmb.gemspec
 
@@ -16,6 +17,16 @@ task :gem => :build do
 end
 
 task :spec => :clean
-
-require 'rake/clean'
 CLEAN.include FileList['pkg/*.gem']
+
+# rspec
+RSpec::Core::RakeTask.new(:spec)
+
+# unit test
+dir = File.dirname(__FILE__)
+Rake::TestTask.new do |t|
+  t.libs << 'test'
+  t.test_files = Dir.glob("#{dir}/test/**/test_*.rb")
+  t.warning = false
+  t.verbose = false
+end

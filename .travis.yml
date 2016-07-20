@@ -8,13 +8,14 @@ sudo: false
 before_install:
   - gem --version
 
-script: bundle exec test/suite.rb
+script: bundle exec rake test
 
 rvm:
   - 2.2
   - 2.3.0
+  - 2.3.1
   - ruby-head
-  
+
 matrix:
   allow_failures:
     - rvm: ruby-head
@@ -23,3 +24,4 @@ notifications:
   email:
     recipients:
       - ngiger@ywesee.com
+      - yasaka@ywesee.com

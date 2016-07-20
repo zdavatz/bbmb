@@ -1,8 +1,5 @@
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
+require 'test_helper'
 
-require 'fileutils'
-require 'minitest/autorun'
-require 'flexmock/test_unit'
 require 'htmlgrid/list'
 require 'bbmb/config'
 require 'bbmb/model/customer'

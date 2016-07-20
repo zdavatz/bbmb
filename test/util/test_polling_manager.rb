@@ -1,12 +1,6 @@
-#!/usr/bin/env ruby
-# Util::TestPollingManager -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
-require 'bbmb/util/polling_manager'
+require 'test_helper'
 require 'fileutils'
+require 'bbmb/util/polling_manager'
 
 module BBMB
   module Util

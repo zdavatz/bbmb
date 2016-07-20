@@ -1,10 +1,4 @@
-#!/usr/bin/env ruby
-# Util::TestPasswordGenerator -- bbmb.ch -- 19.10.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
+require 'test_helper'
 require 'bbmb/util/password_generator'
 
 module BBMB

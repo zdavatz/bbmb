@@ -1,15 +1,5 @@
-#!/usr/bin/env ruby
-# Util::TestServer -- bbmb.ch -- 22.09.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-$: << File.expand_path('..', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
-require 'bbmb'
+require 'test_helper'
 require 'bbmb/util/server'
-require 'stub/persistence'
-require 'flexmock'
 
 module BBMB
   module Util

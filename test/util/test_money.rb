@@ -1,10 +1,4 @@
-#!/usr/bin/env ruby
-# Util::TestMoney -- bbmb.ch -- 14.09.2006 -- hwyss@ywesee.com
-
-$: << File.expand_path('../../lib', File.dirname(__FILE__))
-
-require "minitest/autorun"
-require 'flexmock/test_unit'
+require 'test_helper'
 require 'bbmb/util/numbers'
 
 module BBMB
