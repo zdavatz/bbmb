@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'fileutils'
 require 'bbmb/util/polling_manager'
@@ -7,6 +11,7 @@ module BBMB
     class TestFileMission < Minitest::Test
       include FlexMock::TestCase
       def setup
+        super
         @datadir = File.expand_path('../data', File.dirname(__FILE__))
         BBMB.config = flexmock('config')
         BBMB.config.should_receive(:bbmb_dir).and_return(@datadir)
@@ -14,6 +19,10 @@ module BBMB
         @dir = File.expand_path('../data/poll', File.dirname(__FILE__))
         FileUtils.mkdir_p(@dir)
         @mission.directory = @dir
+      end
+      def teardown
+        BBMB.config = $default_config.clone
+        super
       end
       def test_poll
         path = File.join(@dir, 'test.csv')
@@ -92,6 +101,10 @@ module BBMB
         @mission = FtpMission.new
         @mission.directory = "ftp://user:pass@ftp.server.com/path/to/dir"
       end
+      def teardown
+        BBMB.config = $default_config.clone
+        super
+      end
       def test_poll
         session = flexmock 'ftp'
         session.should_receive(:login).with('user', 'pass').times(2)
@@ -142,10 +155,15 @@ module BBMB
     class TestPopMission < Minitest::Test
       include FlexMock::TestCase
       def setup
+        super
         @mission = PopMission.new
         @mission.host = "mail.ywesee.com"
         @mission.user = "data@bbmb.ch"
         @mission.pass = "test"
+      end
+      def teardown
+        BBMB.config = $default_config.clone
+        super
       end
       def test_poll_message__normal
         skip "Must fix  test_poll_message__normal using the mail gem"
@@ -275,6 +293,7 @@ attached data
     end
     class TestPopMissionXmlConv < ::Minitest::Test
       def setup
+        super
         @popserver = TCPServer.new('127.0.0.1', 0)
         addr = @popserver.addr
         @mission = PopMission.new
@@ -286,7 +305,9 @@ attached data
         @datadir = File.expand_path('data', File.dirname(__FILE__))
       end
       def teardown
+        BBMB.config = $default_config.clone
         FileUtils.rm_r(@datadir)
+        super
       end
       def test_poll
         options = { :from =>  'you@you.com', }
@@ -321,13 +342,20 @@ attached data
       end
       def teardown
         @popserver.close
+        super
       end
     end
     class TestPollingManager < Minitest::Test
       include FlexMock::TestCase
       def setup
+        super
+        BBMB.config = $default_config.clone
         @manager = PollingManager.new
         @datadir = File.expand_path('data', File.dirname(__FILE__))
+      end
+      def teardown
+        BBMB.config = $default_config.clone
+        super
       end
       def test_load_sources
         FileUtils.mkdir_p(@datadir)

@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'stringio'
 require 'bbmb/util/transfer_dat'
@@ -7,8 +11,13 @@ module BBMB
 class TestTransferDat <  Minitest::Test
   include FlexMock::TestCase
   def setup
+    super
     BBMB.logger = flexmock('logger')
     BBMB.logger.should_receive(:error)
+  end
+  def teardown
+    super
+    BBMB.logger = nil
   end
   def test_parse_line
     src = "030201899    0624427Mycolog creme tube 15 g                           000176803710902940"

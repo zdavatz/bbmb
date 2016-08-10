@@ -4,7 +4,7 @@
 
 You can find a graphical overview here
 
-* https://github.com/zdavatz/bbmb/bbmb.jpeg
+* https://raw.githubusercontent.com/zdavatz/bbmb/master/bbmb.jpeg
 
 ## DESCRIPTION:
 
