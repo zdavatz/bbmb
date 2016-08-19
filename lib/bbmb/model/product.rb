@@ -62,11 +62,47 @@ class ProductInfo < Subject
       instance_variable_get("@l#{level}_qty")
     end
   end
-  def to_info
-		self
-  end
+
   def ==(other)
     other.is_a?(ProductInfo) && @article_number == other.article_number
+  end
+
+  def to_info
+    self
+  end
+
+  def to_product
+    convert_to(Product)
+  end
+
+  private
+
+  # Converts as new instance
+  #
+  # @param [Class] klass New class {Product|ProductInfo}
+  # @return [Array(Product,ProductInfo)] new instance
+  def convert_to(klass)
+    base_keys = %i{
+      backorder_date catalogue1 catalogue2 catalogue3
+      description ean13 expiry_date partner_index pcode status
+    }
+    keys = case klass.to_s
+           when 'BBMB::Model::Product'
+             base_keys
+           when 'BBMB::Model::ProductInfo'
+             base_keys += %i{
+               vat price
+               l1_qty l2_qty l3_qty l4_qty l5_qty l6_qty
+               l1_price l2_price l3_price l4_price l5_price l6_price
+             }
+           else
+             raise "Unknown class #{klass}"
+           end
+    obj = klass.new(@article_number)
+    keys.each { |key| obj.send("#{key}=", self.send(key)) }
+    obj.promotion = @promotion.dup if (@promotion && @promotion.current?)
+    obj.sale      = @sale.dup      if (@sale && @sale.current?)
+    obj
   end
 end
 class Product < ProductInfo
@@ -81,18 +117,13 @@ class Product < ProductInfo
   def current_promo
     [@sale, @promotion].find { |promo| promo && promo.current? }
   end
+
+  def to_product
+    self
+  end
+
   def to_info
-    info = ProductInfo.new(@article_number)
-    [ :backorder_date, :catalogue1, :catalogue2, :catalogue3,
-      :description, :ean13, :expiry_date, :partner_index, :pcode,
-      :status, :l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty, :vat,
-      :price, :l1_price, :l2_price, :l3_price, :l4_price, :l5_price, :l6_price
-    ].each { |key|
-      info.send("#{key}=", self.send(key))
-    }
-    info.promotion = @promotion.dup if(@promotion && @promotion.current?)
-    info.sale = @sale.dup if(@sale && @sale.current?)
-    info
+    convert_to(ProductInfo)
   end
 end
   end

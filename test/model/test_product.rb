@@ -79,13 +79,29 @@ class TestProduct < Minitest::Test
     @product.l6_price = 16.50
     assert_equal(16.50, @product.price(6))
   end
-  def test_info
+
+  def test_to_info
     info = @product.to_info
     assert_instance_of(ProductInfo, info)
     assert_equal('article_number', info.article_number)
-    info1 = info.to_info
-    assert_equal(info, info1)
+    assert_equal(info, info.to_info)
   end
+
+  def test_to_product
+    product = @product.to_info.to_product
+    assert_instance_of(Product, product)
+    assert_equal('article_number', product.article_number)
+    assert_equal(product, product.to_product)
+    %w{
+      backorder_date catalogue1 catalogue2 catalogue3
+      description ean13 expiry_date partner_index pcode status
+    }.map do |attr|
+      assert_equal(@product.send(attr), product.send(attr))
+    end
+    assert_equal(@product.promotion, product.promotion)
+    assert_equal(@product.sale, product.sale)
+  end
+
   def test_price_levels__no_promo
     @product.l1_qty = 1
     @product.l1_price = 10
