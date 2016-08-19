@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'bbmb/config'
 require 'bbmb/util/mail'
@@ -5,13 +9,16 @@ require 'bbmb/util/mail'
 module BBMB
   module Util
     class TestMail < Minitest::Test
-      SendRealMail = false
-      if SendRealMail
-        TestRecipient = 'ngiger@ywesee.com'
-      else
-        TestRecipient = 'to.test@bbmb.ch'
-      end
       include FlexMock::TestCase
+      def setup
+        super
+        BBMB.config = $default_config.clone
+      end
+      def teardown
+        BBMB.config = $default_config.clone
+        ::Mail.defaults do  delivery_method :test end
+        super
+      end
       def setup_config
         config = BBMB.config
         config.mail_suppress_sending = true

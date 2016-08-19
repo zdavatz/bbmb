@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'bbmb/util/password_generator'
 

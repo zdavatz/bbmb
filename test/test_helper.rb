@@ -10,7 +10,20 @@ $:.unshift(test_dir) unless $:.include?(test_dir)
 
 require 'minitest/autorun'
 require 'flexmock/test_unit'
-
 require 'bbmb/config'
+
+# We create hier a global copy of the defautl BBMB.config as we
+# must restore it after each change in BBMB.config in a test
+$default_config = BBMB.config.clone
+
+require 'mail'
+::Mail.defaults do delivery_method :test end
+SendRealMail = false
+if SendRealMail
+  TestRecipient = 'ngiger@ywesee.com'
+else
+  TestRecipient = 'to.test@bbmb.ch'
+end
+::Mail::TestMailer.deliveries.clear
 
 Dir[root_dir.join('test/support/**/*.rb')].each { |f| require f }

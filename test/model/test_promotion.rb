@@ -1,9 +1,15 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
+require 'test_helper'
 require 'bbmb/model/promotion'
 
 module BBMB
   module Model
 class TestPromotion < Minitest::Test
   def setup
+    super
     @promo = Promotion.new
   end
   def test_current

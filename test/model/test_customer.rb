@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 
 require 'bbmb/model/customer'
@@ -8,9 +12,16 @@ module BBMB
 class TestCustomer < Minitest::Test
   include FlexMock::TestCase
   def setup
+    super
+    BBMB.config = $default_config.clone
     Customer.clear_instances
     @customer = Customer.new('007')
   end
+  def teardown
+    BBMB.config = $default_config.clone
+    super
+  end
+
   def test_email_writer
     BBMB.server = flexmock('server')
     @customer.instance_variable_set('@email', 'old@bbmb.ch')

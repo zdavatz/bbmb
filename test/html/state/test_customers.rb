@@ -23,6 +23,10 @@ module BBMB
           @session = flexmock('session', :app => app, :user => user)
           @model   = flexmock('model')
         end
+        def teardown
+          BBMB.config = $default_config.clone
+          super
+        end
 
         def test_filter_finds_customer_by_ean13
           search_input = '7999999999999'

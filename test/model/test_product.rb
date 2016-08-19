@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'bbmb/model/product'
 require 'bbmb/model/promotion'
@@ -6,7 +10,11 @@ module BBMB
   module Model
 class TestProduct < Minitest::Test
   def setup
+    super
     @product = Product.new("article_number")
+  end
+  def teardown
+    super
   end
   def test_int_accessors
     [:l1_qty, :l2_qty, :l3_qty, :l4_qty, :l5_qty, :l6_qty ].each { |key|

@@ -56,14 +56,18 @@ module Mail
   end
   def Mail.sendmail(my_body, my_subject, from_addr, to_addr, cc_addrs=[], my_reply_to = nil)
     config = BBMB.config
+    config.mail_suppress_sending = true if  defined?(::MiniTest)
     if config.mail_suppress_sending
-      puts "#{__FILE__}:#{__LINE__} Suppress sending mail with subject: #{my_subject}"
-      puts "    from #{from_addr} to: #{to_addr} cc: #{cc_addrs} reply_to: #{my_reply_to}"
-      puts my_body.to_s[0..10240]
+      msg = [ "#{__FILE__}:#{__LINE__} Suppress sending mail with subject: #{my_subject}",
+              "    from #{from_addr} to: #{to_addr} cc: #{cc_addrs} reply_to: #{my_reply_to}",
+              my_body.to_s[0..10240]
+            ]
+      puts msg unless defined?(::MiniTest)
       ::Mail.defaults do  delivery_method :test end
     else
       puts "Mail.sendmail #{config.smtp_server} #{config.smtp_port} #{config.smtp_helo} smtp_user: #{ config.smtp_user}  #{ config.smtp_pass}  #{ config.smtp_authtype}"
       puts "Mail.sendmail from #{from_addr} to #{to_addr} cc #{cc_addrs} message: #{my_body.class}"
+      return if to_addr == nil
       ::Mail.defaults do
       options = { :address              => config.smtp_server,
                   :port                 => config.smtp_port,

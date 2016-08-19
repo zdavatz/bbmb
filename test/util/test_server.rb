@@ -1,14 +1,25 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'bbmb/util/server'
 
 module BBMB
   module Util
+
 class TestServer < Minitest::Test
   include FlexMock::TestCase
   def setup
+    super
+    BBMB.config = $default_config.clone
     @server = Server.new
     Model::Customer.instances.clear
     Model::Product.instances.clear
+  end
+  def teardown
+    BBMB.config = $default_config.clone
+    super
   end
   def test_inject_order__unknown_customer
     assert_raises(RuntimeError) {

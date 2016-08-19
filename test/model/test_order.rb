@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'bbmb/model/order'
 require 'date'
@@ -7,6 +11,8 @@ module BBMB
 class TestOrder <  Minitest::Test
   include FlexMock::TestCase
   def setup
+    super
+    BBMB.config = $default_config.clone
     @customer = flexmock("customer")
     @customer.should_receive(:quota)
     @order = Order.new(@customer)
@@ -18,6 +24,9 @@ class TestOrder <  Minitest::Test
     @position.should_receive(:quantity).and_return(17).by_default
     @position.should_receive(:freebies).and_return(nil).by_default
     BBMB.config.i2_100 = 'YWESEE'
+  end
+  def teardown
+    BBMB.config = $default_config.clone
   end
   def test_add
     assert_equal(true, @order.empty?)
@@ -392,6 +401,7 @@ end
 class TestOrderPosition < Minitest::Test
   include FlexMock::TestCase
   def setup
+    super
     @product = flexmock('product')
     @position = Order::Position.new(3, @product)
   end

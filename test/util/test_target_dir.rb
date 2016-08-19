@@ -1,3 +1,7 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+$: << File.expand_path('..', File.dirname(__FILE__))
+
 require 'test_helper'
 require 'fileutils'
 require 'bbmb/util/target_dir'
@@ -15,8 +19,9 @@ class TestTargetDir < Minitest::Test
                             File.dirname(__FILE__))
   end
   def teardown
-    super
+    BBMB.config = $default_config.clone
     FileUtils.rm_r(@dir) if(File.exist? @dir)
+    super
   end
   def test_send_order__ftp
     config = BBMB.config
