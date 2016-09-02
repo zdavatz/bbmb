@@ -205,8 +205,6 @@ module BBMB
         assert(blk_called, "poll_message never called its block")
       end
       def test_poll
-        skip "Must fix  test_poll using the mail gem"
-
         src = <<-EOS
 Content-Type: multipart/mixed; boundary="=-1158308026-727155-3822-1761-1-="
 MIME-Version: 1.0
@@ -221,22 +219,29 @@ Content-Disposition: attachment; filename="ywsarti.csv"
 attached data
 --=-1158308026-727155-3822-1761-1-=--
         EOS
-        flexstub(Net::POP3).should_receive(:start).with('mail.ywesee.com', 110, 
-          'data@bbmb.ch', 
-          'test', Proc).and_return { |host, port, user, pass, block|
+        mail = flexmock('mail')
+        mail.should_receive(:pop).and_return(src)
+        mail.should_receive(:mark_for_delete=).with(true)
+        mail.should_receive(:multipart?).and_return(true)
+        mail.should_receive(:parts).and_return([])
+        flexstub(::Mail).should_receive(:delivery_method).and_return(
+          ::Mail::TestMailer.new({}))
+        flexstub(::Mail::TestMailer).should_receive(:deliveries)
+          .and_return([mail])
+        flexstub(Net::POP3).should_receive(:start).with(
+          'mail.ywesee.com',
+          110,
+          'data@bbmb.ch',
+          'test', Proc
+        ).and_return { |host, port, user, pass, block|
           pop = flexmock('pop')
           pop.should_receive(:each_mail).and_return { |block2|
-            mail = flexmock('mail')
-            mail.should_receive(:pop).and_return(src)
-            mail.should_receive(:delete)
             block2.call(mail)
           }
           block.call(pop)
         }
-        @mission.poll { |name, data|
-          assert_equal('ywsarti.csv', name)
-          assert_equal('attached data', data)
-        }
+        # check nothing raised
+        assert_equal([mail],  @mission.poll(&lambda {|name| }))
       end
       def test_poll__error
         skip "Must fix  test_poll__error using the mail gem"

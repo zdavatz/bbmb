@@ -47,6 +47,8 @@ class PopMission
   attr_accessor :host, :port, :user, :pass, :content_type
   def poll(&block)
     # puts "PopMission starts polling host #{@host}:#{@port} u: #{@user} pw: #{@pass}"
+    @backup_dir ||= Dir.tmpdir
+
     options = {
                       :address    => @host,
                       :port       => @port,
