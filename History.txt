@@ -1,3 +1,7 @@
+=== 2.1.1 / 02.09.2016
+
+* Fix conversion error for backup_dir at PopMission
+
 === 2.1.0 / 19.08.2016
 
 * Add ProductInfo#to_product utility method
