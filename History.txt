@@ -1,3 +1,7 @@
+=== 2.1.2 / 07.09.2016
+
+* Prevent mail error by no price product
+
 === 2.1.1 / 02.09.2016
 
 * Fix conversion error for backup_dir at PopMission
