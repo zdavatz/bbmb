@@ -16,7 +16,7 @@ module BBMB
           start = Time.now
           @model  = BBMB.persistence.all(Model::Customer)
           @sortby = [:organisation]
-          BBMB.logger.debug('State') {
+          SBSM.debug('State') {
             sprintf("Customers#init: loaded %i customers in %1.5fs",
                     @model.size, Time.now - start)
           }

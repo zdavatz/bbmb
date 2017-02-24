@@ -4,11 +4,6 @@
 require 'bbmb/config'
 require 'sbsm/session'
 require 'bbmb/html/state/global'
-begin
-require 'bbmb/html/util/lookandfeel'
-rescue LoadError
-  # ignore it for unit tests
-end
 require 'bbmb/html/util/known_user'
 
 
@@ -22,11 +17,13 @@ class Session < SBSM::Session
   EXPIRES = BBMB.config.session_timeout
   PERSISTENT_COOKIE_NAME = "bbmb-barcodereader"
   def login
+    SBSM.info "BBMB::Html::Util::Session login "
     @user = @app.login(user_input(:email), user_input(:pass))
     @user.session = self if(@user.respond_to?(:session=))
     @user
   end
   def logout
+    SBSM.info "BBMB::Html::Util::Session logout "
     @app.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
     super
   end
@@ -35,11 +32,12 @@ class Session < SBSM::Session
     if(@lookandfeel.nil? \
       || (@lookandfeel.language != persistent_user_input(:language)))
       require 'bbmb/html/util/lookandfeel'
-      @lookandfeel = Lookandfeel.new(self) # dtsttcpw
+      @lookandfeel = Lookandfeel.new(self)
     end
     @lookandfeel
   end
   def process(request)
+    SBSM.info "BBMB::Html::Util::Session process"
     begin
       if(@user.is_a?(KnownUser) && @user.auth_session.expired?)
         logout

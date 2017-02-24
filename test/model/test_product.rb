@@ -21,7 +21,7 @@ class TestProduct < Minitest::Test
       assert_nil(@product.send(key))
       @product.send("#{key}=", "2")
       int = @product.send(key)
-      assert_instance_of(Fixnum, int)
+      assert_instance_of(Integer, int)
       assert_equal(2, int)
       @product.send("#{key}=", nil)
       assert_nil(@product.send(key))
@@ -60,9 +60,9 @@ class TestProduct < Minitest::Test
     refute_equal(@product, other)
   end
   def test_price
-    assert_equal(nil, @product.price)
+    assert_nil(@product.price)
     assert_equal(0, @product.price_effective)
-    assert_equal(nil, @product.price(1))
+    assert_nil(@product.price(1))
     assert_equal(0, @product.price_effective(1))
     @product.l1_price = 11.50
     assert_equal(11.50, @product.price)
@@ -170,7 +170,7 @@ class TestProduct < Minitest::Test
     assert_equal(5, @product.price_qty(12))
   end
   def test_freebies__no_promo
-    assert_equal(nil, @product.freebies(1))
+    assert_nil(@product.freebies(1))
   end
   def test_freebies__with_old_promo
     @product.promotion = promo = Promotion.new
@@ -182,8 +182,8 @@ class TestProduct < Minitest::Test
     promo.l2_qty = 12
     promo.l2_price = 7
     promo.l2_free = 3
-    assert_equal(nil, @product.freebies(5))
-    assert_equal(nil, @product.freebies(6))
+    assert_nil(@product.freebies(5))
+    assert_nil(@product.freebies(6))
   end
   def test_freebies__with_current_promo
     @product.promotion = promo = Promotion.new
@@ -195,7 +195,7 @@ class TestProduct < Minitest::Test
     promo.l2_qty = 12
     promo.l2_price = 7
     promo.l2_free = 3
-    assert_equal(nil, @product.freebies(5))
+    assert_nil(@product.freebies(5))
     assert_equal(1, @product.freebies(6))
     assert_equal(1, @product.freebies(11))
     assert_equal(3, @product.freebies(12))
@@ -234,7 +234,7 @@ class TestProduct < Minitest::Test
     assert_equal(10, @product.qty_level(2))
     promo.l1_price = 2
     assert_equal(5, @product.qty_level(1))
-    assert_equal(nil, @product.qty_level(2))
+    assert_nil(@product.qty_level(2))
   end
 end
   end

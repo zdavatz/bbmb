@@ -77,9 +77,9 @@ class TestOrder <  Minitest::Test
     assert_equal([], @order.positions)
   end
   def test_commit
-    assert_equal(nil, @order.commit_time)
+    assert_nil(@order.commit_time)
     assert_raises(RuntimeError) { @order.commit!('commit_id', Time.now) }
-    assert_equal(nil, @order.commit_time)
+    assert_nil(@order.commit_time)
     position = flexmock('position')
     @order.positions.push(position)
     position.should_receive(:article_number).and_return('12345')

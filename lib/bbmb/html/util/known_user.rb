@@ -23,11 +23,12 @@ class KnownUser < SBSM::User
     }
   }
   def initialize(session)
+    puts "BBMB::Html::Util::KnownUser.new"
     @auth_session = session
   end
   def allowed?(action, key=nil)
     allowed = remote_call(:allowed?, action, key)
-    BBMB.logger.debug('User') {
+    SBSM.debug('User') {
       sprintf('%s: allowed?(%s, %s) -> %s', name, action, key, allowed)
     }
     allowed
@@ -37,12 +38,13 @@ class KnownUser < SBSM::User
       && (entity = remote_call(:find_entity, email)) && entity.valid?)
   end
   def navigation
+    puts "BBMB::Html::Util::KnownUser navigation"
     [ :logout ]
   end
   def remote_call(method, *args, &block)
     @auth_session.send(method, *args, &block)
   rescue RangeError, DRb::DRbError => e
-    BBMB.logger.error('auth') { e }
+    SBSM.info('auth') { e }
   end
   alias :method_missing :remote_call
 end

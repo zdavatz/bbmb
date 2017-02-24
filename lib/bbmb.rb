@@ -4,6 +4,6 @@ require 'bbmb/version'
 
 module BBMB
   class << self
-    attr_accessor :auth, :config, :logger, :persistence, :server
+    attr_accessor :auth, :config, :persistence, :server
   end
 end

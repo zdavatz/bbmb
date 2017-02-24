@@ -26,13 +26,13 @@ class TestPromotion < Minitest::Test
     assert_equal(false, @promo.current?)
   end
   def test_price_qty
-    assert_equal(nil, @promo.price_qty(1))
+    assert_nil(@promo.price_qty(1))
     @promo.l1_qty = 6
     @promo.l1_price = 10
-    assert_equal(nil, @promo.price_qty(5))
+    assert_nil(@promo.price_qty(5))
     assert_equal(10, @promo.price_qty(6))
     @promo.l1_discount = 10
-    assert_equal(nil, @promo.price_qty(5))
+    assert_nil(@promo.price_qty(5))
     assert_equal(10, @promo.price_qty(6))
   end
 end

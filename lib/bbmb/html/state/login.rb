@@ -61,7 +61,7 @@ TVS/Virbac-Nr:  #{input[:customer_id]}
     }
   end
   def viral_modules(user)
-    [ 
+    [
       ['.Admin', State::Viral::Admin],
       ['.Customer', State::Viral::Customer],
     ].each { |key, mod|

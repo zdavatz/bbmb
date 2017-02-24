@@ -11,15 +11,36 @@ require 'bbmb/util/updater'
 require 'bbmb/model/order' # needed to be enable to invoice later
 require 'bbmb/model/customer'
 require 'date'
-require 'sbsm/drbserver'
+require 'sbsm/app'
 
 module BBMB
   module Util
-    class Server < SBSM::DRbServer
+    class RackInterface < SBSM::RackInterface
       ENABLE_ADMIN = true
-	    SESSION = Html::Util::Session
-	    VALIDATOR = Html::Util::Validator
+      SESSION = Html::Util::Session
+      VALIDATOR = Html::Util::Validator
       attr_reader :updater
+      def initialize()
+        super(app: BBMB::Util::App.new,
+              session_class: BBMB::Html::Util::Session,
+              unknown_user: BBMB::Html::Util::KnownUser,
+              cookie_name: 'virbac.bbmb'
+              )
+      end
+      if false
+      def inject_order(customer_id, products, infos, opts={})
+        @app.inject_order(customer_id, products, infos, opts)
+      end
+      def run_invoicer
+        @app.run_invoicer
+      end
+      def run_updater
+        @app.run_updater
+      end
+      def rename_user(old_name, new_name)
+        @app.rename_user(old_name, new_name)
+      end
+      end
       def inject_order(customer_id, products, infos, opts={})
         customer = Model::Customer.find_by_customer_id(customer_id) \
           || Model::Customer.find_by_ean13(customer_id)
@@ -39,8 +60,8 @@ module BBMB
         order = Model::Order.new(customer)
         products.each { |info|
           if(product = Model::Product.find_by_pcode(info[:pcode]) \
-             || Model::Product.find_by_ean13(info[:ean13]) \
-             || Model::Product.find_by_article_number(info[:article_number]))
+              || Model::Product.find_by_ean13(info[:ean13]) \
+              || Model::Product.find_by_article_number(info[:article_number]))
             order.add(info[:quantity], product)
             [:article_number, :backorder].each do |key|
               info.store key, product.send(key)
@@ -89,7 +110,7 @@ module BBMB
         end
       end
       def run_invoicer
-        BBMB.logger.debug("run_invoicer starting")
+        SBSM.debug("run_invoicer starting")
         @invoicer ||= Thread.new {
           Thread.current.abort_on_exception = true
           loop {
@@ -99,19 +120,19 @@ module BBMB
             now = Time.now
             at = Time.local(day.year, day.month)
             secs = at - now
-            BBMB.logger.debug("invoicer") {
+            SBSM.debug("invoicer") {
               "sleeping %.2f seconds" % secs
             }
             sleep(secs)
-            BBMB.logger.debug("invoice starting")
+            SBSM.debug("invoice starting")
             invoice(start...at)
-            BBMB.logger.debug("invoice finished")
+            SBSM.debug("invoice finished")
           }
         }
       end
       def run_updater
         run_only_once_at_startup = false
-        BBMB.logger.debug("updater") { "run_updater run_only_once_at_startup? #{run_only_once_at_startup} " }
+        SBSM.debug("updater") { "run_updater run_only_once_at_startup? #{run_only_once_at_startup} " }
         @updater ||= Thread.new {
           loop {
             day = Date.today
@@ -121,12 +142,12 @@ module BBMB
             end
             at = Time.local(day.year, day.month, day.day, BBMB.config.update_hour)
             secs = at - now
-            BBMB.logger.debug("updater") { "sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs  }
+            SBSM.debug("updater") { "sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs  }
             if run_only_once_at_startup then puts "Skipped sleeping #{secs}" else sleep(secs) end
 
-            BBMB.logger.debug("update starting")
+            SBSM.debug("update starting")
             update
-            BBMB.logger.debug("update finished")
+            SBSM.debug("update finished")
             Thread.abort if run_only_once_at_startup
           }
         }
@@ -162,6 +183,8 @@ module BBMB
       rescue Exception => e
         Mail.notify_error(e)
       end
+    end
+    class App < SBSM::App
     end
   end
 end
