@@ -19,11 +19,17 @@ module BBMB
       ENABLE_ADMIN = true
       SESSION = Html::Util::Session
       VALIDATOR = Html::Util::Validator
-      attr_reader :updater
-      def initialize()
-        super(app: BBMB::Util::App.new,
+      attr_reader :updater, :auth
+      def initialize(app: BBMB::Util::App.new,
+                     auth: DRb::DRbObject.new(nil, @config.auth_url),
+                     validator: BBMB::Html::Util::Validator)
+        @auth = auth
+        @app = app
+        binding.pry
+        super(app: app,
               session_class: BBMB::Html::Util::Session,
-              unknown_user: BBMB::Html::Util::KnownUser,
+              unknown_user: Html::Util::KnownUser,
+              validator: validator,
               cookie_name: 'virbac.bbmb'
               )
       end
@@ -91,14 +97,14 @@ module BBMB
       rescue Exception => e
         Mail.notify_error(e)
       end
-      def login(email, pass)
-        session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
-        Html::Util::KnownUser.new(session)
-      end
-      def logout(session)
-        BBMB.auth.logout(session)
-      rescue DRb::DRbError, RangeError, NameError
-      end
+      def login(email, pass); require 'pry'; binding.pry
+          session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
+          Html::Util::KnownUser.new(session)
+        end
+        def logout(session)
+          BBMB.auth.logout(session)
+        rescue DRb::DRbError, RangeError, NameError
+        end
       def rename_user(old_name, new_name)
         return if old_name.eql?(new_name)
         BBMB.auth.autosession(BBMB.config.auth_domain) do |session|
@@ -185,6 +191,14 @@ module BBMB
       end
     end
     class App < SBSM::App
+      def login(email, pass); require 'pry'; binding.pry
+        session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
+        Html::Util::KnownUser.new(session)
+      end
+      def logout(session)
+        BBMB.auth.logout(session)
+      rescue DRb::DRbError, RangeError, NameError
+      end
     end
-  end
-end
+      end
+      end

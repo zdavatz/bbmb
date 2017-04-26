@@ -15,11 +15,11 @@ class KnownUser < SBSM::User
   #
   ### Customers need permissions for:
   # login BBMB.config.auth_domain + ".Customer"
-  attr_reader :auth_session 
+  attr_reader :auth_session
   PREFERENCE_KEYS = [ :home, :pagestep ]
   PREFERENCE_KEYS.each { |key|
     define_method(key) {
-      remote_call(:get_preference, key) 
+      remote_call(:get_preference, key)
     }
   }
   def initialize(session)
@@ -38,7 +38,7 @@ class KnownUser < SBSM::User
       && (entity = remote_call(:find_entity, email)) && entity.valid?)
   end
   def navigation
-    puts "BBMB::Html::Util::KnownUser navigation"
+    puts "BBMB::Html::Util::KnownUser navigation returning  [ :logout ]"
     [ :logout ]
   end
   def remote_call(method, *args, &block)

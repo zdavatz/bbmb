@@ -6,6 +6,7 @@ module BBMB
     module View
 class NavigationLink < HtmlGrid::Link
   def init
+    puts "NavigationLink unless #{@session.event} == #{@name}"
     unless(@session.event == @name)
       self.href = @lookandfeel._event_url(@name)
     end

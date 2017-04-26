@@ -7,7 +7,7 @@ require "bundler/gem_tasks"
 require 'rspec/core/rake_task'
 require 'bbmb/version'
 
-task :default => :test
+task :default => [:clobber, :test, :gem]
 
 # dependencies are now declared in bbmb.gemspec
 

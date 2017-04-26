@@ -14,7 +14,7 @@ module BBMB
     module State
 class Login < SBSM::State
   VIEW = View::Login
-  def login
+  def login; require 'pry'; binding.pry
     reconsider_permissions(@session.login)
     trigger(:home)
   rescue Yus::UnknownEntityError

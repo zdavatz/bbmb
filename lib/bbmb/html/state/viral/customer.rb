@@ -23,6 +23,7 @@ module Customer
     :search_favorites =>  State::FavoritesResult,
   }
   def _customer
+    binding.pry
     @customer ||= Model::Customer.find_by_email(@session.user.name)
   end
   def _increment_order(order)
@@ -91,6 +92,7 @@ module Customer
     _transfer(_customer.favorites)
   end
   def home
+    binding.pry
     trigger(@session.user.home || :current_order)
   end
   def increment_order
@@ -134,6 +136,7 @@ module Customer
     State::Json.new(@session, {:success => success})
   end
   def zone_navigation
+    binding.pry
     [ :current_order, :orders, :favorites ]
   end
 end

@@ -20,18 +20,22 @@ module Admin
     :orders     =>  State::Orders,
   }
   def _customer(customer_id = @session.user_input(:customer_id))
+    binding.pry
     Model::Customer.find_by_customer_id(customer_id)
   end
   def home
+    binding.pry
     trigger(@session.user.home || :customers)
   end
   def order
+    binding.pry
     if(order_id = @session.user_input(:order_id))
       customer_id, commit_id = order_id.split('-', 2)
       State::Order.new(@session, _customer(customer_id).order(commit_id))
     end
   end
   def zone_navigation
+    binding.pry
     [:customers]
   end
 end

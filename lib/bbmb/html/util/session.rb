@@ -16,15 +16,15 @@ class Session < SBSM::Session
   DEFAULT_STATE = State::Login
   EXPIRES = BBMB.config.session_timeout
   PERSISTENT_COOKIE_NAME = "bbmb-barcodereader"
-  def login
-    SBSM.info "BBMB::Html::Util::Session login "
-    @user = @app.login(user_input(:email), user_input(:pass))
+  def login; require 'pry'; binding.pry
+    SBSM.info "BBMB::Html::Util::Session login #{user_input(:email)} #{user_input(:pass)}"
+    @user = @app.auth.login(user_input(:email), user_input(:pass))
     @user.session = self if(@user.respond_to?(:session=))
     @user
   end
-  def logout
+  def logout; require 'pry'; binding.pry
     SBSM.info "BBMB::Html::Util::Session logout "
-    @app.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
+    @app.auth.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
     super
   end
 

@@ -21,6 +21,9 @@ class TestInvoicer < Minitest::Test
     File.open(keypath, 'w') { |fh| fh.puts(key) }
     YDIM::Client::CONFIG.private_key = keypath
     BBMB.config = flexmock($default_config.clone, 'config')
+    @session = flexmock('session')
+    @ydim_server = flexmock('ydim')
+    @ydim_server.should_receive(:login).and_return(@session)
     @drb_server = false
     @ydim_url = 'druby://localhost:10082'
     @ydim_config = flexmock(YDIM::Client::CONFIG, 'ydim_config')
@@ -28,6 +31,7 @@ class TestInvoicer < Minitest::Test
   end
 
   def teardown
+    # require 'pry'; binding.pry
     @drb_server.stop_service if @drb_server
     BBMB.config = $default_config.clone
     super
@@ -70,8 +74,8 @@ class TestInvoicer < Minitest::Test
     @ydim_server.should_receive(:logout).with(session)
     range = Time.local(2006,9)..Time.local(2006,10)
     @drb_server = DRb.start_service(@ydim_url, @ydim_server)
+    sleep 0.1
     result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today)
-    skip 'has error when with SEED=14031 bundle exec rake --verbose test'
     assert_equal(invoice, result)
     assert_equal("01.09.2006 - 30.09.2006", invoice.description)
     assert_equal(today, invoice.date)
@@ -91,7 +95,6 @@ class TestInvoicer < Minitest::Test
     Invoicer.send_invoice(123)
   end
   def test_run
-    skip 'has error when with SEED=14031 bundle exec rake --verbose test'
     order1 = flexmock('order1')
     order1.should_receive(:total).and_return(Util::Money.new(11.00))
     order1.should_receive(:commit_time).and_return(Time.local(2006,8,31,23,59,59))
@@ -108,7 +111,7 @@ class TestInvoicer < Minitest::Test
     BBMB.persistence.should_receive(:all).and_return([])
     BBMB.config.should_receive(:ydim_config)
     BBMB.config.should_receive(:ydim_id).and_return(7)
-    BBMB.config.should_receive(:error_recipients).and_return(BBMB::Util::TestMail::TestRecipient)
+    BBMB.config.should_receive(:error_recipients).and_return(::TestRecipient)
     BBMB.config.should_receive(:invoice_percentage).and_return(1)
     BBMB.config.should_receive(:invoice_format).and_return("%s - %s")
     BBMB.config.should_receive(:invoice_item_format).and_return("%.2f -> %i")
@@ -116,9 +119,6 @@ class TestInvoicer < Minitest::Test
     BBMB.config.should_receive(:invoice_newyear).and_return('1.1.')
     BBMB.config.should_receive(:invoice_monthly_baseline)
     BBMB.config.should_receive(:invoice_monthly_baseamount)
-    session = flexmock('session')
-    @ydim_server = flexmock('ydim')
-    @ydim_server.should_receive(:login).and_return(session)
     today = Date.new(2006,10)
     data = {
       :price    => 0.21,
@@ -127,10 +127,10 @@ class TestInvoicer < Minitest::Test
       :time     => Time.local(2006,10),
       :unit     => "1.0%",
     }
-    session.should_receive(:add_items)
+    @session.should_receive(:add_items)
     @ydim_server.should_receive(:logout)
     range = Time.local(2006,9)...Time.local(2006,10)
-    session.should_receive(:send_invoice).with(39)
+    @session.should_receive(:send_invoice).with(39)
     @drb_server = DRb.start_service(@ydim_url, @ydim_server)
     Invoicer.run(range, today)
     @drb_server.stop_service
