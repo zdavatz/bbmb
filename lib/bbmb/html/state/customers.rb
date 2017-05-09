@@ -51,7 +51,7 @@ module BBMB
 
         def page(model)
           index = @session.user_input(:index).to_i
-          step  = @session.user.pagestep || BBMB.config.pagestep
+          step  = @session.user.get_preference(:pagestep) || BBMB.config.pagestep
           page = OpenStruct.new
           page.index     = index
           page.first     = index + 1
@@ -72,10 +72,12 @@ module BBMB
         end
 
         def last_login
+          binding.pry
           @last_login ||= @session.user.last_login(email)
         end
 
         def valid
+          binding.pry
           @valid ||= @session.user.entity_valid?(email).to_s
         end
       end

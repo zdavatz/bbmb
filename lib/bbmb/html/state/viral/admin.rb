@@ -24,8 +24,8 @@ module Admin
     Model::Customer.find_by_customer_id(customer_id)
   end
   def home
-    binding.pry
-    trigger(@session.user.home || :customers)
+    home = @session.user.get_preference(:home) || :customers
+    trigger(home)
   end
   def order
     binding.pry
@@ -35,7 +35,6 @@ module Admin
     end
   end
   def zone_navigation
-    binding.pry
     [:customers]
   end
 end

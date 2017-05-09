@@ -6,14 +6,23 @@ require 'bbmb/html/util/known_user'
 require 'bbmb/html/util/session'
 require 'bbmb/html/util/validator'
 require 'bbmb/util/invoicer'
+require 'bbmb/util/invoicer'
 require 'bbmb/util/mail'
 require 'bbmb/util/updater'
 require 'bbmb/model/order' # needed to be enable to invoice later
 require 'bbmb/model/customer'
 require 'date'
 require 'sbsm/app'
+require 'bbmb/persistence/odba'
+require 'bbmb/model/customer'
+require 'bbmb/model/quota'
+require 'bbmb/model/product'
+require 'bbmb/model/promotion'
 
 module BBMB
+  def self.persistence
+    @@persistence ||= BBMB::Persistence::ODBA
+  end
   module Util
     class RackInterface < SBSM::RackInterface
       ENABLE_ADMIN = true
@@ -25,11 +34,11 @@ module BBMB
                      validator: BBMB::Html::Util::Validator)
         @auth = auth
         @app = app
-        binding.pry
         super(app: app,
               session_class: BBMB::Html::Util::Session,
               unknown_user: Html::Util::KnownUser,
               validator: validator,
+              auth: auth,
               cookie_name: 'virbac.bbmb'
               )
       end
@@ -102,6 +111,7 @@ module BBMB
           Html::Util::KnownUser.new(session)
         end
         def logout(session)
+    require 'pry'; binding.pry
           BBMB.auth.logout(session)
         rescue DRb::DRbError, RangeError, NameError
         end
@@ -196,6 +206,7 @@ module BBMB
         Html::Util::KnownUser.new(session)
       end
       def logout(session)
+        # Here we start when logging in from the home page
         BBMB.auth.logout(session)
       rescue DRb::DRbError, RangeError, NameError
       end

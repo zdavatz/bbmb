@@ -64,14 +64,14 @@ class CustomersList < HtmlGrid::List
   def customer_id(model)
     link = HtmlGrid::Link.new(:customer_id, model, @session, self)
     link.value = model.customer_id
-    link.href = @lookandfeel._event_url(:customer, 
+    link.href = @lookandfeel._event_url(:customer,
                                         {:customer_id => model.customer_id})
     link
   end
   def organisation(model)
     link = HtmlGrid::Link.new(:organisation, model, @session, self)
     link.value = model.organisation
-    link.href = @lookandfeel._event_url(:customer, 
+    link.href = @lookandfeel._event_url(:customer,
                                         {:customer_id => model.customer_id})
     link
   end
@@ -93,20 +93,26 @@ class CustomersList < HtmlGrid::List
   def active(model)
     model.value(:active)
   end
-=end 
+=end
   def last_login(model)
     if model.respond_to?(:last_login)
       model.last_login
     else
-      @session.user.last_login(model.email)
+      @session.auth_session.last_login(model.email)
     end
   end
   def valid(model)
+    # old = @session.user.entity_valid?(model.email).to_s)
     if model.respond_to?(:valid)
       @lookandfeel.lookup(model.valid)
+    elsif @session.auth_session && defined?(@session.auth_session.entity_valid?)
+      @session.auth_session.entity_valid?(model.email)
     else
       @lookandfeel.lookup(@session.user.entity_valid?(model.email).to_s)
     end
+  rescue => error
+    puts error
+    binding.pry
   end
   private
   def sort_link(header_key, matrix, component)
