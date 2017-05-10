@@ -18,8 +18,8 @@ class CustomerForm < HtmlGrid::Form
     [2,0]   =>  :customer_id,
     [0,1]   =>  :ean13,
     [2,1,0] =>  :turnover,
-    [3,1,0] =>  ' - ', 
-    [3,1,1] =>  :history, 
+    [3,1,0] =>  ' - ',
+    [3,1,1] =>  :history,
     [0,2]   =>  'contact',
     [0,3]   =>  :title,
     [2,3]   =>  :drtitle,
@@ -39,8 +39,8 @@ class CustomerForm < HtmlGrid::Form
     [0,11]  =>  :phone_mobile,
     [2,11]  =>  :fax,
     [0,12]  =>  :pass,
-    [1,12,3]=>  :change_pass, # in UserView#change_pass, the third 
-                              # number here is used as the value of 
+    [1,12,3]=>  :change_pass, # in UserView#change_pass, the third
+                              # number here is used as the value of
                               # the colspan attribute
     [1,12,4]=>  '&nbsp;',
     [1,12,5]=>  :generate_pass,
@@ -84,7 +84,7 @@ class CustomerForm < HtmlGrid::Form
     unless(set_pass?)
       if(@session.state.cleartext)
 				link = HtmlGrid::Link.new(:show_pass, model, @session, self)
-        link.href = 'javascript:' << popup(@lookandfeel._event_url(:show_pass), 
+        link.href = 'javascript:' << popup(@lookandfeel._event_url(:show_pass),
                                            'password')
         link
       else
@@ -99,7 +99,7 @@ class CustomerForm < HtmlGrid::Form
   end
   def history(model)
     link = HtmlGrid::Link.new(:history, model, @session, self)
-    link.href = @lookandfeel._event_url(:history, 
+    link.href = @lookandfeel._event_url(:history,
                                         :customer_id => model.customer_id)
     link
   end
@@ -118,7 +118,7 @@ class CustomerForm < HtmlGrid::Form
     end
   end
   def popup(url, name='popup')
-    script = "window.open('#{url}','#{name}','resizable=yes,menubar=no,height=350,width=500').focus();" 
+    script = "window.open('#{url}','#{name}','resizable=yes,menubar=no,height=350,width=500').focus();"
     if(self.respond_to?(:onload=))
       self.onload = script
     end

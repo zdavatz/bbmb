@@ -60,6 +60,7 @@ module BBMB
     'i2_100'                          => 'YWESEE',
     'load_files'                      => ['bbmb/util/csv_importer'],
     'log_pattern'                     => File.join(Dir.pwd, 'log','/%Y/%m/%d/app_log'),
+    'log_level'                       => nil,
     'mail_suppress_sending'           => false,
     'mail_confirm_body'               => nil,
     'mail_confirm_cc'                 => [],

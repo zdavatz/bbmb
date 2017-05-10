@@ -13,6 +13,8 @@ require 'bbmb/model/order' # needed to be enable to invoice later
 require 'bbmb/model/customer'
 require 'date'
 require 'sbsm/app'
+require 'sbsm/admin_server'
+require 'bbmb/config'
 require 'bbmb/persistence/odba'
 require 'bbmb/model/customer'
 require 'bbmb/model/quota'
@@ -30,15 +32,20 @@ module BBMB
       VALIDATOR = Html::Util::Validator
       attr_reader :updater, :auth
       def initialize(app: BBMB::Util::App.new,
-                     auth: DRb::DRbObject.new(nil, @config.auth_url),
                      validator: BBMB::Html::Util::Validator)
-        @auth = auth
+        [ File.join(Dir.pwd, 'etc', 'config.yml'),
+        ].each do |config_file|
+          if File.exist?(config_file)
+            puts "BBMB.config.load from #{config_file}"
+            BBMB.config.load (config_file)
+            break
+          end
+        end if false
+        @auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
         @app = app
         super(app: app,
               session_class: BBMB::Html::Util::Session,
-              unknown_user: Html::Util::KnownUser,
               validator: validator,
-              auth: auth,
               cookie_name: 'virbac.bbmb'
               )
       end
@@ -106,12 +113,11 @@ module BBMB
       rescue Exception => e
         Mail.notify_error(e)
       end
-      def login(email, pass); require 'pry'; binding.pry
+      def login(email, pass)
           session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
           Html::Util::KnownUser.new(session)
         end
         def logout(session)
-    require 'pry'; binding.pry
           BBMB.auth.logout(session)
         rescue DRb::DRbError, RangeError, NameError
         end
@@ -124,6 +130,23 @@ module BBMB
             session.rename(old_name, new_name)
           end
         end
+      end
+    end
+    class App < SBSM::App
+      def login(email, pass)
+        session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
+        Html::Util::KnownUser.new(session)
+      end
+      def logout(session)
+        # Here we start when logging in from the home page
+        BBMB.auth.logout(session)
+      rescue DRb::DRbError, RangeError, NameError
+      end
+    end
+    class Server < SBSM::AdminServer
+      def initialize(persistence, app)
+        @persistence = persistence
+        super(app: app)
       end
       def run_invoicer
         SBSM.debug("run_invoicer starting")
@@ -200,16 +223,5 @@ module BBMB
         Mail.notify_error(e)
       end
     end
-    class App < SBSM::App
-      def login(email, pass); require 'pry'; binding.pry
-        session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
-        Html::Util::KnownUser.new(session)
-      end
-      def logout(session)
-        # Here we start when logging in from the home page
-        BBMB.auth.logout(session)
-      rescue DRb::DRbError, RangeError, NameError
-      end
-    end
-      end
-      end
+  end
+end
