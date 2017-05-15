@@ -16,7 +16,6 @@ class Customer < Global
   VIEW = View::Customer
   def init
     @model = Model::Customer.find_by_customer_id(@session.user_input(:customer_id))
-    @model = Model::Customer.new(@session.user_input(:customer_id)) unless @model
   end
   def direct_argument_keys
     [:customer_id]

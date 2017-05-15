@@ -101,8 +101,7 @@ module Mail
     parts = []
     config.mail_confirm_lines.collect do |line|
       content = order.collect do |pos|
-        sprintf(line, pos.quantity.to_i,
-                pos.description, pos.price_qty.to_f, pos.total.to_f)
+        sprintf line, pos.quantity, pos.description, pos.price_qty, pos.total
       end
       parts.push date, content.join("\n"), order.total
       if vtotal = order.total_incl_vat

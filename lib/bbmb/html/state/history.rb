@@ -49,9 +49,8 @@ class History < Global
       }
     end
     def add_position(position)
-      # return unless position  && defined?(position.article_number)
       key = position.article_number
-      pos = @map.fetch(key) {
+      pos = @map.fetch(key) { 
         pos = @map.store(key, PositionFacade.new)
         @positions = @map.values
         pos
@@ -71,7 +70,7 @@ class History < Global
       @positions.sort!(*args, &block)
     end
     def turnover
-      @positions.inject(0) { |inj, position|
+      @positions.inject(0) { |inj, position| 
         position.total + inj
       }
     end

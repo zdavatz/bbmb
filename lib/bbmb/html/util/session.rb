@@ -21,12 +21,13 @@ class Session < SBSM::Session
     SERVER_NAME = uri.host
   end
   attr_reader :email, :pass, :auth_session
-  def initialize(app:,  cookie_name:, trans_handler:, validator:)
-    super
+  def initializexx(app:,  cookie_name:, trans_handler:, validator:)
+    super(app,  cookie_name, trans_handler, validator)
   end
   def login
     @email = user_input(:email)
     @password = user_input(:pass)
+    # @user.respond_to?(:session=)) is FALSE!!!!
     @user.session = self if(@user.respond_to?(:session=))
     # Before rack: @user = @app.login(user_input(:email), user_input(:pass))
     @auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
@@ -36,7 +37,10 @@ class Session < SBSM::Session
     else
       @user = SBSM::UnknownUser
     end
-    SBSM.info "BBMB::Html::Util::Session login #{user_input(:email)} #{user_input(:pass)}  #{@user.class} auth_session #{@auth_session.class}"
+    SBSM.info "BBMB::Html::Util::Session login #{user_input(:email)} #{user_input(:pass)}  #{@user.class} @auth #{@auth} auth_session #{@auth_session}"
+    pp @auth
+    pp @auth_session
+    pp @user
     @user
   end
   def logout

@@ -6,8 +6,9 @@ require 'bbmb/model/order'
 
 module BBMB
   module Model
-    MUTEX ||= Mutex.new
 class Customer
+  MUTEX = Mutex.new
+
   attr_reader :customer_id, :email, :archive, :quotas
   attr_accessor :address1, :address2, :address3, :canton, :city,
     :drtitle, :ean13, :fax, :firstname, :language, :lastname,
@@ -22,6 +23,11 @@ class Customer
     @quotas = []
   end
   def add_quota(quota)
+    unless @quotas.is_a?(Array)
+      puts "customer #{customer_id}: Fixing quotas #{@quotas} -> []"
+      @quotas = []
+      odba_store;
+    end
     @quotas.push(quota).uniq!
     quota
   end
@@ -36,7 +42,7 @@ class Customer
     ].compact
   end
   def commit_order!(commit_time = Time.now)
-    BBMB::Model::MUTEX.synchronize {
+    MUTEX.synchronize {
       id = @archive.keys.max.to_i.next
       order = current_order
       order.commit!(id, commit_time)
@@ -72,7 +78,7 @@ class Customer
     @favorites ||= Order.new(self)
   end
   def inject_order(order, commit_time = Time.now)
-    BBMB::Model::MUTEX.synchronize {
+    MUTEX.synchronize {
       id = @archive.keys.max.to_i.next
       order.commit!(id, commit_time)
       @archive.store(id, order)
@@ -92,8 +98,15 @@ class Customer
     @protected.fetch(key, false)
   end
   def turnover
-    orders.inject(0) { |memo, order| order.total + memo }
-    # TODO: orders.inject(0) { |memo, order| defined?(order.total) ? order.total + memo : memo }
+    orders.inject(0) do
+      |memo, order|
+      begin
+        order.total + memo
+      rescue => error
+        SBSM.info "turnover error for #{order.order_id} returning memo"
+        memo
+      end
+    end
   end
 end
   end

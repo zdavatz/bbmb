@@ -205,7 +205,9 @@ class Order
   end
   def total
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }
-    # TODO: @positions.inject(@shipping) { |memo, pos| defined?(pos.total) ? pos.total + memo : memo }
+  rescue
+    SBSM.info "total: rescuing by adding 0 to memo #{memo} as total for #{order_id}"
+    return memo
   end
   def total_incl_vat
     if rate = BBMB.config.vat_rate
