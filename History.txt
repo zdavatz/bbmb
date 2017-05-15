@@ -1,4 +1,4 @@
-=== 2.1.4 / 10.05.2017
+=== 2.1.4 / 15.05.2017
 
 * Admin users create new customer if it does not exist with the given customerid
 * Fixed  set new password for admin users
