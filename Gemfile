@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 gemspec
+gem 'sbsm', '>= 1.3.7'
 
 group :debugger do
 	if RUBY_VERSION.match(/^1/)

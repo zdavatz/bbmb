@@ -23,7 +23,8 @@ module Admin
     Model::Customer.find_by_customer_id(customer_id)
   end
   def home
-    trigger(@session.user.home || :customers)
+    home = @session.user.get_preference(:home) || :customers
+    trigger(home)
   end
   def order
     if(order_id = @session.user_input(:order_id))

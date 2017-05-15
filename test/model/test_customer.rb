@@ -43,7 +43,7 @@ class TestCustomer < Minitest::Test
   def test_email_writer__both_nil
     BBMB.server = flexmock('server')
     @customer.email = nil
-    assert_equal(nil, @customer.email)
+    assert_nil(@customer.email)
   end
   def test_protect
     assert_equal false, @customer.protects?(:email)

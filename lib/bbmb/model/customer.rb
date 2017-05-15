@@ -56,7 +56,6 @@ class Customer
     end
   end
   def quota(article_id)
-    
     @quotas.compact.find { |quota| quota.article_number == article_id }
   end
   def email=(email)
@@ -69,7 +68,7 @@ class Customer
       @email = email
     end
   end
-  def favorites 
+  def favorites
     @favorites ||= Order.new(self)
   end
   def inject_order(order, commit_time = Time.now)
@@ -94,6 +93,7 @@ class Customer
   end
   def turnover
     orders.inject(0) { |memo, order| order.total + memo }
+    # TODO: orders.inject(0) { |memo, order| defined?(order.total) ? order.total + memo : memo }
   end
 end
   end

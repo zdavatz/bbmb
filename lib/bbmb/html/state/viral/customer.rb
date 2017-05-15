@@ -23,7 +23,7 @@ module Customer
     :search_favorites =>  State::FavoritesResult,
   }
   def _customer
-    @customer ||= Model::Customer.find_by_email(@session.user.name)
+    @customer ||= Model::Customer.find_by_email(@session.auth_session.name)
   end
   def _increment_order(order)
     quantities = user_input(:quantity)
@@ -58,7 +58,7 @@ module Customer
       false
     else
       quantities.each { |article_number, quantity|
-        order.add(quantity.to_i, 
+        order.add(quantity.to_i,
                   Model::Product.find_by_article_number(article_number))
       }
       BBMB.persistence.save(order, _customer)
@@ -91,7 +91,8 @@ module Customer
     _transfer(_customer.favorites)
   end
   def home
-    trigger(@session.user.home || :current_order)
+    home = @session.user.get_preference(:home) || :current_order
+    trigger(home)
   end
   def increment_order
     if(_increment_order(_customer.current_order))

@@ -15,6 +15,8 @@ module BBMB
 class Login < SBSM::State
   VIEW = View::Login
   def login
+    # is called from sbsm
+    SBSM.info "BBMB::Html::State Login login #{user_input(:email)} #{user_input(:pass)}  #{@user.class}"
     reconsider_permissions(@session.login)
     trigger(:home)
   rescue Yus::UnknownEntityError
@@ -61,11 +63,13 @@ TVS/Virbac-Nr:  #{input[:customer_id]}
     }
   end
   def viral_modules(user)
-    [ 
+    [
       ['.Admin', State::Viral::Admin],
       ['.Customer', State::Viral::Customer],
     ].each { |key, mod|
+             puts "viral_modules trying #{key} #{mod}"
       if(user.allowed?("login", BBMB.config.auth_domain + key))
+           puts "Was allowed via user #{user} for #{mod}"
         yield mod
       end
     }

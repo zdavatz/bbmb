@@ -1,3 +1,4 @@
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', '..'))
 require 'test_helper'
 
 require 'htmlgrid/list'
@@ -15,8 +16,6 @@ module BBMB
         def setup
           super
           BBMB.config = flexmock('config')
-          BBMB.logger = flexmock('logger')
-          BBMB.logger.should_receive(:debug)
           BBMB.persistence = flexmock('persistence', :all => [])
           app      = flexmock('app')
           user     = flexmock('user', :pagestep => 1)

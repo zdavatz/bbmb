@@ -24,7 +24,7 @@ module TransferDat
       result.quantity = line[70,4].to_i
       result
     rescue Exception => e
-      BBMB.logger.error('transfer') { 
+      SBSM.info('transfer') {
         [e.class, e.message, e.backtrace].pretty_inspect
       }
     end

@@ -59,8 +59,8 @@ module BBMB
     'invoice_percentage'              => 0.1,
     'i2_100'                          => 'YWESEE',
     'load_files'                      => ['bbmb/util/csv_importer'],
-    'log_file'                        => STDERR,
-    'log_level'                       => 'INFO',
+    'log_pattern'                     => File.join(Dir.pwd, 'log','/%Y/%m/%d/app_log'),
+    'log_level'                       => nil,
     'mail_suppress_sending'           => false,
     'mail_confirm_body'               => nil,
     'mail_confirm_cc'                 => [],
@@ -100,6 +100,11 @@ module BBMB
     'vat_rate'                        => 2.4,
     'ydim_config'                     => nil,
     'ydim_id'                         => nil,
+    'yus_domain'                      => 'com.davaz',
+    'yus_server'                      => nil,
+    'test_user'                       => nil,
+    'test_password'                   => nil,
+    'yus_uri'                         => 'drbssl://localhost:9997',
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)

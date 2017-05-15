@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version     = BBMB::VERSION
   spec.author      = "Masaomi Hatakeyama, Zeno R.R. Davatz, Niklaus Giger"
   spec.email       = "mhatakeyama@ywesee.com, zdavatz@ywesee.com, ngiger@ywesee.com"
-  spec.description = "ywesee distributed invoice manager. A Ruby gem"
-  spec.summary     = "ywesee distributed invoice manager"
+  spec.description = "A Ruby gem for browser based orders of approved medical drugs in Switzerland"
+  spec.summary     = "browser based orders of medical drugs"
   spec.homepage    = "https://github.com/zdavatz/bbmb"
   spec.license       = "GPL-v2"
   spec.files         = `git ls-files -z`.split("\x0")
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ydbd-pg", '>= 0.5.2'
   spec.add_dependency "ydbi",    '>= 0.5.3'
   spec.add_dependency "json"
-  spec.add_dependency "sbsm"
+#  spec.add_dependency "sbsm",    '>= 1.3.5'
   spec.add_dependency "htmlgrid"
   spec.add_dependency "ydim",    '>= 0.5.1'
   spec.add_dependency "syck"

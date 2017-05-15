@@ -6,7 +6,7 @@ require 'sbsm/validator'
 module BBMB
   module Html
     module Util
-class Validator < SBSM::Validator
+class Validator < ::SBSM::Validator
   BOOLEAN = [ :accept_terms, :order_confirmation ]
   ENUMS = {
     :canton				=>	[
@@ -32,17 +32,17 @@ class Validator < SBSM::Validator
     return nil if(value.empty?)
     match = /\d{13}/.match(value.to_s)
     unless match
-      raise SBSM::InvalidDataError.new(:e_invalid_ean13, :ean13, value) 
+      raise SBSM::InvalidDataError.new(:e_invalid_ean13, :ean13, value)
     end
     values = match[0].split("")
     check = values.pop
     sum = 0
-    values.each_with_index { |val, index| 
-      modulus = ((index%2)*2)+1	
+    values.each_with_index { |val, index|
+      modulus = ((index%2)*2)+1
       sum += (modulus*val.to_i)
     }
     unless (check.to_i == (10-(sum%10))%10)
-      raise SBSM::InvalidDataError.new(:e_invalid_ean13, :ean13, value) 
+      raise SBSM::InvalidDataError.new(:e_invalid_ean13, :ean13, value)
     end
     match[0]
   end

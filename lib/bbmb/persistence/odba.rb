@@ -24,12 +24,12 @@ module BBMB
         objs.each { |obj| obj.odba_delete }
       end
       def ODBA.migrate_to_subject
-        all(Model::Product) { |product| 
-          product.migrate_to_subject && product.odba_store 
+        all(Model::Product) { |product|
+          product.migrate_to_subject && product.odba_store
         }
         all(Model::Order) { |order|
-          order.each { |position| 
-            position.migrate_to_subject && position.odba_store 
+          order.each { |position|
+            position.migrate_to_subject && position.odba_store
           }
         }
         ::ODBA.cache.create_deferred_indices(true)

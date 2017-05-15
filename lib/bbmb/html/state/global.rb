@@ -22,10 +22,12 @@ module BBMB
   module Html
     module State
 class Global < SBSM::State
-  def initialize(first, second)
-    super(first, second)
+  def initialize(session, model)
+    SBSM.info "BBMB::Html::State Global session #{session.class} model #{model.class}"
+    super(session, model)
   end
   def logout
+    SBSM.info "BBMB::Html::State Global logout"
     @session.logout
     State::Login.new(@session, nil)
   end

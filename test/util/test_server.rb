@@ -2,8 +2,8 @@
 # encoding: utf-8
 $: << File.expand_path('..', File.dirname(__FILE__))
 
-require 'test_helper'
 require 'bbmb/util/server'
+require 'test_helper'
 
 module BBMB
   module Util
@@ -13,7 +13,7 @@ class TestServer < Minitest::Test
   def setup
     super
     BBMB.config = $default_config.clone
-    @server = Server.new
+    @server = BBMB::Util::RackInterface.new
     Model::Customer.instances.clear
     Model::Product.instances.clear
   end
@@ -133,8 +133,6 @@ class TestServer < Minitest::Test
     @server.rename_user('test@bbmb.ch', 'test@bbmb.ch')
   end
   def test_run_invoicer
-    BBMB.logger = flexmock('logger')
-    BBMB.logger.should_ignore_missing
     error_mock = flexmock(RuntimeError.new, 'error')
     flexstub(Mail).should_receive(:notify_error).at_least.once.and_return { |error|
       assert_instance_of(RuntimeError, error_mock)
@@ -159,8 +157,6 @@ class TestServer < Minitest::Test
   def test_run_updater
     BBMB.config = flexmock('config')
     BBMB.config.should_receive(:update_hour).and_return(0)
-    BBMB.logger = flexmock('logger')
-    BBMB.logger.should_ignore_missing
     flexstub(Mail).should_receive(:notify_error).times(1).and_return { |error|
       assert_instance_of(RuntimeError, error)
     }
