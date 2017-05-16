@@ -1,3 +1,8 @@
+=== 2.1.5 / 16.05.2017
+
+* Improved fix for orders with unreachable ODBA-IDs for positions
+* Made some tests work again. Still absent are all watir based tests
+
 === 2.1.4 / 15.05.2017
 
 * Admin users create new customer if it does not exist with the given customerid
