@@ -1,3 +1,9 @@
+=== 2.1.6 / 16.05.2017
+
+* Fixed sorting via last_login when logged in as admin
+* Nicer tracing on how updater/invoicer start
+* Removed some dead code and debug statements
+
 === 2.1.5 / 16.05.2017
 
 * Improved fix for orders with unreachable ODBA-IDs for positions
