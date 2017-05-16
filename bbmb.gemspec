@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ydbd-pg", '>= 0.5.2'
   spec.add_dependency "ydbi",    '>= 0.5.3'
   spec.add_dependency "json"
-#  spec.add_dependency "sbsm",    '>= 1.3.5'
+  spec.add_dependency "sbsm",    '>= 1.3.8'
   spec.add_dependency "htmlgrid"
   spec.add_dependency "ydim",    '>= 0.5.1'
   spec.add_dependency "syck"

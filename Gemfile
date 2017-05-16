@@ -1,7 +1,5 @@
 source 'https://rubygems.org'
 gemspec
-gem 'sbsm', :path => '../sbsm'
-gem 'ydim', :path => '../ydim'
 
 group :debugger do
 	if RUBY_VERSION.match(/^1/)
