@@ -44,7 +44,14 @@ module BBMB
         @app.inject_order(customer_id, products, infos, opts)
       end
       def rename_user(old_name, new_name)
-        @app.rename_user(old_name, new_name)
+        return if old_name.eql?(new_name)
+        @app.auth.autosession(BBMB.config.auth_domain) do |session|
+          if(old_name.nil?)
+            session.create_entity(new_name)
+          else
+            session.rename(old_name, new_name)
+          end
+        end
       end
       def run_invoicer
         @invoicer ||= Thread.new {
@@ -200,16 +207,5 @@ module BBMB
         end
       end
     end
-    class App < SBSM::App
-      def login(email, pass)
-        session = BBMB.auth.login(email, pass, BBMB.config.auth_domain)
-        Html::Util::KnownUser.new(session)
-      end
-      def logout(session)
-        # Here we start when logging in from the home page
-        BBMB.auth.logout(session)
-      rescue DRb::DRbError, RangeError, NameError
-      end
-    end
-      end
-      end
+  end
+end
