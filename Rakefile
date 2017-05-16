@@ -27,7 +27,7 @@ dir = File.dirname(__FILE__)
 Rake::TestTask.new do |t|
   t.libs << 'test'
   t.test_files = Dir.glob("#{dir}/test/model/test_*.rb") +
-       Dir.glob("#{dir}/test/html/state/test_*.rb")
+       Dir.glob("#{dir}/test/html/state/test_*.rb") +
        Dir.glob("#{dir}/test/util/test_*.rb")
 
   t.warning = false
