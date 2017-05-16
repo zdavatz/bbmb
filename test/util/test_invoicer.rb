@@ -76,7 +76,7 @@ class TestInvoicer < Minitest::Test
     range = Time.local(2006,9)..Time.local(2006,10)
     @drb_server = DRb.start_service(@ydim_url, @ydim_server)
     sleep 0.5
-    result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today.to_time + 3600)
+    result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today)
     if result.is_a?(FlexMock::Undefined)
       msg = "Skipping this sometimes failing test "
       puts msg
