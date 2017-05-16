@@ -204,10 +204,16 @@ class Order
     twin
   end
   def total
+    @positions.delete_if do |pos|
+      begin
+        pos.total
+        false
+      rescue => error
+        SBSM.info "Deleting an invalid position from order #{order_id}"
+        true
+      end
+    end
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }
-  rescue
-    SBSM.info "total: rescuing by adding 0 to memo #{memo} as total for #{order_id}"
-    return memo
   end
   def total_incl_vat
     if rate = BBMB.config.vat_rate
