@@ -72,7 +72,7 @@ module BBMB
         end
 
         def last_login
-          @last_login ||= @session.user.last_login(email)
+          @last_login ||= @session.auth_session.last_login(email)
         end
 
         def valid
