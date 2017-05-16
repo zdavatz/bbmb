@@ -26,11 +26,11 @@ module BBMB
   module Util
     class Server
       def initialize(persistence, app)
-        puts "Self #{self.class} initialize"
         @persistence = persistence
         @app = app
       end
       def invoice(range)
+        SBSM.info "invoice started at #{Time.now} for #{range}"
         Invoicer.run(range)
       rescue Exception => e
         Mail.notify_error(e)
@@ -47,7 +47,6 @@ module BBMB
         @app.rename_user(old_name, new_name)
       end
       def run_invoicer
-        SBSM.debug("run_invoicer starting")
         @invoicer ||= Thread.new {
           Thread.current.abort_on_exception = true
           loop {
@@ -57,19 +56,16 @@ module BBMB
             now = Time.now
             at = Time.local(day.year, day.month)
             secs = at - now
-            SBSM.debug("invoicer") {
-              "sleeping %.2f seconds" % secs
-            }
+            msg = "run_invoicer sleeping %.2f seconds (or more than %d days)" % [ secs, secs/3600/24 ]
+            SBSM.debug(msg)
             sleep(secs)
-            SBSM.debug("invoice starting")
             invoice(start...at)
-            SBSM.debug("invoice finished")
           }
         }
       end
       def run_updater
         run_only_once_at_startup = false
-        SBSM.debug("updater") { "run_updater run_only_once_at_startup? #{run_only_once_at_startup} " }
+        SBSM.debug("run_only_once_at_startup? #{run_only_once_at_startup} hour: #{BBMB.config.update_hour}")
         @updater ||= Thread.new {
           loop {
             day = Date.today
@@ -79,9 +75,8 @@ module BBMB
             end
             at = Time.local(day.year, day.month, day.day, BBMB.config.update_hour)
             secs = at - now
-            SBSM.debug("updater") { "sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs  }
+            SBSM.debug("updater sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs)
             if run_only_once_at_startup then puts "Skipped sleeping #{secs}" else sleep(secs) end
-
             SBSM.debug("update starting")
             update
             SBSM.debug("update finished")
@@ -101,13 +96,12 @@ module BBMB
         [ File.join(Dir.pwd, 'etc', 'config.yml'),
         ].each do |config_file|
           if File.exist?(config_file)
-            puts "BBMB.config.load from #{config_file}"
+            SBSM.info "BBMB.config.load from #{config_file}"
             BBMB.config.load (config_file)
             break
           end
         end
         @auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
-        puts "@auth is #{@auth} from #{self.class}"
         @app = app
         super(app: app,
               session_class: BBMB::Html::Util::Session,
