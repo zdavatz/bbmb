@@ -4,6 +4,7 @@ $: << File.expand_path('..', File.dirname(__FILE__))
 
 require 'test_helper'
 require 'stringio'
+require 'sbsm/logger'
 require 'bbmb/util/transfer_dat'
 
 module BBMB
