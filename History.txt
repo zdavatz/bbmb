@@ -1,3 +1,7 @@
+=== 2.2.0 / 17.05.2017
+
+* Refuse empty e-mail adress with e_email_required
+
 === 2.1.9 / 17.05.2017
 
 * Trying to set a customer to an already existing e-mail-address fails correctly
