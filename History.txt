@@ -1,3 +1,8 @@
+=== 2.1.9 / 17.05.2017
+
+* Trying to set a customer to an already existing e-mail-address fails correctly
+  (Pending: When no customer with the given e-mail exists, allow it)
+
 === 2.1.8 / 17.05.2017
 
 * Fix logging the number of imported items
