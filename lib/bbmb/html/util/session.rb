@@ -38,7 +38,7 @@ class Session < SBSM::Session
   def logout
     SBSM.info "BBMB::Html::Util::Session logout @auth_session #{@auth_session.class}"
     $stdout.sync = true
-    @app.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
+    BBMB.auth.logout(@user.auth_session) if(@user.respond_to?(:auth_session))
     super
   end
 
