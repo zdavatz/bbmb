@@ -1,3 +1,8 @@
+=== 2.2.1 / 17.05.2017
+
+* Fix logout. Uses app
+* Allow changing the e-mail address when old is nil and new one is not used by any other customer
+
 === 2.2.0 / 17.05.2017
 
 * Refuse empty e-mail adress with e_email_required
