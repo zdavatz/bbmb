@@ -21,26 +21,18 @@ class Session < SBSM::Session
     SERVER_NAME = uri.host
   end
   attr_reader :email, :pass, :auth_session
-  def initializexx(app:,  cookie_name:, trans_handler:, validator:)
-    super(app,  cookie_name, trans_handler, validator)
-  end
   def login
     @email = user_input(:email)
     @password = user_input(:pass)
-    # @user.respond_to?(:session=)) is FALSE!!!!
     @user.session = self if(@user.respond_to?(:session=))
     # Before rack: @user = @app.login(user_input(:email), user_input(:pass))
-    @auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
-    @auth_session = @auth.login(user_input(:email), user_input(:pass), BBMB.config.auth_domain) # logs in claude meier without problem, but not admin
+    @auth_session = BBMB.auth.login(user_input(:email), user_input(:pass), BBMB.config.auth_domain) # logs in claude meier without problem, but not admin
     if @auth_session.valid?
       @user = BBMB::Html::Util::KnownUser.new(self) # TODO:Should we set it already in the initialize method?
     else
       @user = SBSM::UnknownUser
     end
-    SBSM.info "BBMB::Html::Util::Session login #{user_input(:email)} #{user_input(:pass)}  #{@user.class} @auth #{@auth} auth_session #{@auth_session}"
-    pp @auth
-    pp @auth_session
-    pp @user
+    SBSM.info "BBMB::Html::Util::Session login #{user_input(:email)} #{user_input(:pass)}  #{@user.class} BBMB.auth #{BBMB.auth} auth_session #{@auth_session}"
     @user
   end
   def logout
