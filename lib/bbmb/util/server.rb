@@ -18,16 +18,18 @@ require 'bbmb/model/customer'
 require 'bbmb/model/quota'
 require 'bbmb/model/product'
 require 'bbmb/model/promotion'
+require 'sbsm/admin_server'
 
 module BBMB
   def self.persistence
     @@persistence ||= BBMB::Persistence::ODBA
   end
   module Util
-    class Server
+    class Server < SBSM::AdminServer
       def initialize(persistence, app)
         @persistence = persistence
         @app = app
+        super(app: app)
       end
       def invoice(range)
         SBSM.info "invoice started at #{Time.now} for #{range}"
