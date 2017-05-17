@@ -43,11 +43,16 @@ module BBMB
       def inject_order(customer_id, products, infos, opts={})
         @app.inject_order(customer_id, products, infos, opts)
       end
-      def rename_user(old_name, new_name)
+      def rename_user(customer_id, old_name, new_name)
         return if old_name.eql?(new_name)
         BBMB.auth.autosession(BBMB.config.auth_domain) do |session|
-          if(old_name.nil?)
-            session.create_entity(new_name)
+          if (old_name.nil?)
+            begin
+              session.create_entity(new_name)
+            rescue => error
+              raise error if Model::Customer.odba_extent.find {|x| x.email && x.email.index(new_name) }
+              SBSM.info("Skip session.create_entity for customer #{customer_id} as we found no customer with e-mail #{new_name}")
+            end
           else
             session.rename(old_name, new_name)
           end

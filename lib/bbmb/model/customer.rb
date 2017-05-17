@@ -70,7 +70,7 @@ class Customer
       return if @email.eql?(email)
       email = email.encode('UTF-8')
       ## notify the server of this change, as it affects the user-data
-      BBMB.server.rename_user(@email, email)
+      BBMB.server.rename_user(customer_id, @email, email)
       @email = email
     end
   end
