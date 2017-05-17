@@ -89,6 +89,10 @@ class Customer < Global
   end
   def update_user(input)
     email = input.delete(:email)
+    unless email
+      error = create_error(:e_email_required, :email, @model.email)
+      return
+    end
     @model.email = email
     @model.protect!(:email)
     if(passhash = input.delete(:confirm_pass))
