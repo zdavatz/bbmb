@@ -34,11 +34,9 @@ module BBMB
           BBMB.persistence = BBMB::Persistence::ODBA
         end
         BBMB.auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
-        puts "installed BBMB.auth for #{BBMB.config.auth_url}"
         BBMB.server = BBMB::Util::Server.new(BBMB.persistence, self)
         BBMB.server.extend(DRbUndumped)
         BBMB.server = BBMB.server
-        puts "installed BBMB.server #{BBMB.server}"
         if(BBMB.config.update?)
           BBMB.server.run_updater
         end
@@ -50,16 +48,16 @@ module BBMB
         DRb.start_service(url, BBMB.server)
         $SAFE = 1
         $0 = BBMB.config.name
-        SBSM.logger.info('start') { sprintf("starting bbmb-server on %s", url) }
+        SBSM.logger.info("started bbmb-server on #{url}")
         DRb.thread.join
         SBSM.logger.info('finished') { sprintf("starting bbmb-server on %s", url) }
       rescue Exception => error
-        SBSM.logger.error('fatal') { error }
+        SBSM.logger.error('fatal')
         raise
       end
       def initialize
           super
-          puts "Starting Rack-Service #{self.class} and service #{BBMB.config.server_url}"
+          SBSM.logger.info "Starting Rack-Service #{self.class} and service #{BBMB.config.server_url}"
           Thread.new {
               start_service
           }
