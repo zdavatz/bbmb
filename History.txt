@@ -1,3 +1,8 @@
+=== 2.2.1 / upcoming
+
+* Remove bin/bbmbd. It is replaced by config.ru to start the rack process
+* Made bin/bbmb_admin work again
+
 === 2.2.1 / 17.05.2017
 
 * Fix logout. Uses app
