@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Util::Server -- de.bbmb.org -- 01.09.2006 -- hwyss@ywesee.com
-
 require 'bbmb/config'
+require 'ydim/invoice'
 require 'bbmb/html/util/known_user'
 require 'bbmb/html/util/session'
 require 'bbmb/html/util/validator'
