@@ -17,7 +17,7 @@ class ShowPassInnerComposite < HtmlGrid::Composite
 end
 class Address < HtmlGrid::Composite
   COMPONENTS = {
-    [0,0] => :to_str 
+    [0,0] => :to_str
   }
 end
 class ShowPassComposite < HtmlGrid::DivComposite
@@ -33,9 +33,6 @@ class ShowPassComposite < HtmlGrid::DivComposite
   }
   CSS_MAP = ['address', 'address']
   def admin_address(model)
-    #div = HtmlGrid::Div.new(model, @session, self)
-    #div.css_id = 'admin-address'
-    #div.value = 
     BBMB.config.admin_address.gsub("\n", "<br>")
   end
   def customer_address(model)
@@ -48,11 +45,10 @@ class ShowPass < Template
     [0,1]	 =>	ShowPassComposite,
   }
   SYMBOL_MAP = {
-    :logo => HtmlGrid::Image, 
+    :logo => HtmlGrid::Image,
   }
   def init
     super
-    self.onload = 'window.opener.location.reload();'
   end
 end
     end
