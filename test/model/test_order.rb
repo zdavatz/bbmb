@@ -15,7 +15,7 @@ class TestOrder <  Minitest::Test
     BBMB.config = $default_config.clone
     @customer = flexmock("customer")
     @customer.should_receive(:quota)
-    @customer.should_receive(:customer_id).and_return('customer_id')
+    @customer.should_receive(:customer_id).and_return(7)
     @order = Order.new(@customer)
     @position = flexmock('position')
     @position.should_receive(:pcode).and_return(nil).by_default
