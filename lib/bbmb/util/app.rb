@@ -62,6 +62,33 @@ module BBMB
               start_service
           }
       end
+      def send_order order, customer
+        SBSM.logger.info "send_order #{order.order_id} and customer #{customer.customer_id}"
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::TargetDir.send_order(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::Mail.send_order(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
+        begin
+          Timeout.timeout(300) {
+            BBMB::Util::Mail.send_confirmation(order)
+          }
+        rescue StandardError => err
+          err.message << " (Email: #{customer.email} - Customer-Id: #{customer.customer_id})"
+          BBMB::Util::Mail.notify_error(err)
+        end
+      end
     end
   end
 end

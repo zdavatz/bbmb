@@ -44,8 +44,9 @@ class CurrentOrder < Global
     unless error?
       _customer.commit_order!
       order = @model
+      SBSM.info("committing #{_customer.customer_id} #{order.order_id} #{caller[0..10].join("\n")}")
       @session.async {
-        @session.send_order order, _customer
+        @session.app.send_order order, _customer
       }
       @model = _customer.current_order
       Info.new(@session, :message => :order_sent,
