@@ -12,6 +12,8 @@ class Favorites < Global
   VIEW = View::Favorites
   def init
     @model = _customer.favorites
+    @model.positions.delete_if { |position| position.product.nil? }
+    @model
   end
 end
     end
