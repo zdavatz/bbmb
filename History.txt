@@ -1,3 +1,7 @@
+=== 2.2.4 / 22.05.2017
+
+* Fix send_order
+
 === 2.2.3 / 22.05.2017
 
 * Delete in Schnellbestellung all positions with an invalid product
