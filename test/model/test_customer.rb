@@ -25,17 +25,14 @@ class TestCustomer < Minitest::Test
   def test_email_writer
     BBMB.server = flexmock('server')
     @customer.instance_variable_set('@email', 'old@bbmb.ch')
-    BBMB.server.should_receive(:rename_user).and_return { |old, new|
-      assert_equal('old@bbmb.ch', old)
-      assert_equal('test@bbmb.ch', new)
-    }
+    BBMB.server.should_receive(:rename_user).once
     @customer.email = 'test@bbmb.ch'
     assert_equal('test@bbmb.ch', @customer.email)
   end
   def test_email_writer__nil
     BBMB.server = flexmock('server')
     @customer.instance_variable_set('@email', 'old@bbmb.ch')
-    assert_raises(RuntimeError) { 
+    assert_raises(RuntimeError) {
       @customer.email = nil
     }
     assert_equal('old@bbmb.ch', @customer.email)

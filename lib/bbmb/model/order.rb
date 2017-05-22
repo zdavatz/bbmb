@@ -259,7 +259,7 @@ class Order
         pos.total
         false
       rescue => error
-        SBSM.info "Deleting an invalid position from order #{order_id}"
+        SBSM.info "Deleting an invalid position from order #{order_id}" if defined?(SBSM)
         true
       end
     end

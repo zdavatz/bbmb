@@ -15,6 +15,7 @@ class TestOrder <  Minitest::Test
     BBMB.config = $default_config.clone
     @customer = flexmock("customer")
     @customer.should_receive(:quota)
+    @customer.should_receive(:customer_id).and_return('customer_id')
     @order = Order.new(@customer)
     @position = flexmock('position')
     @position.should_receive(:pcode).and_return(nil).by_default
@@ -65,7 +66,7 @@ class TestOrder <  Minitest::Test
     @order.comment = 'Comment'
     assert_equal({:comment => 'Comment'}, @order.additional_info)
     @order.reference = '12345'
-    assert_equal({:comment => 'Comment', :reference => '12345'}, 
+    assert_equal({:comment => 'Comment', :reference => '12345'},
                  @order.additional_info)
     @order.comment = nil
     assert_equal({:reference => '12345'}, @order.additional_info)
