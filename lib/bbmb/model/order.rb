@@ -87,6 +87,7 @@ class Order
     info
   end
   def calculate_effective_prices
+    delete_invalid_positions
     @positions.each { |pos|
       pos.price_effective = price_effective(pos)
     }
@@ -121,6 +122,7 @@ class Order
     add(quantity, product)
   end
   def item_count
+    delete_invalid_positions
     @positions.inject(0) { |memo, pos| memo + pos.quantity }
   end
   def i2_body
@@ -204,15 +206,7 @@ class Order
     twin
   end
   def total
-    @positions.delete_if do |pos|
-      begin
-        pos.total
-        false
-      rescue => error
-        SBSM.info "Deleting an invalid position from order #{order_id}"
-        true
-      end
-    end
+    delete_invalid_positions
     @positions.inject(@shipping) { |memo, pos| pos.total + memo }
   end
   def total_incl_vat
@@ -258,6 +252,17 @@ class Order
   private
   def _formatted_comment(replacement=';')
     @comment.to_s.gsub(/[\r\n]+/, replacement)[0,60] if @comment
+  end
+  def delete_invalid_positions
+    @positions.delete_if do |pos|
+      begin
+        pos.total
+        false
+      rescue => error
+        SBSM.info "Deleting an invalid position from order #{order_id}"
+        true
+      end
+    end
   end
 end
   end
