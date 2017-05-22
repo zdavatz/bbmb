@@ -18,6 +18,10 @@ module BBMB
           __old_current_order__
           odba_store
         end
+        if @current_order.is_a?(NilClass)
+          @current_order = BBMB::Model::Order.new(self)
+          odba_store
+        end
         @current_order
       end
       alias :__old_commit_order__ :commit_order!
