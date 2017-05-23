@@ -1,3 +1,8 @@
+=== 2.2.5 / 23.05.2017
+
+* Avoid eternal loop when displaying generated password
+* Made unit tests work again on Travis-CI
+
 === 2.2.4 / 22.05.2017
 
 * Fix send_order
