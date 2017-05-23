@@ -13,7 +13,7 @@ require 'bbmb/model/order' # needed to be enable to invoice later
 require 'bbmb/model/customer'
 require 'date'
 require 'sbsm/app'
-require 'bbmb/persistence/odba'
+require 'bbmb/persistence/odba' unless BBMB.config.persistence.eql?('none')
 require 'bbmb/model/customer'
 require 'bbmb/model/quota'
 require 'bbmb/model/product'

@@ -1,5 +1,6 @@
 === 2.2.5 / 23.05.2017
 
+* Don't require persistence/odba if config.persitence == none
 * Avoid eternal loop when displaying generated password
 * Made unit tests work again on Travis-CI
 
