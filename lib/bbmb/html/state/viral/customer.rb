@@ -40,8 +40,9 @@ module Customer
     end
   end
   def _transfer(order)
-    if(io = user_input(:file_chooser))
-      BBMB::Util::TransferDat.parse(io) { |info|
+    if(io = user_input(:file_chooser) && (file = user_input(:file_chooser)[:tempfile]))
+      file = user_input(:file_chooser)[:tempfile]
+      BBMB::Util::TransferDat.parse( open(file.path)) { |info|
         if(product = Model::Product.find_by_pcode(info.pcode) \
            || Model::Product.find_by_ean13(info.ean13))
           order.increment(info.quantity, product)
