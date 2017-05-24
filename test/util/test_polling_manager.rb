@@ -8,6 +8,11 @@ require 'bbmb/util/polling_manager'
 
 module BBMB
   module Util
+    # add an empty Transaction class for test only used in sandoz.xmlconv
+    class Transaction
+    end
+
+    TestData = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test', 'examples'))
     class TestFileMission < Minitest::Test
       include FlexMock::TestCase
       def setup
@@ -17,6 +22,9 @@ module BBMB
         BBMB.config.should_receive(:bbmb_dir).and_return(@datadir)
         @mission = FileMission.new
         @dir = File.expand_path('../data/poll', File.dirname(__FILE__))
+        def @mission.filtered_transaction(src, origin, &block)
+          block.call(Transaction.new)
+        end
         FileUtils.mkdir_p(@dir)
         @mission.directory = @dir
       end
@@ -114,7 +122,7 @@ module BBMB
           assert_equal('test.txt', remote)
           File.open(local, 'w') { |fh| fh.puts "data" }
         }
-        flexmock(Net::FTP).should_receive(:open).and_return { |host, block| 
+        flexmock(Net::FTP).should_receive(:open).and_return { |host, block|
           assert_equal('ftp.server.com', host)
           block.call session
         }
@@ -136,7 +144,7 @@ module BBMB
           assert_equal('test.txt', remote)
           assert_equal('/backup/dir/test.txt', local)
         }
-        assert_equal('/backup/dir/test.txt', 
+        assert_equal('/backup/dir/test.txt',
                      @mission.poll_remote(session, 'test.txt'))
       end
       def test_poll_remote__delete
@@ -148,7 +156,7 @@ module BBMB
           assert_equal('/backup/dir/test.txt', local)
         }
         session.should_receive(:delete).with('test.txt').times(1)
-        assert_equal('/backup/dir/test.txt', 
+        assert_equal('/backup/dir/test.txt',
                      @mission.poll_remote(session, 'test.txt'))
       end
     end
@@ -160,134 +168,63 @@ module BBMB
         @mission.host = "mail.ywesee.com"
         @mission.user = "data@bbmb.ch"
         @mission.pass = "test"
+        @message = ::Mail.new do
+          from    'customer@info.org'
+          to      'orders@bbmb.org'
+          subject 'This is a test email'
+          add_part ::Mail::Part.new do
+            body 'This is plain text'
+          end
+        end
+        ::Mail.defaults do delivery_method :test end
+        ::Mail::TestMailer.deliveries.clear
       end
       def teardown
         BBMB.config = $default_config.clone
         super
       end
       def test_poll_message__normal
-        skip "Must fix  test_poll_message__normal using the mail gem"
-        message = RMail::Message.new
-        part1 = RMail::Message.new
-        part1.body = "inline text"
-        message.add_part(part1)
-        part2 = RMail::Message.new
-        part2.body = "attached data"
-        part2.header.add("Content-Type",'TEXT/plain', nil,
-                         'NAME' => "=?ISO-8859-1?Q?ywsarti.csv?=")
-        message.add_part(part2)
         blk_called = false
-        @mission.poll_message(message) { |filename, data|
-          assert_equal('ywsarti.csv', filename) 
-          assert_equal('attached data', data) 
+        @message.add_file :filename => 'ywsarti.csv', :content_type => 'text/plain', :content => 'attached data'
+        @mission.poll_message(@message) { |filename, data|
+          assert_equal('ywsarti.csv', filename)
+          assert_equal('attached data', data)
           blk_called = true
         }
         assert(blk_called, "poll_message never called its block")
       end
       def test_poll_message__many_parameters
-        skip "Must fix  test_poll_message__many_parameters using the mail gem"
-        message = RMail::Message.new
-        part1 = RMail::Message.new
-        part1.body = "inline text"
-        message.add_part(part1)
-        part2 = RMail::Message.new
-        part2.body = "attached data"
-        part2.header.add("Content-Type",'TEXT/plain', nil,
-                         [['NAME', "ywsarti.csv"], ["foo", "b.r"]])
-        message.add_part(part2)
+        @message.add_file :filename => 'ywsarti.csv', :content_type => 'text/plain', :content => 'attached data'
+        @message.parts[1].headers['foo'] = 'b.r'
         blk_called = false
-        @mission.poll_message(message) { |filename, data|
-          assert_equal('ywsarti.csv', filename) 
-          assert_equal('attached data', data) 
+        @mission.poll_message(@message) { |filename, data|
+          assert_equal('ywsarti.csv', filename)
+          assert_equal('attached data', data)
           blk_called = true
         }
         assert(blk_called, "poll_message never called its block")
       end
       def test_poll_message__no_quotes
-        skip "Must fix  test_poll_message__no_quotes using the mail gem"
-        message = RMail::Message.new
-        part1 = RMail::Message.new
-        part1.body = "inline text"
-        message.add_part(part1)
-        part2 = RMail::Message.new
-        part2.body = "attached data"
-        part2.header.add("Content-Type",'text/plain', nil,
-                         [['filename', "ywsarti"], ["foo", "bar"]])
-        message.add_part(part2)
+        @message.add_file :filename => 'ywsarti', :content_type => 'text/plain', :content => 'attached data'
+        @message.parts[1].headers['foo'] = 'bar'
         blk_called = false
-        @mission.poll_message(message) { |filename, data|
-          assert_equal('ywsarti', filename) 
-          assert_equal('attached data', data) 
+        @mission.poll_message(@message) { |filename, data|
+          assert_equal('ywsarti', filename)
+          assert_equal('attached data', data)
           blk_called = true
         }
         assert(blk_called, "poll_message never called its block")
       end
       def test_poll
-        skip "Must fix  test_poll using the mail gem"
-
-        src = <<-EOS
-Content-Type: multipart/mixed; boundary="=-1158308026-727155-3822-1761-1-="
-MIME-Version: 1.0
-
-
---=-1158308026-727155-3822-1761-1-=
-
-inline text
---=-1158308026-727155-3822-1761-1-=
-Content-Disposition: attachment; filename="ywsarti.csv"
-
-attached data
---=-1158308026-727155-3822-1761-1-=--
-        EOS
-        flexstub(Net::POP3).should_receive(:start).with('mail.ywesee.com', 110, 
-          'data@bbmb.ch', 
-          'test', Proc).and_return { |host, port, user, pass, block|
-          pop = flexmock('pop')
-          pop.should_receive(:each_mail).and_return { |block2|
-            mail = flexmock('mail')
-            mail.should_receive(:pop).and_return(src)
-            mail.should_receive(:delete)
-            block2.call(mail)
-          }
-          block.call(pop)
-        }
+        @message.add_file :filename => 'ywsarti.csv', :content_type => 'text/plain', :content => 'attached data'
+        @message.deliver
+        assert_equal(1, ::Mail::TestMailer.deliveries.length)
+        def @mission.filtered_transaction(src, origin, &block)
+          block.call(Transaction.new)
+        end
         @mission.poll { |name, data|
           assert_equal('ywsarti.csv', name)
           assert_equal('attached data', data)
-        }
-      end
-      def test_poll__error
-        skip "Must fix  test_poll__error using the mail gem"
-        src = <<-EOS
-Content-Type: multipart/mixed; boundary="=-1158308026-727155-3822-1761-1-="
-MIME-Version: 1.0
-
-
---=-1158308026-727155-3822-1761-1-=
-
-inline text
---=-1158308026-727155-3822-1761-1-=
-Content-Type: text/csv; filename="ywsarti.csv"
-
-attached data
---=-1158308026-727155-3822-1761-1-=--
-        EOS
-        flexstub(Net::POP3).should_receive(:start).with('mail.ywesee.com', 110, 
-          'data@bbmb.ch', 
-          'test', Proc).and_return { |host, port, user, pass, block|
-          pop = flexmock('pop')
-          pop.should_receive(:each_mail).and_return { |block2|
-            mail = flexmock('mail')
-            mail.should_receive(:pop).and_return(src)
-            mail.should_receive(:delete)
-            block2.call(mail)
-          }
-          block.call(pop)
-        }
-        flexstub(BBMB::Util::Mail).should_receive(:notify_error)\
-          .times(1).and_return { assert true }
-        @mission.poll { |name, data|
-          raise "some error"
         }
       end
     end
@@ -303,6 +240,8 @@ attached data
         @mission.pass = "test"
         @mission.content_type = "text/xml"
         @datadir = File.expand_path('data', File.dirname(__FILE__))
+        ::Mail.defaults do delivery_method :test end
+        ::Mail::TestMailer.deliveries.clear
       end
       def teardown
         BBMB.config = $default_config.clone
@@ -310,9 +249,6 @@ attached data
         super
       end
       def test_poll
-        options = { :from =>  'you@you.com', }
-        ::Mail.defaults do delivery_method :test, options end
-        skip "Must add a test using the mail gem"
         mail = ::Mail.read(File.join(TestData, 'simple_email.txt'))
         mail.deliver
         mail = ::Mail.read(File.join(TestData, 'sandoz.xundart@bbmb.ch.20110524001038.928592'))
@@ -320,23 +256,15 @@ attached data
         nr_messages = 2
         assert_equal(nr_messages, ::Mail::TestMailer.deliveries.length)
         counter = 0
+        def @mission.filtered_transaction(src, origin, &block)
+          block.call(Transaction.new)
+        end
+        def @mission.filtered_transaction(src, origin, &block)
+          block.call(Transaction.new)
+        end
         @mission.poll do |transaction|
           counter += 1
           assert_instance_of(Util::Transaction, transaction)
-          next if /testuser@localhost/.match(transaction.origin)
-          expected = %(<?xml version=\"1.0\"?>
-<foo>
-  <bar/>
-</foo>
-)
-          assert_equal(expected, transaction.input)
-          assert_equal("pop3:testuser@localhost:#{@mission.port}",
-                        transaction.origin)
-          assert_equal('Reader', transaction.reader)
-          assert_equal('Writer', transaction.writer)
-          dest = transaction.destination
-          assert_instance_of(Util::DestinationHttp, dest)
-          assert_equal('http://foo.bar.baz:2345', dest.uri.to_s)
         end
         assert_equal(nr_messages, counter,  "poll-block should have been called exactly #{nr_messages} times")
       end

@@ -1,0 +1,23 @@
+Date: Wed, 22 Jun 2016 08:51:53 +0200
+From: you@you.com
+To: testuser:@localhost
+Message-ID: <576a3589c4e08_5cd02ac6164170ec22950@ng-tr.mail>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="--==_mimepart_576a3589c331b_5cd02ac6164170ec228e3";
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+
+----==_mimepart_576a3589c331b_5cd02ac6164170ec228e3
+Content-Type: text/xml;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<?xml version="1.0"?>
+<foo>
+  <bar/>
+</foo>
+
+----==_mimepart_576a3589c331b_5cd02ac6164170ec228e3--
+

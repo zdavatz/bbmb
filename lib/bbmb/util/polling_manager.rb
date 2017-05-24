@@ -19,7 +19,6 @@ class FileMission
     res = Dir.glob(path).collect { |entry|
       File.expand_path(entry, @directory)
     }.compact
-    puts res
     res
   end
   def poll(&block)
@@ -30,6 +29,8 @@ class FileMission
     }
   end
   def poll_path(path, &block)
+    @backup_dir = BBMB.config.backup_dir if BBMB.config.respond_to?(:backup_dir)
+    @backup_dir ||= Dir.tmpdir
     File.open(path) { |io|
       block.call(File.basename(path), io)
     }
@@ -52,8 +53,10 @@ class FileMission
 end
 class PopMission
   attr_accessor :host, :port, :user, :pass, :content_type
+  @@ptrn = /name=(?:(?:(?<quote>['"])(?:=\?.+?\?[QB]\?)?(?<file>.*?)(\?=)?(?<!\\)\k<quote>)|(?:(?<file>.+?)(?:;|$)))/i
   def poll(&block)
-    # puts "PopMission starts polling host #{@host}:#{@port} u: #{@user} pw: #{@pass}"
+    @backup_dir = BBMB.config.backup_dir if BBMB.config.respond_to?(:backup_dir)
+    @backup_dir ||= Dir.tmpdir
     options = {
                       :address    => @host,
                       :port       => @port,
@@ -84,6 +87,8 @@ class PopMission
       end
     elsif(/text\/xml/.match(message.content_type))
       filtered_transaction(message.decoded, sprintf('pop3:%s@%s:%s', @user, @host, @port), &block)
+    elsif message.attachment?
+      block.call(message.filename, message.decoded)
     end
   end
 end
@@ -91,10 +96,11 @@ class FtpMission
   attr_accessor :backup_dir, :delete, :pattern, :directory
   def initialize(*args)
     super
+    @backup_dir = BBMB.config.backup_dir if BBMB.config.respond_to?(:backup_dir)
+    @backup_dir ||= Dir.tmpdir
     @regexp = Regexp.new('.*')
   end
   def poll(&block)
-    @backup_dir ||= Dir.tmpdir
     FileUtils.mkdir_p(@backup_dir)
     @regexp = Regexp.new(@pattern || '.*')
     uri = URI.parse(@directory)
