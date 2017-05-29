@@ -46,7 +46,7 @@ class Order
       price * @quantity
     end
     def respond_to?(name)
-      super || @product.respond_to?(name)
+      super(name) || @product.respond_to?(name)
     end
   end
   include Enumerable
