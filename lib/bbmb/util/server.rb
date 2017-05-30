@@ -59,6 +59,9 @@ module BBMB
             session.rename(old_name, new_name)
           end
         end
+      rescue => error
+        SBSM.info(msg = "#{error}: Cannot rename email '#{old_name}' to '#{new_name}'")
+        raise Yus::YusError
       end
       def run_invoicer
         @invoicer ||= Thread.new {
