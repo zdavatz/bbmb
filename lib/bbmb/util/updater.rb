@@ -12,6 +12,7 @@ module Updater
     SBSM.info "Updated.run started at #{Time.now}"
     PollingManager.new.poll_sources do |filename, io|
       importer, *args = BBMB.config.importers[filename]
+      SBSM.info "Updated.run filename #{File.expand_path(filename)} importer #{importer.class}"
       if(importer)
         import(importer, args, io)
       end

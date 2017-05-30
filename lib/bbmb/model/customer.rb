@@ -64,6 +64,13 @@ class Customer
   def quota(article_id)
     @quotas.compact.find { |quota| quota.article_number == article_id }
   end
+  # This method is only for the importer!
+  def set_email_without_yus(email)
+    raise "Invalid email address: nil" unless email
+    email = email.encode('UTF-8')
+    return if @email.eql?(email)
+    @email = email
+  end
   def email=(email)
     if(@email || email)
       raise "Invalid email address: nil" unless email
