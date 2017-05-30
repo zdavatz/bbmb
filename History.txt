@@ -1,3 +1,10 @@
+=== 2.2.8 / 30.05.2017
+
+* Add Customer set_email_without_yus for importer
+* Show error, not traceback, when changing a email fails
+* Fixed skipped test in test_polling_manager
+* Avoid warning when importing orders
+
 === 2.2.7 / 24.05.2017
 
 * Fix running updater (@backup_dir no initialized)
