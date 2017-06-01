@@ -172,7 +172,7 @@ class Order
       "521:PCE", "540:2", "541:%s" % @commit_time.strftime('%Y%m%d')]
   end
   def order_id
-    sprintf "%s-%s", @customer.customer_id, @commit_id
+    sprintf "%s-%s" ,@customer ? @customer.customer_id : 'no_customer', @commit_id
   end
   def position(product)
     @positions.find { |pos| pos.product == product }
@@ -207,7 +207,8 @@ class Order
   end
   def total
     delete_invalid_positions
-    @positions.inject(@shipping) { |memo, pos| pos.total + memo }
+    res = @positions.inject(@shipping) { |memo, pos| pos.total + memo }
+    res || Util::Money.new(0)
   end
   def total_incl_vat
     if rate = BBMB.config.vat_rate

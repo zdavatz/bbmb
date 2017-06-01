@@ -64,6 +64,7 @@ module BBMB
         raise Yus::YusError
       end
       def run_invoicer
+        run_only_once_at_startup = false
         @invoicer ||= Thread.new {
           Thread.current.abort_on_exception = true
           loop {
@@ -73,10 +74,11 @@ module BBMB
             now = Time.now
             at = Time.local(day.year, day.month)
             secs = at - now
-            msg = "run_invoicer sleeping %.2f seconds (or more than %d days)" % [ secs, secs/3600/24 ]
-            SBSM.debug(msg)
-            sleep(secs)
+            SBSM.debug("run_invoicer sleeping %.2f seconds. run_only_once_at_startup #{run_only_once_at_startup}" % secs)
+            if run_only_once_at_startup then puts "Skipped sleeping #{secs}" else sleep(secs) end
+            SBSM.debug("invoice starting")
             invoice(start...at)
+            SBSM.debug("invoice finished")
           }
         }
       end
