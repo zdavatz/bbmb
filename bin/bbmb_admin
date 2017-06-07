@@ -54,7 +54,7 @@ while(line = readline(prompt, true))
   else
     begin
       bgflag = line.slice!(/\s*\&\s*$/)
-      $current = bbmb._admin(line, result, priority)
+      $current = BBMB.server._admin(line, result, priority)
       unless(bgflag)
         $current.join
       end

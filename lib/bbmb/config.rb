@@ -5,31 +5,20 @@ require 'rclconf'
 require 'bbmb'
 
 module BBMB
-  default_dir = if(root =  ENV['DOCUMENT_ROOT'])
-                  File.expand_path('../etc', root)
-                elsif(home = ENV['HOME'])
-                  File.expand_path('.bbmb/etc', home)
-                else
-                  require 'tmpdir'
-                  Dir.tmpdir
-                end
-  default_config_files = [
-    File.join(default_dir, 'bbmb.yml'),
-    '/etc/bbmb/bbmb.yml',
-  ]
+  default_config_file = File.join(Dir.pwd, 'etc', 'config.yml')
   defaults = {
     'admin_address'                   => '',
     'admins'                          => [],
     'auth_domain'                     => 'ch.bbmb',
     'auth_url'                        => 'druby://localhost:12001',
-    'bbmb_dir'                        => File.expand_path('..', default_dir),
-    'config'			                    => default_config_files,
+    'bbmb_dir'                        => Dir.pwd,
+    'config'			                    => default_config_file,
     'confirm_error_body'              => 'Customer %s does not have an email address configured',
     'confirm_error_cc'                => [],
     'confirm_error_from'              => 'errors.test@bbmb.ch',
     'confirm_error_subject'           => 'Customer %s without email address',
     'confirm_error_to'                => nil,
-    'data_dir'                        => File.expand_path('../data', default_dir),
+    'data_dir'                        => File.join(Dir.pwd, 'data'),
     'db_name'                         => 'bbmb',
     'db_user'                         => 'bbmb',
     'db_auth'                         => 'bbmb',
@@ -79,7 +68,7 @@ module BBMB
     'order_destinations'              => [],
     'pagestep'                        => 20,
     'persistence'                     => 'odba',
-    'polling_file'                    => File.expand_path('polling.yml', default_dir),
+    'polling_file'                    => File.join(Dir.pwd, 'etc', 'polling.yml'),
     'scm_link'                        => 'https://github.com/zdavatz/bbmb',
     'server_url'                      => 'druby://localhost:12000',
     'session_timeout'                 => 3600,
@@ -107,6 +96,8 @@ module BBMB
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)
+  raise "config file #{config.config} must exist" unless  File.exist?(config.config)
+  puts "Loading BBMB config from #{config.config}"
   config.load(config.config)
   @config = config
 end
