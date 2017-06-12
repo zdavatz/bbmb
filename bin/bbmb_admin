@@ -4,7 +4,12 @@
 require 'drb'
 require 'bbmb'
 $: << File.expand_path('../lib', File.dirname(__FILE__))
+require 'bbmb/config'
+ENV['SERVER_PORT'] =  BBMB.config.server_port.to_s if BBMB.config.respond_to?(:server_port)
+require 'bbmb/html/util/validator'
 require 'bbmb/util/app'
+require 'sbsm/logger'
+require 'bbmb/util/rack_interface'
 require 'readline'
 include Readline
 
@@ -54,7 +59,7 @@ while(line = readline(prompt, true))
   else
     begin
       bgflag = line.slice!(/\s*\&\s*$/)
-      $current = BBMB.server._admin(line, result, priority)
+      $current = bbmb._admin(line, result, priority)
       unless(bgflag)
         $current.join
       end

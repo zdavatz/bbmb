@@ -43,7 +43,48 @@ module BBMB
         Mail.notify_error(e)
       end
       def inject_order(customer_id, products, infos, opts={})
-        @app.inject_order(customer_id, products, infos, opts)
+        customer = Model::Customer.find_by_customer_id(customer_id) \
+          || Model::Customer.find_by_ean13(customer_id)
+        needed_create = false
+        unless customer
+          if idtype = opts[:create_missing_customer] && !customer_id.empty?
+            customer = Model::Customer.new(customer_id)
+            if idtype.to_s == 'ean13'
+              customer.ean13 = customer_id
+            end
+            BBMB.persistence.save(customer)
+            needed_create = true
+          else
+            raise "Unknown Customer #{customer_id}"
+          end
+        end
+        order = Model::Order.new(customer)
+        products.each { |info|
+          if(product = Model::Product.find_by_pcode(info[:pcode]) \
+             || Model::Product.find_by_ean13(info[:ean13]) \
+             || Model::Product.find_by_article_number(info[:article_number]))
+            order.add(info[:quantity], product)
+            [:article_number, :backorder].each do |key|
+              info.store key, product.send(key)
+            end
+            info.store :description, product.description.de
+            info[:deliverable] = info[:quantity]
+          else
+            info[:deliverable] = 0
+          end
+        }
+        infos.each { |key, value|
+          order.send("#{key}=", value)
+        }
+        customer.inject_order(order)
+        if opts[:deliver]
+          @app.send_order order, customer
+        end
+        if needed_create
+          BBMB::Util::Mail.notify_inject_error(order, opts)
+        end
+        SBSM.info "inject_order #{order.order_id} for customer_id #{customer_id} done at #{Time.now}"
+        { :order_id => order.order_id, :products => products }
       end
       def rename_user(customer_id, old_name, new_name)
         return if old_name.eql?(new_name)
