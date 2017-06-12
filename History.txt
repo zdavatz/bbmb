@@ -1,3 +1,9 @@
+=== 2.3.1 / 12.06.2017
+
+* Fix inject_order for xmlconv
+* Fix starting bin/bbmb_admin
+* Load :postproc_dir and :plugin_dir if defined in config
+
 === 2.3.0 / 07.06.2017
 
 * Use by default only the etc/config.yml inside the current working directory
