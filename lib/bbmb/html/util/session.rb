@@ -28,7 +28,7 @@ class Session < SBSM::Session
     # Before rack: @user = @app.login(user_input(:email), user_input(:pass))
     @auth_session = BBMB.auth.login(user_input(:email), user_input(:pass), BBMB.config.auth_domain) # logs in claude meier without problem, but not admin
     if @auth_session.valid?
-      @user = BBMB::Html::Util::KnownUser.new(self) # TODO:Should we set it already in the initialize method?
+      @user = BBMB::Html::Util::KnownUser.new(@auth_session)
     else
       @user = SBSM::UnknownUser
     end

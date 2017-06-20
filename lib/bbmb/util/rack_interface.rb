@@ -38,7 +38,6 @@ module BBMB
         @app = app
         super(app: app,
               session_class: BBMB::Html::Util::Session,
-              unknown_user: Html::Util::KnownUser,
               validator: validator,
               cookie_name: 'virbac.bbmb'
               )

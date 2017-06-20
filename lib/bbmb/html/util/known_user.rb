@@ -17,8 +17,8 @@ class KnownUser < SBSM::User
   # login BBMB.config.auth_domain + ".Customer"
   attr_reader :auth_session
   PREFERENCE_KEYS = [ :home, :pagestep ]
-  def initialize(session)
-    @auth_session = session.auth_session
+  def initialize(auth_session)
+    @auth_session = auth_session
   end
   def allowed?(action, key=nil)
     if @auth_session
