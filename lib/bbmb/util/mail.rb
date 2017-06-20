@@ -65,8 +65,10 @@ module Mail
       puts msg unless defined?(::MiniTest)
       ::Mail.defaults do  delivery_method :test end
     else
-      puts "Mail.sendmail #{config.smtp_server} #{config.smtp_port} #{config.smtp_helo} smtp_user: #{ config.smtp_user}  #{ config.smtp_pass}  #{ config.smtp_authtype}"
-      puts "Mail.sendmail from #{from_addr} to #{to_addr} cc #{cc_addrs} message: #{my_body.class}"
+      msg = "Mail.sendmail #{config.smtp_server} #{config.smtp_port} #{config.smtp_helo} smtp_user: #{ config.smtp_user}  #{ config.smtp_pass}  #{ config.smtp_authtype}\n" +
+            "Mail.sendmail from #{from_addr} to #{to_addr} cc #{cc_addrs} subject: #{my_subject} message: #{my_body.class}"
+      puts msg
+      SBSM.debug(msg)
       return if to_addr == nil
       ::Mail.defaults do
       options = { :address              => config.smtp_server,
