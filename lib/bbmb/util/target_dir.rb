@@ -12,6 +12,7 @@ module TargetDir
   def TargetDir.send_order(order)
     content = order.to_target_format
     basename = BBMB.config.tmpfile_basename
+    SBSM.info("TargetDir.send_order #{order.order_id} basename #{basename} -> #{BBMB.config.order_destinations}")
     BBMB.config.order_destinations.each { |destination|
       uri = URI.parse(File.join(destination, order.filename))
       case uri.scheme

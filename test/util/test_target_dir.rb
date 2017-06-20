@@ -15,7 +15,7 @@ class TestTargetDir < Minitest::Test
     BBMB.config = config = flexmock('config')
     bbmb_dir = File.expand_path('..', File.dirname(__FILE__))
     config.should_receive(:bbmb_dir).and_return(bbmb_dir)
-    @dir = File.expand_path('../data/destination', 
+    @dir = File.expand_path('../data/destination',
                             File.dirname(__FILE__))
   end
   def teardown
@@ -30,6 +30,7 @@ class TestTargetDir < Minitest::Test
     config.should_receive(:order_destinations).and_return([ftp])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
+    order.should_receive(:order_id).and_return('order_id')
     order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open)\
@@ -51,6 +52,7 @@ class TestTargetDir < Minitest::Test
     config.should_receive(:order_destinations).and_return([@dir])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
+    order.should_receive(:order_id).and_return('order_id')
     order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open).times(0)
@@ -66,6 +68,7 @@ class TestTargetDir < Minitest::Test
     config.should_receive(:order_destinations).and_return(['data/destination'])
     config.should_receive(:tmpfile_basename).and_return('bbmb')
     order = flexmock('order')
+    order.should_receive(:order_id).and_return('order_id')
     order.should_receive(:to_target_format).and_return('data')
     order.should_receive(:filename).and_return('order.csv')
     flexstub(Net::FTP).should_receive(:open).times(0)

@@ -96,8 +96,8 @@ module BBMB
   }
 
   config = RCLConf::RCLConf.new(ARGV, defaults)
-  raise "config file #{config.config} must exist" unless  File.exist?(config.config)
+  raise "config file #{config.config} must exist" if !defined?(MiniTest) && !File.exist?(config.config)
   puts "Loading BBMB config from #{config.config}"
-  config.load(config.config)
+  config.load(config.config) if File.exist?(config.config)
   @config = config
 end
