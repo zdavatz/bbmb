@@ -59,23 +59,28 @@ module BBMB
           end
         end
         order = Model::Order.new(customer)
-        products.each { |info|
-          if(product = Model::Product.find_by_pcode(info[:pcode]) \
+        products.each do |info|
+          product = Model::Product.find_by_pcode(info[:pcode]) \
              || Model::Product.find_by_ean13(info[:ean13]) \
-             || Model::Product.find_by_article_number(info[:article_number]))
+             || Model::Product.find_by_article_number(info[:article_number])
+          if info[:pcode] || product
+            unless product
+             product = Model::Product.new(info[:pcode])
+              product.description.de = "pharmacode #{info[:pcode]}"
+              product.odba_store
+            end
             order.add(info[:quantity], product)
             [:article_number, :backorder].each do |key|
               info.store key, product.send(key)
             end
-            info.store :description, product.description.de
+
+          info.store :description, product.description.de
             info[:deliverable] = info[:quantity]
           else
             info[:deliverable] = 0
           end
-        }
-        infos.each { |key, value|
-          order.send("#{key}=", value)
-        }
+        end
+        infos.each { |key, value| order.send("#{key}=", value) }
         customer.inject_order(order)
         if opts[:deliver]
           @app.send_order order, customer
