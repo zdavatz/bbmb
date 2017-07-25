@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# TransferDat -- bbmb -- 31.10.2002 -- hwyss@ywesee.com 
+# TransferDat -- bbmb -- 31.10.2002 -- hwyss@ywesee.com
 
 require 'bbmb/model/order'
 
@@ -7,9 +7,15 @@ module BBMB
   module Util
 module TransferDat
   def TransferDat.parse(io)
-    io.rewind
-    data = io.read
-    data.split(/[\r\n]+/).collect { |line|
+    begin
+      io.rewind
+      data = io.read
+      lines = data.split(/[\r\n]+/)
+    rescue ArgumentError => error
+      raise error unless io.is_a?(File)
+      lines = File.open(io, external_encoding: Encoding::ISO_8859_1).read.split(/[\r\n]+/)
+    end
+    lines.collect { |line|
       if(parsed = parse_line(line))
         yield parsed
       end

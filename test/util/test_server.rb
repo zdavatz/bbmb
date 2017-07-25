@@ -9,7 +9,7 @@ module BBMB
 class TestServer < Minitest::Test
   include FlexMock::TestCase
   def setup
-    skip ('This does not yet work with the new rack based')
+#    skip ('This does not yet work with the new rack based')
     require 'bbmb/util/server'
 
     super

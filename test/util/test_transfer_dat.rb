@@ -43,6 +43,16 @@ class TestTransferDat <  Minitest::Test
     end
     assert_equal(2, count)
   end
+  def test_parse_iso_8859
+    data_dir = File.expand_path(File.join(__FILE__, '../../data'))
+    src = File.open(File.join(data_dir, 'transfer_leima_iso_8859-1.dat'))
+    count = 0
+    TransferDat.parse(src) do |info|
+      assert_instance_of(Model::Order::Info, info)
+      count += 1
+    end
+    assert_equal(92, count)
+  end
 end
   end
 end
