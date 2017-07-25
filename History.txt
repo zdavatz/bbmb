@@ -1,3 +1,8 @@
+=== 2.3.3 / 25.07.2017
+
+* Handle transfer.dat with ISO 8859-1 encoding
+* Create new product if only pharmacode is giving and none exists
+
 === 2.3.2 / 20.06.2017
 
 * Use SBSM 1.4.5 and adapt KnownUser
