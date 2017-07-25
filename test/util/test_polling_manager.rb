@@ -14,7 +14,6 @@ module BBMB
 
     TestData = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test', 'examples'))
     class TestFileMission < Minitest::Test
-      include FlexMock::TestCase
       def setup
         super
         @datadir = File.expand_path('../data', File.dirname(__FILE__))
@@ -101,7 +100,6 @@ module BBMB
       end
     end
     class TestFtpMission < Minitest::Test
-      include FlexMock::TestCase
       def setup
         @datadir = File.expand_path('../data', File.dirname(__FILE__))
         BBMB.config = flexmock('config')
@@ -161,7 +159,6 @@ module BBMB
       end
     end
     class TestPopMission < Minitest::Test
-      include FlexMock::TestCase
       def setup
         super
         @mission = PopMission.new
@@ -274,7 +271,6 @@ module BBMB
       end
     end
     class TestPollingManager < Minitest::Test
-      include FlexMock::TestCase
       def setup
         super
         BBMB.config = $default_config.clone

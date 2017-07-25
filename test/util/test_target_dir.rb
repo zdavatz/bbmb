@@ -9,7 +9,6 @@ require 'bbmb/util/target_dir'
 module BBMB
   module Util
 class TestTargetDir < Minitest::Test
-  include FlexMock::TestCase
   def setup
     super
     BBMB.config = config = flexmock('config')

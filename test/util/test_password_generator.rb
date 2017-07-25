@@ -8,7 +8,6 @@ require 'bbmb/util/password_generator'
 module BBMB
   module Util
 class TestPasswordGenerator < Minitest::Test
-  include FlexMock::TestCase
   def test_generate
     customer = flexmock('Customer')
     customer.should_receive(:organisation).and_return('abab')

@@ -11,7 +11,6 @@ module BBMB
   module Html
     module State
       class TestCustomers < Minitest::Test
-        include FlexMock::TestCase
 
         def setup
           super

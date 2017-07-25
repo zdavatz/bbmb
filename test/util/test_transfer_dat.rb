@@ -10,7 +10,6 @@ require 'bbmb/util/transfer_dat'
 module BBMB
   module Util
 class TestTransferDat <  Minitest::Test
-  include FlexMock::TestCase
   def setup
     super
   end

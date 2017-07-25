@@ -9,7 +9,6 @@ require 'bbmb/util/mail'
 module BBMB
   module Util
     class TestMail < Minitest::Test
-      include FlexMock::TestCase
       def setup
         super
         BBMB.config = $default_config.clone
@@ -99,7 +98,7 @@ Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: errors.test@bbmb.ch
 To: #{TestRecipient}
-Cc: 
+Cc:
 Subject: Order 12345678-90 with missing customer: Pharmacy Health
         EOS
         body = <<-EOS
@@ -139,7 +138,7 @@ Content-Type: text/plain; charset="utf-8"
 Content-Disposition: inline
 From: errors.test@bbmb.ch
 To: #{TestRecipient}
-Cc: 
+Cc:
 Subject: Customer 12345678 without email address
         EOS
         body = <<-EOS
@@ -158,7 +157,7 @@ Customer 12345678 does not have an email address configured
       def test_notify_error
         config = setup_config
         smtp = flexmock('smtp')
-        flexstub(Net::SMTP).should_receive(:start).and_return { 
+        flexstub(Net::SMTP).should_receive(:start).and_return {
           |srv, port, helo, user, pass, type, block|
           assert_equal('mail.test.com', srv)
           assert_equal(25, port)
@@ -166,7 +165,7 @@ Customer 12345678 does not have an email address configured
           assert_equal('user', user)
           assert_equal('secret', pass)
           assert_equal(:plain, type)
-          block.call(smtp) 
+          block.call(smtp)
         }
         headers = <<-EOS
 Mime-Version: 1.0
@@ -182,9 +181,9 @@ RuntimeError
 error-message
         EOS
         smtp.should_receive(:sendmail).and_return { |message, from, recipients|
-          assert(message.include?(headers), 
+          assert(message.include?(headers),
                  "missing headers:\n#{headers}\nin message:\n#{message}")
-          assert(message.include?(body), 
+          assert(message.include?(body),
                  "missing body:\n#{body}\nin message:\n#{message}")
           assert_equal('from.test@bbmb.ch', from)
           assert_equal([TestRecipient], recipients)
@@ -198,7 +197,7 @@ error-message
         order.should_receive(:filename).and_return('filename')
         config = setup_config
         smtp = flexmock('smtp')
-        flexstub(Net::SMTP).should_receive(:start).and_return { 
+        flexstub(Net::SMTP).should_receive(:start).and_return {
           |srv, port, helo, user, pass, type, block|
           assert_equal('mail.test.com', srv)
           assert_equal(25, port)
@@ -206,7 +205,7 @@ error-message
           assert_equal('user', user)
           assert_equal('secret', pass)
           assert_equal(:plain, type)
-          block.call(smtp) 
+          block.call(smtp)
         }
         headers = <<-EOS
 Mime-Version: 1.0
@@ -223,11 +222,11 @@ Message-ID: <order-id@from.test.bbmb.ch>
 i2-data
         EOS
         smtp.should_receive(:sendmail).and_return { |message, from, recipients|
-          assert(message.include?(headers), 
+          assert(message.include?(headers),
                  "missing headers:\n#{headers}\nin message:\n#{message}")
-          assert(message.include?(body), 
+          assert(message.include?(body),
                  "missing body:\n#{body}\nin message:\n#{message}")
-          #assert(message.include?(attachment), 
+          #assert(message.include?(attachment),
                  #"missing attachment:\n#{attachment}\nin message:\n#{message}")
           assert_equal('from.test@bbmb.ch', from)
           assert_equal([TestRecipient, 'cc.test@bbmb.ch'], recipients)
@@ -237,7 +236,7 @@ i2-data
       def test_send_request
         config = setup_config
         smtp = flexmock('smtp')
-        flexstub(Net::SMTP).should_receive(:start).and_return { 
+        flexstub(Net::SMTP).should_receive(:start).and_return {
           |srv, port, helo, user, pass, type, block|
           assert_equal('mail.test.com', srv)
           assert_equal(25, port)
@@ -245,7 +244,7 @@ i2-data
           assert_equal('user', user)
           assert_equal('secret', pass)
           assert_equal(:plain, type)
-          block.call(smtp) 
+          block.call(smtp)
         }
         headers = <<-EOS
 Mime-Version: 1.0
@@ -262,12 +261,12 @@ Reply-To: sender@email.com
 request body
         EOS
         smtp.should_receive(:sendmail).and_return { |message, from, recipients|
-          assert(message.include?(headers), 
+          assert(message.include?(headers),
                  "missing headers:\n#{headers}\nin message:\n#{message}")
-          assert(message.include?(body), 
+          assert(message.include?(body),
                  "missing body:\n#{body}\nin message:\n#{message}")
           assert_equal('from.request.test@bbmb.ch', from)
-          assert_equal(['to.request.test@bbmb.ch', 'cc.request.test@bbmb.ch'], 
+          assert_equal(['to.request.test@bbmb.ch', 'cc.request.test@bbmb.ch'],
                        recipients)
         }
         Mail.send_request('sender@email.com', 'Organisation', 'request body')

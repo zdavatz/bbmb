@@ -9,12 +9,15 @@ $:.unshift(lib_dir)  unless $:.include?(lib_dir)
 $:.unshift(test_dir) unless $:.include?(test_dir)
 
 require 'minitest/autorun'
-require 'flexmock/test_unit'
+require 'flexmock/minitest'
 require 'bbmb/config'
+require 'sbsm/logger'
+SBSM.logger = Logger.new('test_helper.log')
 
 # We create hier a global copy of the defautl BBMB.config as we
 # must restore it after each change in BBMB.config in a test
 $default_config = BBMB.config.clone
+BBMB.config.persistence = 'none'
 
 require 'mail'
 ::Mail.defaults do delivery_method :test end

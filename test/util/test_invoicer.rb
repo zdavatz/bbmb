@@ -11,7 +11,6 @@ require 'bbmb/util/numbers'
 module BBMB
   module Util
 class TestInvoicer < Minitest::Test
-  include FlexMock::TestCase
   def setup
     @drb_server.stop_service if @drb_server
     super

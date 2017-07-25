@@ -2,19 +2,20 @@
 # encoding: utf-8
 $: << File.expand_path('..', File.dirname(__FILE__))
 require 'test_helper'
+require 'sbsm/logger'
+require 'bbmb/util/rack_interface'
+require 'bbmb/util/app'
 
 module BBMB
   module Util
 
 class TestServer < Minitest::Test
-  include FlexMock::TestCase
   def setup
-#    skip ('This does not yet work with the new rack based')
     require 'bbmb/util/server'
-
     super
     BBMB.config = $default_config.clone
-    @server = BBMB::Util::RackInterface.new
+    @rack_app = BBMB::Util::App.new
+    @server = BBMB::Util::Server.new('none', @rack_app)
     Model::Customer.instances.clear
     Model::Product.instances.clear
   end
@@ -97,6 +98,8 @@ class TestServer < Minitest::Test
       :reference => '76543',
     }
     flexmock(BBMB::Util::Mail).should_receive(:send_order).with(BBMB::Model::Order)
+    BBMB.config.mail_confirm_reply_to = 'replyto@test.org'
+    BBMB.config.error_recipients = 'to@test.org'
     res = @server.inject_order('1234567890123', prods, infos, :deliver => true)
     assert_equal("12345-", res[:order_id])
     assert_equal(3, res[:products].size)
@@ -113,7 +116,7 @@ class TestServer < Minitest::Test
     session.should_receive(:create_entity).times(1).and_return { |email|
       assert_equal('test@bbmb.ch', email)
     }
-    @server.rename_user(nil, 'test@bbmb.ch')
+    @server.rename_user('cutomer_id', nil, 'test@bbmb.ch')
   end
   def test_rename_user__existing
     BBMB.config = flexmock('config')
@@ -128,10 +131,10 @@ class TestServer < Minitest::Test
       assert_equal('old@bbmb.ch', previous)
       assert_equal('test@bbmb.ch', email)
     }
-    @server.rename_user('old@bbmb.ch', 'test@bbmb.ch')
+    @server.rename_user('cutomer_id',   'old@bbmb.ch', 'test@bbmb.ch')
   end
   def test_rename_user__same
-    @server.rename_user('test@bbmb.ch', 'test@bbmb.ch')
+    @server.rename_user('cutomer_id', 'test@bbmb.ch', 'test@bbmb.ch')
   end
   def test_run_invoicer
     error_mock = flexmock(RuntimeError.new, 'error')
