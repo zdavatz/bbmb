@@ -13,7 +13,7 @@ class Order
 			res = __old_commit__(*args)
 			odba_store
 			res
-		end  
+		end
   end
   include ODBA::Persistable
   ODBA_SERIALIZABLE = ['@unavailable']
@@ -21,22 +21,20 @@ class Order
   def add(quantity, product)
     if(pos = __old_add__(quantity, product))
       if(quantity.zero?)
-        pos.odba_delete
+        pos.odba_delete unless BBMB.config.persistence.eql?('none')
       else
-        pos.odba_store
+        pos.odba_store unless BBMB.config.persistence.eql?('none')
       end
-      @positions.odba_store
+      @positions.odba_store unless BBMB.config.persistence.eql?('none')
       pos
     end
   end
   alias :__old_clear__ :clear
   def clear
-    @positions.each { |pos|
-      pos.odba_delete
-    }
+    @positions.each { |pos| pos.odba_delete } unless BBMB.config.persistence.eql?('none')
     res = __old_clear__
     @positions.odba_store
-    odba_store
+    odba_store unless BBMB.config.persistence.eql?('none')
     res
   end
   alias :__old_commit__ :commit!
@@ -44,7 +42,7 @@ class Order
     res = __old_commit__(*args)
     odba_store
     res
-  end  
+  end
 end
   end
 end

@@ -13,7 +13,12 @@ require 'bbmb/model/order' # needed to be enable to invoice later
 require 'bbmb/model/customer'
 require 'date'
 require 'sbsm/app'
-require 'bbmb/persistence/odba' unless BBMB.config.persistence.eql?('none')
+case BBMB.config.persistence
+when 'odba'
+  require 'bbmb/persistence/odba'
+else
+  require 'bbmb/persistence/none'
+end
 require 'bbmb/model/customer'
 require 'bbmb/model/quota'
 require 'bbmb/model/product'
@@ -31,8 +36,8 @@ module BBMB
         case BBMB.config.persistence
         when 'odba'
           DRb.install_id_conv ODBA::DRbIdConv.new
-          BBMB.persistence = BBMB::Persistence::ODBA
         end
+        BBMB.persistence = BBMB::Persistence::ODBA
         BBMB.auth = DRb::DRbObject.new(nil, BBMB.config.auth_url)
         BBMB.server = BBMB::Util::Server.new(BBMB.persistence, self)
         BBMB.server.extend(DRbUndumped)

@@ -9,7 +9,7 @@ class Quota
   class << self
     def delegate(*keys)
       keys.each { |key|
-        define_method(key) { @product.send(key) } 
+        define_method(key) { @product.send(key) }
       }
     end
   end

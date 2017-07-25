@@ -1,5 +1,7 @@
 require 'pathname'
 
+begin require 'pry'; rescue LoadError; end
+
 root_dir = Pathname.new(__FILE__).realpath.parent.parent
 lib_dir  = root_dir.join('lib')
 test_dir = root_dir.join('test')
@@ -18,6 +20,7 @@ SBSM.logger = Logger.new('test_helper.log')
 # must restore it after each change in BBMB.config in a test
 $default_config = BBMB.config.clone
 BBMB.config.persistence = 'none'
+require 'support/stub/persistence'
 
 require 'mail'
 ::Mail.defaults do delivery_method :test end

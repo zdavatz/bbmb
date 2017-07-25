@@ -31,7 +31,6 @@ class TestInvoicer < Minitest::Test
   end
 
   def teardown
-    # require 'pry'; binding.pry
     @drb_server.stop_service if @drb_server
     BBMB.config = $default_config.clone
     super
@@ -76,17 +75,11 @@ class TestInvoicer < Minitest::Test
     @drb_server = DRb.start_service(@ydim_url, @ydim_server)
     sleep 0.5
     result = Invoicer.create_invoice(range, Util::Money.new(24), [order1, order2], today)
-    if result.is_a?(FlexMock::Undefined)
-      msg = "Skipping this sometimes failing test "
-      puts msg
-      skip msg
-    else
-      assert_equal(invoice, result)
-      assert_equal("01.09.2006 - 30.09.2006", invoice.description)
-      assert_equal(today, invoice.date)
-      assert_equal('CHF', invoice.currency)
-      assert_equal(30, invoice.payment_period)
-    end
+    assert_equal(invoice, result)
+    assert_equal("01.09.2006 - 30.09.2006", invoice.description)
+    assert_equal(today, invoice.date)
+    assert_equal('CHF', invoice.currency)
+    assert_equal(30, invoice.payment_period)
   ensure
     FileUtils.rm_r(datadir) if(File.exist?(datadir))
     @drb_server.stop_service
@@ -113,8 +106,10 @@ class TestInvoicer < Minitest::Test
     order4 = flexmock('order4')
     order4.should_receive(:total).and_return(Util::Money.new(19.00))
     order4.should_receive(:commit_time).and_return(Time.local(2006,10))
-    BBMB.persistence = flexmock('persistence')
-    BBMB.persistence.should_receive(:all).and_return([])
+    unless BBMB.persistence
+      BBMB.persistence = flexmock('persistence')
+      BBMB.persistence.should_receive(:all).and_return([])
+    end
     BBMB.config.should_receive(:ydim_config)
     BBMB.config.should_receive(:ydim_id).and_return(7)
     BBMB.config.should_receive(:error_recipients).and_return(::TestRecipient)

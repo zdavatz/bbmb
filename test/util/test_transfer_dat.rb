@@ -28,7 +28,7 @@ class TestTransferDat <  Minitest::Test
   def test_parse_line__error
     info = nil
     info = TransferDat.parse_line("")
-    assert_nil(info)
+    assert_equal(true, info)
   end
   def test_parse
     src = <<-EOS.strip
